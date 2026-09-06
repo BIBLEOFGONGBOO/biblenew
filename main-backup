@@ -200,6 +200,1125 @@ var chunkHtml =
           'Bible data load failed.';
       }
     };
+
+// ============================================================
+// BLOCK 1100: bible-mic.js
+// ENG Bible Passage 음성 읽기 연습
+// ============================================================
+
+var BibleSpeechRecognition =
+  window.SpeechRecognition ||
+  window.webkitSpeechRecognition;
+
+
+// SUBBLOCK 1101
+// ============================================================
+// MIC 전역 상태
+// ============================================================
+
+var _bibleMicInstalled = false;
+var _bibleMicMoving = false;
+var _bibleMicRestartTimer = null;
+var _bibleMicRecognizeTimer = null;
+var _bibleMicLastTranscript = '';
+var _bibleRecognition = null;
+
+window.__bibleMicThreshold =
+  Number(
+    localStorage.getItem(
+      'gongboo.biblenew.micThreshold'
+    )
+  ) || 70;
+
+window.__bibleMicRecognizeDelay =
+  Number(
+    localStorage.getItem(
+      'gongboo.biblenew.micRecognizeDelay'
+    )
+  ) || 2.0;
+
+window.__bibleMicAutoAdvance =
+  localStorage.getItem(
+    'gongboo.biblenew.micAutoAdvance'
+  ) !== 'false';
+
+
+// SUBBLOCK 1102
+// ============================================================
+// Bible MIC 언어
+// ============================================================
+
+function getBibleMicLanguage() {
+
+  return {
+    code: 'ENG',
+    recognition: 'en-US'
+  };
+}
+
+
+// SUBBLOCK 1103
+// ============================================================
+// 현재 Bible English Passage
+// ============================================================
+
+function getCurrentBibleMicSentence() {
+
+  var sentenceEl =
+    document.getElementById(
+      'bibleEnglishPassage'
+    );
+
+  if (!sentenceEl) {
+
+    console.warn(
+      '[BIBLE MIC] English Passage 없음'
+    );
+
+    return null;
+  }
+
+  var text =
+    String(
+      sentenceEl.textContent || ''
+    ).trim();
+
+  if (!text) {
+    return null;
+  }
+
+  return {
+    element: sentenceEl,
+    text: text,
+    code: 'ENG',
+    recognition: 'en-US'
+  };
+}
+
+
+// SUBBLOCK 1104
+// ============================================================
+// 영어 비교용 정규화
+// ============================================================
+
+function normalizeBibleMicText(text) {
+
+  return String(text || '')
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(
+      /[^a-z0-9\s']/g,
+      ' '
+    )
+    .replace(
+      /\s+/g,
+      ' '
+    )
+    .trim();
+}
+
+
+// SUBBLOCK 1105
+// ============================================================
+// Levenshtein
+// ============================================================
+
+function bibleMicLevenshtein(a, b) {
+
+  a = String(a || '');
+  b = String(b || '');
+
+  var m = a.length;
+  var n = b.length;
+
+  if (!m) return n;
+  if (!n) return m;
+
+  var prev =
+    new Array(n + 1);
+
+  var curr =
+    new Array(n + 1);
+
+  for (
+    var j = 0;
+    j <= n;
+    j++
+  ) {
+    prev[j] = j;
+  }
+
+  for (
+    var i = 1;
+    i <= m;
+    i++
+  ) {
+
+    curr[0] = i;
+
+    for (
+      var j = 1;
+      j <= n;
+      j++
+    ) {
+
+      var cost =
+        a[i - 1] === b[j - 1]
+          ? 0
+          : 1;
+
+      curr[j] =
+        Math.min(
+          prev[j] + 1,
+          curr[j - 1] + 1,
+          prev[j - 1] + cost
+        );
+    }
+
+    var temp = prev;
+    prev = curr;
+    curr = temp;
+  }
+
+  return prev[n];
+}
+
+
+// SUBBLOCK 1106
+// ============================================================
+// 문장 일치율
+// ============================================================
+
+function calculateBibleMicScore(
+  original,
+  spoken
+) {
+
+  var target =
+    normalizeBibleMicText(
+      original
+    );
+
+  var heard =
+    normalizeBibleMicText(
+      spoken
+    );
+
+  if (!target || !heard) {
+    return 0;
+  }
+
+  var distance =
+    bibleMicLevenshtein(
+      target,
+      heard
+    );
+
+  var maxLength =
+    Math.max(
+      target.length,
+      heard.length
+    );
+
+  if (!maxLength) {
+    return 100;
+  }
+
+  return Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(
+        (
+          1 -
+          distance / maxLength
+        ) * 100
+      )
+    )
+  );
+}
+
+
+// SUBBLOCK 1107
+// ============================================================
+// MIC 설정 패널
+// ============================================================
+
+function ensureBibleMicPanel() {
+
+  var panel =
+    document.getElementById(
+      'bibleMicPanel'
+    );
+
+  if (panel) {
+    return panel;
+  }
+
+  panel =
+    document.createElement(
+      'div'
+    );
+
+  panel.id =
+    'bibleMicPanel';
+
+  panel.style.cssText = `
+    display:none;
+    position:absolute;
+    z-index:9999;
+    min-width:210px;
+    padding:10px 12px;
+    background:#ffffff;
+    border:1px solid #d1d5db;
+    border-radius:10px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.18);
+    font-size:13px;
+  `;
+
+  panel.innerHTML = `
+
+    <div style="
+      display:flex;
+      justify-content:space-between;
+      font-weight:700;
+      margin-bottom:7px;
+    ">
+      <span>🎤 PASS</span>
+      <span id="bibleMicThresholdLabel">
+        ${window.__bibleMicThreshold}%
+      </span>
+    </div>
+
+    <input
+      id="bibleMicThreshold"
+      type="range"
+      min="40"
+      max="100"
+      step="5"
+      value="${window.__bibleMicThreshold}"
+      style="width:100%;cursor:pointer;"
+    >
+
+    <div style="
+      margin-top:9px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    ">
+      <span style="font-weight:700;">
+        Recognize Delay
+      </span>
+
+      <select
+        id="bibleMicRecognizeDelay"
+      >
+        <option value="1">1.0 sec</option>
+        <option value="1.5">1.5 sec</option>
+        <option value="2">2.0 sec</option>
+        <option value="2.5">2.5 sec</option>
+        <option value="3">3.0 sec</option>
+        <option value="4">4.0 sec</option>
+        <option value="5">5.0 sec</option>
+      </select>
+    </div>
+
+    <div style="
+      margin-top:9px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    ">
+      <span style="font-weight:700;">
+        Next
+      </span>
+
+      <button
+        id="bibleMicAdvanceMode"
+        type="button"
+      ></button>
+    </div>
+
+    <button
+      id="bibleMicRecognize"
+      type="button"
+      style="
+        width:100%;
+        margin-top:9px;
+        padding:7px;
+        border:0;
+        border-radius:7px;
+        background:#2563eb;
+        color:#fff;
+        font-weight:700;
+        cursor:pointer;
+      "
+    >
+      Recognize
+    </button>
+
+    <div
+      id="bibleMicScore"
+      style="
+        margin-top:7px;
+        text-align:center;
+        font-weight:700;
+      "
+    >
+      Ready
+    </div>
+  `;
+
+  document.body.appendChild(
+    panel
+  );
+
+
+  var threshold =
+    document.getElementById(
+      'bibleMicThreshold'
+    );
+
+  threshold.oninput =
+    function() {
+
+      window.__bibleMicThreshold =
+        Number(this.value);
+
+      document.getElementById(
+        'bibleMicThresholdLabel'
+      ).textContent =
+        this.value + '%';
+
+      localStorage.setItem(
+        'gongboo.biblenew.micThreshold',
+        this.value
+      );
+    };
+
+
+  var delay =
+    document.getElementById(
+      'bibleMicRecognizeDelay'
+    );
+
+  delay.value =
+    String(
+      window.__bibleMicRecognizeDelay
+    );
+
+  delay.onchange =
+    function() {
+
+      window.__bibleMicRecognizeDelay =
+        Number(this.value) || 2;
+
+      localStorage.setItem(
+        'gongboo.biblenew.micRecognizeDelay',
+        String(
+          window.__bibleMicRecognizeDelay
+        )
+      );
+    };
+
+
+  var modeBtn =
+    document.getElementById(
+      'bibleMicAdvanceMode'
+    );
+
+  function refreshMode() {
+
+    modeBtn.textContent =
+      window.__bibleMicAutoAdvance
+        ? 'AUTO'
+        : 'MANUAL';
+  }
+
+  modeBtn.onclick =
+    function() {
+
+      window.__bibleMicAutoAdvance =
+        !window.__bibleMicAutoAdvance;
+
+      localStorage.setItem(
+        'gongboo.biblenew.micAutoAdvance',
+        String(
+          window.__bibleMicAutoAdvance
+        )
+      );
+
+      refreshMode();
+    };
+
+  refreshMode();
+
+
+  document.getElementById(
+    'bibleMicRecognize'
+  ).onclick =
+    function() {
+
+      finalizeBibleMicRecognition();
+    };
+
+
+  return panel;
+}
+
+
+// SUBBLOCK 1108
+// ============================================================
+// MIC 패널 위치
+// ============================================================
+
+function positionBibleMicPanel() {
+
+  var btn =
+    document.getElementById(
+      'anneMicButton'
+    );
+
+  var panel =
+    ensureBibleMicPanel();
+
+  if (!btn || !panel) {
+    return;
+  }
+
+  var rect =
+    btn.getBoundingClientRect();
+
+  panel.style.left =
+    Math.max(
+      8,
+      rect.left +
+      window.scrollX -
+      145
+    ) + 'px';
+
+  panel.style.top =
+    (
+      rect.bottom +
+      window.scrollY +
+      7
+    ) + 'px';
+}
+
+
+// SUBBLOCK 1109
+// ============================================================
+// 점수 + 맞은 단어 하이라이트
+// ============================================================
+
+function showBibleMicScore(
+  score,
+  passed
+) {
+
+  var el =
+    document.getElementById(
+      'bibleMicScore'
+    );
+
+  if (!el) {
+    return;
+  }
+
+  el.textContent =
+    score +
+    '% ' +
+    (
+      passed
+        ? '✓ PASS'
+        : '↻ AGAIN'
+    );
+
+  el.style.color =
+    passed
+      ? '#15803d'
+      : '#b45309';
+}
+
+
+function highlightBibleMicWords(
+  sentence,
+  spokenText
+) {
+
+  if (
+    !sentence ||
+    !sentence.element
+  ) {
+    return;
+  }
+
+  var originalWords =
+    String(sentence.text || '')
+      .match(/\S+/g) || [];
+
+  var spokenWords =
+    String(spokenText || '')
+      .match(/\S+/g) || [];
+
+  var normalizedSpoken =
+    spokenWords.map(
+      function(word) {
+        return normalizeBibleMicText(
+          word
+        );
+      }
+    );
+
+  var used =
+    new Array(
+      normalizedSpoken.length
+    ).fill(false);
+
+  sentence.element.innerHTML = '';
+
+  originalWords.forEach(
+    function(word, index) {
+
+      var normalizedWord =
+        normalizeBibleMicText(
+          word
+        );
+
+      var matchedIndex = -1;
+
+      for (
+        var i = 0;
+        i < normalizedSpoken.length;
+        i++
+      ) {
+
+        if (
+          !used[i] &&
+          normalizedWord &&
+          normalizedWord ===
+            normalizedSpoken[i]
+        ) {
+
+          matchedIndex = i;
+          break;
+        }
+      }
+
+      var span =
+        document.createElement(
+          'span'
+        );
+
+      span.textContent = word;
+
+      if (matchedIndex >= 0) {
+
+        used[matchedIndex] =
+          true;
+
+        span.style.background =
+          '#fde047';
+
+        span.style.borderRadius =
+          '3px';
+
+        span.style.padding =
+          '0 2px';
+      }
+
+      sentence.element.appendChild(
+        span
+      );
+
+      if (
+        index <
+        originalWords.length - 1
+      ) {
+
+        sentence.element.appendChild(
+          document.createTextNode(' ')
+        );
+      }
+    }
+  );
+}
+
+
+// SUBBLOCK 1110
+// ============================================================
+// Recognition 중지
+// ============================================================
+
+function stopBibleRecognition() {
+
+  if (_bibleMicRestartTimer) {
+
+    clearTimeout(
+      _bibleMicRestartTimer
+    );
+
+    _bibleMicRestartTimer =
+      null;
+  }
+
+  if (_bibleMicRecognizeTimer) {
+
+    clearTimeout(
+      _bibleMicRecognizeTimer
+    );
+
+    _bibleMicRecognizeTimer =
+      null;
+  }
+
+  if (_bibleRecognition) {
+
+    try {
+
+      _bibleRecognition.onend =
+        null;
+
+      _bibleRecognition.abort();
+
+    } catch (e) {}
+
+    _bibleRecognition =
+      null;
+  }
+}
+
+
+// SUBBLOCK 1111
+// ============================================================
+// Recognition 시작
+// ============================================================
+
+function startBibleRecognition() {
+
+  if (!BibleSpeechRecognition) {
+
+    alert(
+      'Please use Chrome or Edge for microphone practice.'
+    );
+
+    return;
+  }
+
+  stopBibleRecognition();
+
+  var sentence =
+    getCurrentBibleMicSentence();
+
+  if (!sentence) {
+    return;
+  }
+
+  var recognition =
+    new BibleSpeechRecognition();
+
+  _bibleRecognition =
+    recognition;
+
+  _bibleMicLastTranscript =
+    '';
+
+  recognition.lang =
+    sentence.recognition;
+
+  recognition.continuous =
+    true;
+
+  recognition.interimResults =
+    true;
+
+  recognition.maxAlternatives =
+    3;
+
+
+  recognition.onresult =
+    function(event) {
+
+      var transcript = '';
+
+      for (
+        var i = 0;
+        i < event.results.length;
+        i++
+      ) {
+
+        if (
+          event.results[i] &&
+          event.results[i][0]
+        ) {
+
+          transcript +=
+            event.results[i][0]
+              .transcript +
+            ' ';
+        }
+      }
+
+      transcript =
+        transcript.trim();
+
+      if (!transcript) {
+        return;
+      }
+
+      _bibleMicLastTranscript =
+        transcript;
+
+
+      if (_bibleMicRecognizeTimer) {
+
+        clearTimeout(
+          _bibleMicRecognizeTimer
+        );
+      }
+
+      _bibleMicRecognizeTimer =
+        setTimeout(
+          function() {
+
+            if (
+              _bibleRecognition ===
+              recognition
+            ) {
+
+              finalizeBibleMicRecognition();
+            }
+
+          },
+          window.__bibleMicRecognizeDelay *
+            1000
+        );
+    };
+
+
+  recognition.onend =
+    function() {
+
+      if (_bibleMicRecognizeTimer) {
+
+        clearTimeout(
+          _bibleMicRecognizeTimer
+        );
+
+        _bibleMicRecognizeTimer =
+          null;
+      }
+
+      var spoken =
+        String(
+          _bibleMicLastTranscript || ''
+        ).trim();
+
+      if (!spoken) {
+
+        _bibleMicRestartTimer =
+          setTimeout(
+            startBibleRecognition,
+            400
+          );
+
+        return;
+      }
+
+      var score =
+        calculateBibleMicScore(
+          sentence.text,
+          spoken
+        );
+
+      var passed =
+        score >=
+        window.__bibleMicThreshold;
+
+      console.log(
+        '[BIBLE MIC] 원문:',
+        sentence.text
+      );
+
+      console.log(
+        '[BIBLE MIC] 인식:',
+        spoken
+      );
+
+      console.log(
+        '[BIBLE MIC] 점수:',
+        score + '%'
+      );
+
+      showBibleMicScore(
+        score,
+        passed
+      );
+
+      highlightBibleMicWords(
+        sentence,
+        spoken
+      );
+
+
+      if (
+        passed &&
+        window.__bibleMicAutoAdvance &&
+        typeof window.loadNextBibleQuestion ===
+          'function'
+      ) {
+
+        setTimeout(
+          function() {
+
+            window.loadNextBibleQuestion();
+
+          },
+          650
+        );
+
+        return;
+      }
+
+
+      _bibleMicRestartTimer =
+        setTimeout(
+          startBibleRecognition,
+          500
+        );
+    };
+
+
+  recognition.onerror =
+    function(event) {
+
+      console.warn(
+        '[BIBLE MIC]',
+        event.error
+      );
+
+      if (
+        event.error ===
+        'not-allowed'
+      ) {
+
+        turnBibleMicOff();
+      }
+    };
+
+
+  try {
+
+    recognition.start();
+
+  } catch (e) {
+
+    console.warn(
+      '[BIBLE MIC] start failed:',
+      e
+    );
+  }
+}
+
+
+// SUBBLOCK 1112
+// ============================================================
+// Recognize 즉시 마감
+// ============================================================
+
+function finalizeBibleMicRecognition() {
+
+  if (_bibleMicRecognizeTimer) {
+
+    clearTimeout(
+      _bibleMicRecognizeTimer
+    );
+
+    _bibleMicRecognizeTimer =
+      null;
+  }
+
+  if (!_bibleRecognition) {
+    return;
+  }
+
+  var scoreEl =
+    document.getElementById(
+      'bibleMicScore'
+    );
+
+  if (scoreEl) {
+
+    scoreEl.textContent =
+      'Recognizing...';
+
+    scoreEl.style.color =
+      '#2563eb';
+  }
+
+  try {
+
+    _bibleRecognition.stop();
+
+  } catch (e) {}
+}
+
+
+// SUBBLOCK 1113
+// ============================================================
+// MIC ON / OFF
+// ============================================================
+
+var _bibleMicOn = false;
+
+function turnBibleMicOn() {
+
+  if (
+    typeof stopSpeech ===
+    'function'
+  ) {
+    stopSpeech();
+  }
+
+  _bibleMicOn = true;
+
+  var btn =
+    document.getElementById(
+      'anneMicButton'
+    );
+
+  if (btn) {
+    btn.classList.add('active');
+    btn.setAttribute(
+      'aria-pressed',
+      'true'
+    );
+  }
+
+  var panel =
+    ensureBibleMicPanel();
+
+  positionBibleMicPanel();
+
+  panel.style.display =
+    'block';
+
+  startBibleRecognition();
+}
+
+
+function turnBibleMicOff() {
+
+  _bibleMicOn = false;
+
+  stopBibleRecognition();
+
+  var btn =
+    document.getElementById(
+      'anneMicButton'
+    );
+
+  if (btn) {
+    btn.classList.remove('active');
+    btn.setAttribute(
+      'aria-pressed',
+      'false'
+    );
+  }
+
+  var panel =
+    document.getElementById(
+      'bibleMicPanel'
+    );
+
+  if (panel) {
+    panel.style.display = 'none';
+  }
+}
+
+
+// SUBBLOCK 1114
+// ============================================================
+// MIC 버튼 바인딩
+// ============================================================
+
+function installBibleMicButton() {
+
+  var btn =
+    document.getElementById(
+      'anneMicButton'
+    );
+
+  if (!btn) {
+    return false;
+  }
+
+  if (
+    btn.dataset.bibleMicBound ===
+    '1'
+  ) {
+    return true;
+  }
+
+  btn.dataset.bibleMicBound =
+    '1';
+
+  btn.onclick =
+    function() {
+
+      if (_bibleMicOn) {
+        turnBibleMicOff();
+      } else {
+        turnBibleMicOn();
+      }
+    };
+
+  _bibleMicInstalled = true;
+
+  console.log(
+    '[BIBLE MIC] ✅ 설치 완료'
+  );
+
+  return true;
+}
+
+
+// SUBBLOCK 1115
+// ============================================================
+// TTS가 MIC 버튼 생성할 때까지 감시
+// ============================================================
+
+(function watchBibleMicButton() {
+
+  if (
+    installBibleMicButton()
+  ) {
+    return;
+  }
+
+  var observer =
+    new MutationObserver(
+      function() {
+
+        if (
+          installBibleMicButton()
+        ) {
+
+          observer.disconnect();
+        }
+      }
+    );
+
+  observer.observe(
+    document.documentElement,
+    {
+      childList: true,
+      subtree: true
+    }
+  );
+
+})();
+  
 // ============================================================
 // BLOCK 1300: anne-speech.js
 // ============================================================
