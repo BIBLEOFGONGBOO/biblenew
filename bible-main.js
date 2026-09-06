@@ -360,49 +360,33 @@ function collectVisibleSpeechItems() {
     return [];
   }
 
-  var elements =
-    Array.from(
-      root.querySelectorAll(
-        '.language-line[data-language]'
-      )
-    );
-
   var items = [];
 
-  elements.forEach(function(el) {
+  // English Passage
+  var enPassage =
+    document.getElementById(
+      'bibleEnglishPassage'
+    );
 
-    if (!isSpeechElementVisible(el)) {
-      return;
-    }
+  if (
+    enPassage &&
+    isSpeechElementVisible(enPassage)
+  ) {
 
-    var text =
-      String(el.textContent || '');
-
-    if (!text.trim()) {
-      return;
-    }
-
-    var langCode =
+    var enText =
       String(
-        el.dataset.language || 'ENG'
-      ).toUpperCase();
+        enPassage.textContent || ''
+      ).trim();
 
-    if (
-      langCode !== 'ENG' &&
-      langCode !== 'KOR' &&
-      langCode !== 'JPN'
-    ) {
-      langCode = 'ENG';
+    if (enText) {
+      items.push({
+        text: enText,
+        langCode: 'ENG',
+        lang: 'en-US',
+        container: enPassage
+      });
     }
-
-    items.push({
-      text: text,
-      langCode: langCode,
-      lang: mapLanguageCode(langCode),
-      container: el
-    });
-
-  });
+  }
 
   console.log(
     '[TTS] 화면 읽기 목록:',
