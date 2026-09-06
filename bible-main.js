@@ -670,39 +670,38 @@ function ensureBibleMicPanel() {
 // SUBBLOCK 1108
 // ============================================================
 // MIC 패널 위치
+// PASSAGE를 가리지 않도록 화면 오른쪽 위 고정
 // ============================================================
 
 function positionBibleMicPanel() {
 
-  var btn =
-    document.getElementById(
-      'anneMicButton'
-    );
-
   var panel =
     ensureBibleMicPanel();
 
-  if (!btn || !panel) {
+  if (!panel) {
     return;
   }
 
-  var rect =
-    btn.getBoundingClientRect();
-
-  panel.style.left =
-    Math.max(
-      8,
-      rect.left +
-      window.scrollX -
-      145
-    ) + 'px';
+  panel.style.position =
+    'fixed';
 
   panel.style.top =
-    (
-      rect.bottom +
-      window.scrollY +
-      7
-    ) + 'px';
+    '70px';
+
+  panel.style.right =
+    '12px';
+
+  panel.style.left =
+    'auto';
+
+  panel.style.bottom =
+    'auto';
+
+  panel.style.maxWidth =
+    '230px';
+
+  panel.style.zIndex =
+    '99999';
 }
 
 
