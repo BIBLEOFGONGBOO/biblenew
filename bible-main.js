@@ -234,11 +234,11 @@ var _speechRunId = 0;
 
 // SUBBLOCK 1303
 function getAnneState() {
-  if (typeof ANNE_STATE === 'undefined') {
-    console.warn('[TTS] ANNE_STATE 없음');
-    return null;
-  }
-  return ANNE_STATE;
+  return {
+    mode: 'study',
+    auto: false,
+    micMode: false
+  };
 }
 
 // SUBBLOCK 1304
@@ -352,11 +352,7 @@ function isSpeechElementVisible(el) {
 // SUBBLOCK 1308
 function collectVisibleSpeechItems() {
 
-  var root =
-    document.getElementById('questionContainer');
-
-  if (!root) {
-    console.warn('[TTS] questionContainer 없음');
+  console.warn('[TTS] content 없음');
     return [];
   }
 
