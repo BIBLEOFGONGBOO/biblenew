@@ -1564,5 +1564,11 @@ if (
   );
 }
   
-
+setTimeout(
+  function() {
+    installSpeech();
+  },
+  200
+);
+  
 })();
