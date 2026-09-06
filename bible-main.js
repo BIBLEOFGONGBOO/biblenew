@@ -29,30 +29,7 @@
         return;
       }
 
-var chunks = [];
 
-for (var i = 1; i <= 5; i++) {
-
-  var enChunk =
-    String(en['chunk_' + i] || '').trim();
-
-  var koChunk =
-    String(ko['chunk_' + i] || '').trim();
-
-  if (enChunk || koChunk) {
-
-    chunks.push(
-      '<span style="margin-right:12px;">' +
-      '<strong>' + enChunk + '</strong>' +
-      ' — ' +
-      koChunk +
-      '</span>'
-    );
-  }
-}
-
-var chunkHtml =
-  chunks.join('');
 
       
       content.innerHTML =
@@ -127,6 +104,31 @@ var chunkHtml =
             }
           ) || {};
 
+        
+var chunks = [];
+
+for (var i = 1; i <= 5; i++) {
+
+  var enChunk =
+    String(en['chunk_' + i] || '').trim();
+
+  var koChunk =
+    String(ko['chunk_' + i] || '').trim();
+
+  if (enChunk || koChunk) {
+
+    chunks.push(
+      '<span style="margin-right:12px;">' +
+      '<strong>' + enChunk + '</strong>' +
+      ' — ' +
+      koChunk +
+      '</span>'
+    );
+  }
+}
+
+var chunkHtml =
+  chunks.join('');
 
         content.innerHTML = `
           <div style="
