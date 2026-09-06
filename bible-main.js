@@ -144,12 +144,15 @@ var chunkHtml =
               ${recordId}
             </div>
 
-            <div style="
-              font-size:18px;
-              line-height:1.6;
-              margin-bottom:8px;
-            ">
-              ${en.passage || ''}
+            <div
+  id="bibleEnglishPassage"
+  style="
+    font-size:18px;
+    line-height:1.6;
+    margin-bottom:8px;
+  "
+>
+  ${en.passage || ''}
 </div>
 
 <div style="
