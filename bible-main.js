@@ -352,40 +352,12 @@ function isSpeechElementVisible(el) {
 // SUBBLOCK 1308
 function collectVisibleSpeechItems() {
 
-  console.warn('[TTS] content 없음');
+  var root =
+    document.getElementById('content');
+
+  if (!root) {
+    console.warn('[TTS] content 없음');
     return [];
-  }
-
-  var state =
-    getAnneState();
-
-  var currentMode =
-    state ? state.mode : 'study';
-
-  var correctAnswer =
-    null;
-
-  if (state) {
-
-    var currentDate =
-      state._currentDate;
-
-    var dayQuestions =
-      state.questions.filter(function(q) {
-        return q.date === currentDate;
-      });
-
-    var dayIndex =
-      state.index -
-      (state._currentDayStart || 0);
-
-    var currentQuestion =
-      dayQuestions[dayIndex];
-
-    if (currentQuestion) {
-      correctAnswer =
-        Number(currentQuestion.answer);
-    }
   }
 
   var elements =
@@ -399,40 +371,8 @@ function collectVisibleSpeechItems() {
 
   elements.forEach(function(el) {
 
-    // 화면에 안 보이는 것은 제외
     if (!isSpeechElementVisible(el)) {
       return;
-    }
-
-    // 모든 모드 공통:
-    // 해설은 읽지 않음
-    if (
-      el.closest('#licenseFeedback') ||
-      el.closest('.explanation')
-    ) {
-      return;
-    }
-
-    // LRN 모드:
-    // 선택지는 정답만 읽음
-    var choice =
-      el.closest('.choice');
-
-    if (
-      currentMode === 'learn' &&
-      choice
-    ) {
-
-      var answerNumber =
-        Number(
-          choice.getAttribute('data-answer')
-        );
-
-      if (
-        answerNumber !== correctAnswer
-      ) {
-        return;
-      }
     }
 
     var text =
