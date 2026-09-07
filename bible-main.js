@@ -4317,38 +4317,145 @@ function setButtonActive(btn) {
 }
 
 // SUBBLOCK 1004
-var prevBtn = document.getElementById('prevBtn');
-var skipBtn = document.getElementById('skipBtn');
-var nextBtn = document.getElementById('nextBtn');
-var quitBtn = document.getElementById('quitBtn');
+// ============================================================
+// NAV buttons
+// PREV / SKIP / NEXT / QUIT
+// + ArrowLeft / ArrowRight
+// ============================================================
+
+var prevBtn =
+  document.getElementById('prevBtn');
+
+var skipBtn =
+  document.getElementById('skipBtn');
+
+var nextBtn =
+  document.getElementById('nextBtn');
+
+var quitBtn =
+  document.getElementById('quitBtn');
+
 
 if (prevBtn) {
   prevBtn.onclick = function() {
+
     setButtonActive(this);
-    go(-1);
+
+    if (ANNE_STATE.index > 0) {
+      go(-1);
+    }
   };
 }
+
+
 if (skipBtn) {
   skipBtn.onclick = function() {
+
     setButtonActive(this);
-    if (ANNE_STATE.answers[ANNE_STATE.index] == null) {
-      ANNE_STATE.answers[ANNE_STATE.index] = -1;
+
+    if (
+      ANNE_STATE.answers[
+        ANNE_STATE.index
+      ] == null
+    ) {
+      ANNE_STATE.answers[
+        ANNE_STATE.index
+      ] = -1;
     }
-    go(1);
+
+    if (
+      ANNE_STATE.index <
+      ANNE_STATE.questions.length - 1
+    ) {
+      go(1);
+    }
   };
 }
+
+
 if (nextBtn) {
   nextBtn.onclick = function() {
+
     setButtonActive(this);
-    go(1);
+
+    if (
+      ANNE_STATE.index <
+      ANNE_STATE.questions.length - 1
+    ) {
+      go(1);
+    }
   };
 }
+
+
 if (quitBtn) {
   quitBtn.onclick = function() {
+
     setButtonActive(this);
-    setTimeout(function() { location.reload(); }, 200);
+
+    setTimeout(function() {
+      location.reload();
+    }, 200);
   };
 }
+
+
+// Arrow keys
+document.addEventListener(
+  'keydown',
+  function(e) {
+
+    if (
+      e.target &&
+      e.target.matches(
+        'input,select,textarea'
+      )
+    ) {
+      return;
+    }
+
+
+    if (
+      e.key === 'ArrowRight'
+    ) {
+
+      e.preventDefault();
+
+      if (
+        ANNE_STATE.index <
+        ANNE_STATE.questions.length - 1
+      ) {
+
+        if (nextBtn) {
+          setButtonActive(nextBtn);
+        }
+
+        go(1);
+      }
+
+      return;
+    }
+
+
+    if (
+      e.key === 'ArrowLeft'
+    ) {
+
+      e.preventDefault();
+
+      if (
+        ANNE_STATE.index > 0
+      ) {
+
+        if (prevBtn) {
+          setButtonActive(prevBtn);
+        }
+
+        go(-1);
+      }
+    }
+  }
+);
 
 // SUBBLOCK 1005
 document.addEventListener('keydown', function(e) {
