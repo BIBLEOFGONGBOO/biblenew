@@ -463,7 +463,12 @@ export class VectorMap25D {
 });
 
 text.textContent = place.name;
+text.textContent = place.name;
 
+      
+text.style.pointerEvents = 'auto';
+text.style.cursor = 'pointer';
+      
 text.style.pointerEvents = 'auto';
 text.style.cursor = 'pointer';
 
