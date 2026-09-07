@@ -182,16 +182,23 @@ text.textContent = node.label;
 text.style.pointerEvents = 'all';
 text.style.cursor = 'pointer';
 
+text.style.pointerEvents = 'all';
+text.style.cursor = 'pointer';
+
 text.onpointerdown = function(e) {
   e.preventDefault();
   e.stopPropagation();
+  e.stopImmediatePropagation();
+
+  var placeName =
+    text.textContent.trim();
 
   if (
     typeof window.openBibleContext === 'function'
   ) {
     window.openBibleContext({
       tab: 'places',
-      placeName: node.label
+      placeName: placeName
     });
   }
 };
