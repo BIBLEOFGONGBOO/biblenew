@@ -170,9 +170,33 @@ export class VectorScene25D {
       }
       if (!placement) continue;
       boxes.push(placement.box);
-      const text = makeSvg('text', { x: point.x + placement.dx, y: point.y + placement.dy, 'font-size': font, class: 'scene25d-label' });
-      text.textContent = node.label;
-      this.labelLayer.appendChild(text);
+      const text = makeSvg('text', {
+  x: point.x + placement.dx,
+  y: point.y + placement.dy,
+  'font-size': font,
+  class: 'scene25d-label'
+});
+
+text.textContent = node.label;
+
+text.style.pointerEvents = 'all';
+text.style.cursor = 'pointer';
+
+text.onpointerdown = function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  if (
+    typeof window.openBibleContext === 'function'
+  ) {
+    window.openBibleContext({
+      tab: 'places',
+      placeName: node.label
+    });
+  }
+};
+
+this.labelLayer.appendChild(text);
     }
     for (const item of this.scene.texts) {
       const point = this.toScreen([item.x, item.y]);
