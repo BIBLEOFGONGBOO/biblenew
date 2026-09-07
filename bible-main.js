@@ -1321,14 +1321,24 @@ window.loadBibleChapter =
       );
 
 
-      if (
-        !BIBLE_CHAPTER_CATALOG
-          .length
-      ) {
+     if (
+  !BIBLE_CHAPTER_CATALOG.length ||
+  !BIBLE_CHAPTER_CATALOG.some(
+    function(item) {
 
-        await loadBibleChapterCatalog_();
-      }
+      return String(
+        item.CODE || ''
+      ).indexOf(
+        testament + '-'
+      ) === 0;
+    }
+  )
+) {
 
+  await loadBibleChapterCatalog_(
+    testament
+  );
+}
 
       var catalog =
         findBibleChapterCatalog_(
