@@ -7,6 +7,15 @@
 // ============================================================
 // ============================================================
 
+import {
+  VectorScene25D,
+  sceneFromGraphicObjects
+} from './graphics/map25d/vector-scene25d.js';
+
+window.VectorScene25D = VectorScene25D;
+window.sceneFromGraphicObjects = sceneFromGraphicObjects;
+
+
 const C = window.LICENSE_CONFIG || {
   authStorageKey: 'bible_supabase_auth_v1',
   progressPrefix: 'gongboo.license.'
