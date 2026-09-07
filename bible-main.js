@@ -10214,6 +10214,18 @@ function initBiblePeopleExplorer() {
 setTimeout(
   function() {
 
+    var peopleBtn =
+      document.getElementById(
+        'biblePeopleToggle'
+      );
+
+    if (peopleBtn) {
+      peopleBtn.disabled = false;
+      peopleBtn.removeAttribute(
+        'disabled'
+      );
+    }
+
     initBiblePeopleExplorer();
 
   },
