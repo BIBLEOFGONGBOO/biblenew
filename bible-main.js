@@ -1029,128 +1029,393 @@ window.ANNE_STATE = ANNE_STATE;
 
 
 // ============================================================
-// BLOCK 0400: anne-home.js
+// BLOCK 0400: bible-home.js
 // ============================================================
 // ============================================================
 
 var _homeInitialized = false;
 
+
 // SUBBLOCK 0401
+// ============================================================
+// Bible 기본 설정 저장
+// ============================================================
+
 function saveLastSettings() {
+
   try {
-    var psgBtn = document.getElementById('biblePassageToggle');
-    var qzBtn = document.getElementById('bibleQuizToggle');
-    
+
     var settings = {
-      mode: ANNE_STATE.mode || 'study',
-      firstLang: $('biblePrimaryTextSelector')?.value || 'ENG',
-      secondLang: $('bibleSecondaryTextSelector')?.value || 'KOR',
-      auto: ANNE_STATE.auto || false,
-      micThreshold: window.__micThreshold || 50,
-      lastDate: ANNE_STATE._currentDate || '',
-      lastIndex: ANNE_STATE.index || 0,
-      lastProduct: ANNE_STATE.product || '',
-      lastDayStart: ANNE_STATE._currentDayStart || 0,
-      psgOn: psgBtn ? psgBtn.classList.contains('is-on') : true,
-      qzOn: qzBtn ? qzBtn.classList.contains('is-on') : true
+
+      mode:
+        ANNE_STATE.mode ||
+        'study',
+
+      firstLang:
+        $('biblePrimaryTextSelector')
+          ?.value ||
+        'ENG',
+
+      secondLang:
+        $('bibleSecondaryTextSelector')
+          ?.value ||
+        'KOR',
+
+      auto:
+        ANNE_STATE.auto ||
+        false,
+
+      micThreshold:
+        window.__micThreshold ||
+        70
     };
-    localStorage.setItem('gongboo.license.lastSettings', JSON.stringify(settings));
+
+    localStorage.setItem(
+      'gongboo.biblenew.lastSettings',
+      JSON.stringify(settings)
+    );
+
   } catch (e) {
-    console.warn('설정 저장 실패:', e);
+
+    console.warn(
+      '[BIBLE] 설정 저장 실패:',
+      e
+    );
   }
 }
 
-// SUBBLOCK 0402
+
+// SUBBLOCK 0405
+// ============================================================
+// Bible Home 초기화
+// ============================================================
+
 function setupHome() {
-    
-    if (_homeInitialized) {
-    console.log('[ANNE] setupHome 이미 실행됨, 중복 실행 방지');
+
+  if (_homeInitialized) {
+
+    console.log(
+      '[BIBLE] setupHome already initialized'
+    );
+
     return;
   }
 
   _homeInitialized = true;
-  console.log('[ANNE] setupHome 실행');
 
-  document.documentElement.dataset.studyMode = 'study';
+  console.log(
+    '[BIBLE] setupHome'
+  );
 
-  var splash = document.getElementById('splashOverlay');
-  if (splash) splash.style.display = 'none';
 
-  var main = document.getElementById('mainContainer');
-  if (main) main.style.display = 'block';
+  document.documentElement.dataset.studyMode =
+    'study';
 
-  var quiz = document.getElementById('quizMain');
-  if (quiz) quiz.style.display = 'none';
 
-  var setup = document.getElementById('setupSection');
-  if (setup) setup.style.display = 'block';
+  var splash =
+    document.getElementById(
+      'splashOverlay'
+    );
 
-  var satTitle = document.querySelector('.sat-title');
-  if (satTitle) {
-    satTitle.innerHTML =
-      '<span id="currentSetTitle">  ANNE</span>';
+  if (splash) {
+    splash.style.display =
+      'none';
   }
 
-  $('bibleExploreToggle').disabled = true;
-  $('biblePeopleToggle').disabled = true;
-  $('biblePassageToggle').disabled = true;
-  $('bibleQuizToggle').disabled = true;
 
-  var card = document.querySelector('.card-new');
+  var main =
+    document.getElementById(
+      'mainContainer'
+    );
+
+  if (main) {
+    main.style.display =
+      'block';
+  }
+
+
+  var quiz =
+    document.getElementById(
+      'quizMain'
+    );
+
+  if (quiz) {
+    quiz.style.display =
+      'none';
+  }
+
+
+  var setup =
+    document.getElementById(
+      'setupSection'
+    );
+
+  if (setup) {
+    setup.style.display =
+      'block';
+  }
+
+
+// SUBBLOCK 0410
+// ============================================================
+// Header title
+// ============================================================
+
+  var satTitle =
+    document.querySelector(
+      '.sat-title'
+    );
+
+  if (satTitle) {
+
+    satTitle.innerHTML =
+      '<span id="currentSetTitle">BIBLE</span>';
+  }
+
+
+// SUBBLOCK 0415
+// ============================================================
+// 초기 버튼 상태
+// ============================================================
+
+  var exploreBtn =
+    document.getElementById(
+      'bibleExploreToggle'
+    );
+
+  var peopleBtn =
+    document.getElementById(
+      'biblePeopleToggle'
+    );
+
+  var passageBtn =
+    document.getElementById(
+      'biblePassageToggle'
+    );
+
+  var quizBtn =
+    document.getElementById(
+      'bibleQuizToggle'
+    );
+
+
+  if (exploreBtn) {
+    exploreBtn.disabled =
+      true;
+  }
+
+  if (peopleBtn) {
+    peopleBtn.disabled =
+      true;
+  }
+
+  if (passageBtn) {
+    passageBtn.disabled =
+      true;
+  }
+
+  if (quizBtn) {
+    quizBtn.disabled =
+      true;
+  }
+
+
+// SUBBLOCK 0420
+// ============================================================
+// NEW LESSON
+// OT / NT
+// ============================================================
+
+  var card =
+    document.querySelector(
+      '.card-new'
+    );
 
   if (card) {
+
     card.innerHTML = `
-      <div class="card-icon">📖</div>
-      <div class="card-title card-title-new"
-           id="anneMainBtn"
-           style="cursor:pointer;">
-        ANNE - Quiz
+
+      <div class="card-icon">
+        📖
       </div>
-      <div id="licenseSetArea" hidden></div>
+
+      <div
+        class="card-title card-title-new"
+      >
+        NEW LESSON
+      </div>
+
+      <div
+        class="card-sub"
+        style="
+          margin-bottom:16px;
+        "
+      >
+        Choose a Testament
+      </div>
+
+      <div
+        id="bibleTestamentArea"
+        style="
+          width:100%;
+          display:grid;
+          grid-template-columns:
+            1fr 1fr;
+          gap:10px;
+        "
+      >
+
+        <button
+          type="button"
+          id="bibleOldTestamentBtn"
+          class="btn-start"
+          style="
+            margin-top:0;
+          "
+        >
+          OLD TESTAMENT
+        </button>
+
+        <button
+          type="button"
+          id="bibleNewTestamentBtn"
+          class="btn-start"
+          style="
+            margin-top:0;
+          "
+        >
+          NEW TESTAMENT
+        </button>
+
+      </div>
+
+      <div
+        id="licenseSetArea"
+        hidden
+      ></div>
+
     `;
-
-    var anneBtn =
-      document.getElementById('anneMainBtn');
-
-    if (anneBtn) {
-      anneBtn.onclick = function() {
-        console.log('[ANNE] 📖 ANNE 버튼 클릭됨');
-        choose('anne');
-      };
-    }
   }
+
+
+// SUBBLOCK 0425
+// ============================================================
+// OT / NT 버튼
+//
+// 아직 기존 Bible Loader를 이식하기 전이므로
+// 현재 단계에서는 클릭 확인만 한다.
+// 다음 단계에서 기존 Bible Book/Chapter Loader 연결.
+// ============================================================
+
+  var otBtn =
+    document.getElementById(
+      'bibleOldTestamentBtn'
+    );
+
+  var ntBtn =
+    document.getElementById(
+      'bibleNewTestamentBtn'
+    );
+
+
+  if (otBtn) {
+
+    otBtn.onclick =
+      function() {
+
+        console.log(
+          '[BIBLE] OLD TESTAMENT selected'
+        );
+
+        window.__bibleSelectedTestament =
+          'OT';
+      };
+  }
+
+
+  if (ntBtn) {
+
+    ntBtn.onclick =
+      function() {
+
+        console.log(
+          '[BIBLE] NEW TESTAMENT selected'
+        );
+
+        window.__bibleSelectedTestament =
+          'NT';
+      };
+  }
+
+
+// SUBBLOCK 0430
+// ============================================================
+// Resume 카드 초기에는 숨김
+// ============================================================
 
   var resume =
-    document.querySelector('.card-resume');
+    document.querySelector(
+      '.card-resume'
+    );
 
   if (resume) {
-    resume.hidden = true;
-    resume.style.display = 'none';
+
+    resume.hidden =
+      true;
+
+    resume.style.display =
+      'none';
   }
 
+
+// SUBBLOCK 0435
+// ============================================================
+// Anne GOLD 공통 기능 설치
+// ============================================================
+
   installLanguages();
+
   installModes();
+
   installTimer();
+
   installTutor();
+
   installResults();
+
   installSpeech();
+
   installAnneToggles();
 
-  var savedSettings = {};
+
+// SUBBLOCK 0440
+// ============================================================
+// 저장 설정 복원
+// ============================================================
+
+  var savedSettings =
+    {};
 
   try {
+
     var raw =
       localStorage.getItem(
-        'gongboo.license.lastSettings'
+        'gongboo.biblenew.lastSettings'
       );
 
     if (raw) {
+
       savedSettings =
         JSON.parse(raw);
     }
+
   } catch (e) {}
 
-  if (savedSettings.mode) {
+
+  if (
+    savedSettings.mode
+  ) {
+
     var modeBtn =
       document.querySelector(
         '[data-ui-mode="' +
@@ -1163,106 +1428,95 @@ function setupHome() {
     }
   }
 
-  if (savedSettings.firstLang) {
+
+  if (
+    savedSettings.firstLang
+  ) {
+
     $('biblePrimaryTextSelector').value =
       savedSettings.firstLang;
   }
 
-  if (savedSettings.secondLang) {
+
+  if (
+    savedSettings.secondLang
+  ) {
+
     $('bibleSecondaryTextSelector').value =
       savedSettings.secondLang;
   }
 
-  if (savedSettings.auto) {
-    ANNE_STATE.auto = true;
+
+  if (
+    savedSettings.auto
+  ) {
+
+    ANNE_STATE.auto =
+      true;
 
     var autoBtn =
       $('licenseAuto');
 
     if (autoBtn) {
-      autoBtn.textContent = 'AUTO ON';
+
+      autoBtn.textContent =
+        'AUTO ON';
+
       autoBtn.setAttribute(
         'aria-pressed',
         'true'
       );
-      autoBtn.classList.add('active');
+
+      autoBtn.classList.add(
+        'active'
+      );
     }
   }
 
-  if (savedSettings.micThreshold) {
-    var thresholdInput =
-      $('licenseMicThreshold');
 
-    var thresholdLabel =
-      $('licenseMicThresholdLabel');
-
-    if (thresholdInput) {
-      thresholdInput.value =
-        savedSettings.micThreshold;
-    }
+  if (
+    savedSettings.micThreshold
+  ) {
 
     window.__micThreshold =
-      Number(savedSettings.micThreshold);
-
-    if (thresholdLabel) {
-      thresholdLabel.textContent =
-        savedSettings.micThreshold + '%';
-    }
+      Number(
+        savedSettings.micThreshold
+      );
   }
 
-  if (savedSettings.psgOn !== undefined) {
-    ANNE_STATE.annePassageVisible =
-      savedSettings.psgOn;
-  }
 
-  if (savedSettings.qzOn !== undefined) {
-    ANNE_STATE.anneQuizVisible =
-      savedSettings.qzOn;
-  }
+// SUBBLOCK 0445
+// ============================================================
+// PSG / QZ
+// ============================================================
+
+  ANNE_STATE.annePassageVisible =
+    true;
+
+  ANNE_STATE.anneQuizVisible =
+    true;
+
 
   syncAnneToggleButtons();
+
   applyAnneVisibility();
 
-  var resumeContainer =
-    document.getElementById(
-      'resumeQuickContainer'
-    );
 
-  if (resumeContainer) {
-    if (
-      savedSettings.lastProduct &&
-      savedSettings.lastDate
-    ) {
-      resumeContainer.hidden = false;
-
-      resumeContainer.innerHTML = `
-        <div class="resume-badge"
-             onclick="resumeLastSession()">
-          <span class="count">
-            📖 ${savedSettings.lastProduct}
-          </span>
-          <span class="time">
-            📅 ${savedSettings.lastDate}
-          </span>
-          <span class="hint">
-            ▶ RESUME
-          </span>
-        </div>
-      `;
-    } else {
-      resumeContainer.hidden = true;
-      resumeContainer.innerHTML = '';
-    }
+  if (passageBtn) {
+    passageBtn.disabled =
+      false;
   }
 
-  $('biblePassageToggle').disabled = false;
-  $('bibleQuizToggle').disabled = false;
+  if (quizBtn) {
+    quizBtn.disabled =
+      false;
+  }
 
-  saveLastSettings();
 
-  // ==========================================================
-  // CHUNK
-  // ==========================================================
+// SUBBLOCK 0450
+// ============================================================
+// CHUNK button
+// ============================================================
 
   var helpBtn =
     document.getElementById(
@@ -1270,40 +1524,58 @@ function setupHome() {
     );
 
   if (helpBtn) {
-    helpBtn.title = 'Chunk';
 
-    helpBtn.onclick = function() {
+    helpBtn.title =
+      'Chunk';
 
-      ANNE_STATE.anneChunkVisible =
-        !ANNE_STATE.anneChunkVisible;
+    helpBtn.onclick =
+      function() {
 
-      var container =
-        document.getElementById(
-          'chunkContainer'
+        ANNE_STATE.anneChunkVisible =
+          !ANNE_STATE.anneChunkVisible;
+
+
+        var container =
+          document.getElementById(
+            'chunkContainer'
+          );
+
+
+        if (container) {
+
+          container.style.display =
+            ANNE_STATE.anneChunkVisible
+              ? 'block'
+              : 'none';
+        }
+
+
+        this.classList.toggle(
+          'active',
+          ANNE_STATE.anneChunkVisible
         );
 
-      if (container) {
-        container.style.display =
-          ANNE_STATE.anneChunkVisible
-            ? 'block'
-            : 'none';
-      }
 
-      this.classList.toggle(
-        'active',
-        ANNE_STATE.anneChunkVisible
-      );
-
-      this.setAttribute(
-        'aria-pressed',
-        String(
-          ANNE_STATE.anneChunkVisible
-        )
-      );
-    };
+        this.setAttribute(
+          'aria-pressed',
+          String(
+            ANNE_STATE.anneChunkVisible
+          )
+        );
+      };
   }
 
-  console.log('[ANNE] ✅ setupHome 완료');
+
+// SUBBLOCK 0455
+// ============================================================
+// 완료
+// ============================================================
+
+  saveLastSettings();
+
+  console.log(
+    '[BIBLE] ✅ setupHome complete'
+  );
 }
 
 
