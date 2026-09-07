@@ -1012,8 +1012,14 @@ function renderJourney(index = 0) {
   activeJourneyScene.setScene(sceneFromGraphicObjects(journey.graphic));
   sceneHost.addEventListener('scene25d:select', (event) => {
     event.stopPropagation();
-    const nodeName = String(event?.detail?.node?.label || event?.detail?.node?.name || '')
-      .replace(/\s*\([^)]*\)\s*$/, '').trim();
+    const nodeName = String(
+  event?.detail?.node?.label ||
+  event?.detail?.node?.name ||
+  ''
+)
+.replace(/^\s*\d+\.\s*/, '')
+.replace(/\s*\([^)]*\)\s*$/, '')
+.trim();
     const place = findPlaceForVisibleLabel(nodeName);
     if (!place) return;
     selectTab('places');
