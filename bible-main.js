@@ -10960,3 +10960,39 @@ async function openBibleScriptureReference_(
 
 window.openBibleScriptureReference =
   openBibleScriptureReference_;
+
+// SUBBLOCK 1595
+// ============================================================
+// Scripture Reference Button Click
+// ============================================================
+
+document.addEventListener(
+  'click',
+  function(event) {
+
+    var button =
+      event.target.closest(
+        '[data-bible-source-code]'
+      );
+
+    if (!button) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    var sourceCode =
+      button.getAttribute(
+        'data-bible-source-code'
+      );
+
+    if (!sourceCode) {
+      return;
+    }
+
+    window.openBibleScriptureReference(
+      sourceCode
+    );
+  }
+);
