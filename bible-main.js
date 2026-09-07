@@ -2971,7 +2971,31 @@ function openBibleChapter_(
     '[BIBLE] Loader connection is next step'
   );
 }
+// SUBBLOCK 0550
+function enterQuiz(at) {
+  var actualIndex = ANNE_STATE._currentDayStart || 0;
+  ANNE_STATE.index = actualIndex + (at || 0);
 
+  $('setupSection').style.display = 'none';
+  $('quizMain').style.display = 'block';
+  $('quizContent').style.display = 'block';
+
+  var progress = document.querySelector('.progress-area');
+  if (progress) progress.style.display = 'block';
+
+  var tutor = $('satTutorPanel');
+  if (tutor) tutor.classList.add('is-license-active');
+
+  $('biblePassageToggle').disabled = false;
+  $('bibleQuizToggle').disabled = false;
+
+  ANNE_STATE.annePassageVisible = true;
+  ANNE_STATE.anneQuizVisible = true;
+
+  syncAnneToggleButtons();
+  setPlaybackEnabled(true);
+  render();
+}
 
 // ============================================================
 // BLOCK 0600: anne-render.js
