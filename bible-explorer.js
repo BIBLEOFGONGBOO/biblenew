@@ -1008,6 +1008,23 @@ function renderJourney(index = 0) {
     labelFontSize: 12,
     selectableLabels: true
   });
+  sceneHost.addEventListener('scene25d:select', (event) => {
+  const node = event.detail && event.detail.node;
+  if (!node) return;
+
+  const placeName =
+    node.name ||
+    node.label ||
+    node.metadata?.placeName ||
+    '';
+
+  if (!placeName) return;
+
+  window.openBibleContext({
+    tab: 'places',
+    placeName: placeName
+  });
+});
   activeJourneyScene.setScene(sceneFromGraphicObjects(journey.graphic));
   sceneHost.addEventListener('scene25d:select', (event) => {
     event.stopPropagation();
