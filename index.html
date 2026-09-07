@@ -1,47 +1,30 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
   <title>Bible New</title>
 
   <style>
-    body {
+    * {
+      box-sizing: border-box;
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      color: #1f2937;
+      padding: 0;
     }
 
-    .app {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 20px;
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #eef2f6;
+      color: #172033;
     }
 
-    .home {
-      text-align: center;
-      margin-top: 60px;
+    button,
+    select {
+      font: inherit;
     }
 
-    .home h1 {
-      font-size: 32px;
-      margin-bottom: 28px;
-    }
-
-    .study-btn {
-      width: 220px;
-      margin: 8px;
-      padding: 14px;
-      border: 0;
-      border-radius: 10px;
-      background: #2563eb;
-      color: white;
-      font-size: 17px;
-      font-weight: 700;
+    button {
       cursor: pointer;
     }
 
@@ -49,15 +32,314 @@
       position: fixed;
       left: 6px;
       top: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      background: #fff59d;
+      z-index: 99999;
       padding: 3px 6px;
+      border: 1px solid #d4c85a;
       border-radius: 4px;
+      background: #fff59d;
+      color: #111;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .quiz-container {
+      width: min(900px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      background: #fff;
+      box-shadow: 0 0 22px rgba(15, 23, 42, 0.08);
+    }
+
+    /* ============================================================
+       BLOCK 05: Header UI
+       ============================================================ */
+
+    .quiz-header {
+      padding: 8px 14px 10px;
+      background: #075ea8;
+      color: #fff;
+      border-bottom: 3px solid #8ed4f8;
+    }
+
+    .header-main {
+      display: grid;
+      grid-template-columns: 2fr 3fr;
+      align-items: center;
+      gap: 8px;
+      width: min(440px, 100%);
+      margin: 0 auto;
+    }
+
+    .brand {
+      min-width: 0;
+      text-align: left;
+      font-size: clamp(1rem, 3vw, 1.35rem);
+      font-weight: 900;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .header-tools {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .header-tool {
+      height: 32px;
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 8px;
+      background: rgba(255,255,255,.16);
+      color: #fff;
+      font-weight: 800;
+    }
+
+    .header-tool:hover {
+      background: #fff;
+      color: #075ea8;
+    }
+
+    /* ============================================================
+       BLOCK 10: Playback / Learning Controls
+       ============================================================ */
+
+    #bibleHeaderActionRow {
+      width: min(440px, 100%);
+      margin: 5px auto 0;
+    }
+
+    .bible-speech-controls {
+      display: grid !important;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 4px;
+      width: 100% !important;
+    }
+
+    .bible-speech-button,
+    .bible-speech-speed {
+      width: 100% !important;
+      min-width: 0 !important;
+      height: 36px !important;
+      min-height: 36px !important;
+      padding: 0 3px !important;
+      border: 1px solid #74d59c !important;
+      border-radius: 8px !important;
+      background: #e6faef !important;
+      color: #145c35 !important;
+      font-weight: 800 !important;
+    }
+
+    .bible-speech-button.active,
+    .bible-speech-button[aria-pressed="true"] {
+      background: #123a67 !important;
+      color: #fff !important;
+      border-color: #071f38 !important;
+    }
+
+    .learning-mode-panel {
+      width: min(440px, 100%);
+      margin: 4px auto 0;
+    }
+
+    .mode-buttons {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 4px;
+    }
+
+    .mode-btn {
+      height: 36px;
+      border: 1px solid #dfd1ad;
+      border-radius: 8px;
+      background: #fff8e7;
+      color: #243b53;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .mode-btn.active {
+      border-color: #123a67;
+      color: #123a67;
+      box-shadow: inset 0 0 0 1px rgba(18,58,103,.22);
+    }
+
+    .bible-passage-controls {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+      margin-top: 4px;
+    }
+
+    .bible-passage-toggle,
+    .bible-quiz-toggle,
+    #biblePrimaryTextSelector,
+    #bibleSecondaryTextSelector {
+      width: 100%;
+      min-width: 0;
+      height: 36px;
+      border: 1px solid #74d59c;
+      border-radius: 8px;
+      background: #e6faef;
+      color: #145c35;
+      padding: 2px 4px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .bible-passage-toggle.is-on,
+    .bible-quiz-toggle.is-on {
+      border-color: #123a67;
+      color: #123a67;
+      box-shadow: inset 0 0 0 1px rgba(18,58,103,.22);
+    }
+
+    /* ============================================================
+       BLOCK 15: Home / Book Entry
+       ============================================================ */
+
+    .setup-area {
+      padding: 34px 20px;
+    }
+
+    .setup-card {
+      width: min(680px, 100%);
+      margin: 0 auto;
+      padding: 28px 22px;
+      border: 1px solid #e2e8f0;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
+      text-align: center;
+    }
+
+    .setup-icon {
+      font-size: 2.4rem;
+    }
+
+    .setup-title {
+      margin-top: 6px;
+      font-size: 1.35rem;
+      font-weight: 900;
+      color: #26384d;
+    }
+
+    .setup-sub {
+      margin-top: 4px;
+      color: #64748b;
+      font-size: .92rem;
+    }
+
+    .testament-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      width: min(520px, 100%);
+      margin: 20px auto 0;
+    }
+
+    .testament-btn {
+      min-height: 52px;
+      border: 0;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 900;
+      font-size: 15px;
+      box-shadow: 0 4px 14px rgba(15,23,42,.12);
+    }
+
+    .testament-btn.ot {
+      background: #2563eb;
+    }
+
+    .testament-btn.nt {
+      background: #16a34a;
+    }
+
+    /* ============================================================
+       BLOCK 20: Bible Content
+       ============================================================ */
+
+    .content-wrap {
+      padding: 0 20px 24px;
     }
 
     #content {
-      margin-top: 24px;
+      width: min(760px, 100%);
+      margin: 0 auto;
+    }
+
+    #bibleEnglishPassage {
+      font-size: 18px;
+      line-height: 1.75;
+    }
+
+    .speech-correct {
+      background: #fde047;
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 8px;
+      width: min(760px, 100%);
+      margin: 18px auto 0;
+    }
+
+    .nav-btn {
+      flex: 1;
+      min-height: 44px;
+      border: 0;
+      border-radius: 10px;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    #prevBtn {
+      background: #3498db;
+    }
+
+    #nextBtn {
+      background: #2ecc71;
+    }
+
+    /* ============================================================
+       BLOCK 25: Responsive
+       ============================================================ */
+
+    @media (max-width: 600px) {
+      .quiz-header {
+        padding: 7px 10px 9px;
+      }
+
+      .header-main,
+      #bibleHeaderActionRow,
+      .learning-mode-panel {
+        width: 100%;
+      }
+
+      .brand {
+        font-size: .95rem;
+      }
+
+      .header-tool {
+        font-size: 12px;
+      }
+
+      .setup-area {
+        padding: 22px 10px;
+      }
+
+      .setup-card {
+        padding: 22px 14px;
+      }
+
+      .content-wrap {
+        padding: 0 10px 18px;
+      }
+
+      .testament-buttons {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -66,40 +348,142 @@
 
   <div id="buildNumber"></div>
 
-  <main class="app">
+  <div class="quiz-container">
 
-    <section id="home" class="home">
-      <h1>BIBLE</h1>
+    <!-- ============================================================
+         BLOCK 05: Header
+         ============================================================ -->
+    <header class="quiz-header">
 
-      <button
-        class="study-btn"
-        onclick="loadBibleSample('OT')"
-      >
-        Old Testament
-      </button>
+      <div class="header-main">
+        <div class="brand">
+          BIBLE
+        </div>
 
-      <button
-        class="study-btn"
-        onclick="loadBibleSample('NT')"
-      >
-        New Testament
-      </button>
+        <div class="header-tools">
+          <button type="button" class="header-tool" id="bibleExploreToggle" title="Atlas">🌐</button>
+          <button type="button" class="header-tool" id="biblePeopleToggle" title="People">👤</button>
+          <button type="button" class="header-tool" id="bibleGuideToggle" title="Chunk">?</button>
+          <button type="button" class="header-tool" id="bibleLogoutToggle" title="Logout">↪</button>
+        </div>
+      </div>
+
+      <div
+        id="bibleHeaderActionRow"
+        aria-label="Playback controls"
+      ></div>
+
+      <div class="learning-mode-panel">
+
+        <div id="modeButtons" class="mode-buttons">
+          <button type="button" class="mode-btn" data-ui-mode="learn">Lrn</button>
+          <button type="button" class="mode-btn active" data-ui-mode="study">Std</button>
+          <button type="button" class="mode-btn" data-ui-mode="exam">Exm</button>
+        </div>
+
+        <div
+          id="biblePassageControls"
+          class="bible-passage-controls"
+        >
+          <button
+            type="button"
+            id="biblePassageToggle"
+            class="bible-passage-toggle"
+            aria-pressed="false"
+          >
+            PSG
+          </button>
+
+          <button
+            type="button"
+            id="bibleQuizToggle"
+            class="bible-quiz-toggle is-on"
+            aria-pressed="true"
+          >
+            Qz
+          </button>
+
+          <select
+            id="biblePrimaryTextSelector"
+            aria-label="Primary language"
+          >
+            <option value="WEB">ModEng</option>
+            <option value="KJV">KJV</option>
+            <option value="KO_WEB">한국어</option>
+          </select>
+
+          <select
+            id="bibleSecondaryTextSelector"
+            aria-label="Secondary language"
+          >
+            <option value="NONE">None</option>
+            <option value="WEB">ModEng</option>
+            <option value="KJV">KJV</option>
+            <option value="KO_WEB">한국어</option>
+          </select>
+        </div>
+
+      </div>
+    </header>
+
+
+    <!-- ============================================================
+         BLOCK 15: Start
+         ============================================================ -->
+    <section class="setup-area" id="setupSection">
+
+      <div class="setup-card">
+        <div class="setup-icon">📖</div>
+        <div class="setup-title">NEW LESSON</div>
+        <div class="setup-sub">Choose a testament to begin.</div>
+
+        <div class="testament-buttons">
+          <button
+            type="button"
+            class="testament-btn ot"
+            onclick="loadBibleSample('OT')"
+          >
+            Old Testament
+          </button>
+
+          <button
+            type="button"
+            class="testament-btn nt"
+            onclick="loadBibleSample('NT')"
+          >
+            New Testament
+          </button>
+        </div>
+      </div>
+
     </section>
 
 
-    <div
-  id="bibleHeaderActionRow"
-  style="
-    display:flex;
-    justify-content:center;
-    margin:10px 0;
-  "
-></div>
-    
-    <section id="content"></section>
+    <!-- ============================================================
+         BLOCK 20: Bible Content
+         ============================================================ -->
+    <main class="content-wrap">
 
-  </main>
+      <div id="content"></div>
 
+      <div class="nav-buttons">
+        <button type="button" id="prevBtn" class="nav-btn">
+          ◀ PREV
+        </button>
+
+        <button type="button" id="nextBtn" class="nav-btn">
+          NEXT ▶
+        </button>
+      </div>
+
+    </main>
+
+  </div>
+
+
+  <!-- ============================================================
+       BLOCK 30: Scripts
+       ============================================================ -->
   <script src="./config.js"></script>
   <script src="./bible-main.js"></script>
 
