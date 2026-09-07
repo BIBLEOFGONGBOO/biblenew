@@ -1283,7 +1283,8 @@ renderBibleBookPicker_();
 
 // SUBBLOCK 0430
 // ============================================================
-// Resume previous lesson
+// Compact RESUME button
+// 책 목록 바로 위 작은 버튼
 // ============================================================
 
 var resume =
@@ -1293,12 +1294,62 @@ var resume =
 
 if (resume) {
 
-  resume.hidden =
-    false;
+  resume.hidden = true;
+  resume.style.display = 'none';
+}
 
-  resume.style.display =
-    '';
 
+var resumeQuick =
+  document.getElementById(
+    'resumeQuickContainer'
+  );
+
+if (resumeQuick) {
+
+  resumeQuick.hidden = false;
+
+  resumeQuick.innerHTML = `
+    <button
+      type="button"
+      id="bibleResumeBtn"
+      style="
+        display:inline-block;
+        width:auto;
+        min-width:0;
+        padding:5px 12px;
+        margin:0 0 12px 0;
+        border:1px solid #e5a923;
+        border-radius:7px;
+        background:#fff8e7;
+        color:#2c3e50;
+        font-size:12px;
+        font-weight:700;
+        cursor:pointer;
+      "
+    >
+      RESUME
+    </button>
+  `;
+
+
+  var resumeBtn =
+    document.getElementById(
+      'bibleResumeBtn'
+    );
+
+  if (resumeBtn) {
+
+    resumeBtn.onclick =
+      function() {
+
+        console.log(
+          '[BIBLE] RESUME selected'
+        );
+
+        // 실제 Resume 연결은
+        // Bible progress 연결 단계에서 추가
+      };
+  }
 }
 
 
@@ -1669,8 +1720,10 @@ function bibleBookDisplayName_(
 
 // SUBBLOCK 0530
 // ============================================================
-// 66권 목록 - 좌우 2열 고정
-// 기존 Bible 방식
+// 66권 목록 - 좌우 정확히 33권씩
+//
+// LEFT  : Genesis ~ Micah
+// RIGHT : Nahum ~ Malachi + New Testament
 // ============================================================
 
 function renderBibleBookPicker_() {
@@ -1692,15 +1745,9 @@ function renderBibleBookPicker_() {
     return;
   }
 
-
-  chapterHost.hidden =
-    true;
-
-  chapterHost.innerHTML =
-    '';
-
-  bookHost.innerHTML =
-    '';
+  chapterHost.hidden = true;
+  chapterHost.innerHTML = '';
+  bookHost.innerHTML = '';
 
 
   var grid =
@@ -1727,11 +1774,7 @@ function renderBibleBookPicker_() {
     );
 
 
-  // ----------------------------------------------------------
-  // LEFT
-  // Genesis ~ Micah
-  // ----------------------------------------------------------
-
+  // LEFT HEADER
   var leftHeading =
     document.createElement(
       'h3'
@@ -1743,7 +1786,7 @@ function renderBibleBookPicker_() {
 
   leftHeading.style.cssText =
     'font-size:16px;' +
-    'margin:0 0 12px 0;' +
+    'margin:0 0 10px 0;' +
     'color:#2c3e50;';
 
   leftColumn.appendChild(
@@ -1751,23 +1794,18 @@ function renderBibleBookPicker_() {
   );
 
 
-  // ----------------------------------------------------------
-  // RIGHT
-  // Nahum ~ Malachi + New Testament
-  // ----------------------------------------------------------
-
+  // RIGHT OT HEADER
   var rightOldHeading =
     document.createElement(
       'h3'
     );
 
   rightOldHeading.innerHTML =
-    '<span>Old Testament · continued</span>' +
-    '<small style="float:right;">39 books</small>';
+    '<span>Old Testament · continued</span>';
 
   rightOldHeading.style.cssText =
     'font-size:16px;' +
-    'margin:0 0 12px 0;' +
+    'margin:0 0 10px 0;' +
     'color:#2c3e50;';
 
   rightColumn.appendChild(
@@ -1806,7 +1844,7 @@ function renderBibleBookPicker_() {
     button.style.cssText =
       'display:block;' +
       'width:100%;' +
-      'padding:10px 4px;' +
+      'padding:9px 4px;' +
       'border:0;' +
       'border-bottom:1px solid #dbe3ec;' +
       'background:transparent;' +
@@ -1862,36 +1900,45 @@ function renderBibleBookPicker_() {
   }
 
 
-  // OT 39권
-  // 앞 28권 → LEFT
-  // 나머지 11권 → RIGHT
+  // ----------------------------------------------------------
+  // LEFT = Genesis ~ Micah
+  // index 0 ~ 32 = 33 books
+  // ----------------------------------------------------------
+
   for (
     var i = 0;
+    i < 33;
+    i++
+  ) {
+
+    leftColumn.appendChild(
+      createBookButton(
+        BIBLE_BOOK_ORDER[i]
+      )
+    );
+  }
+
+
+  // ----------------------------------------------------------
+  // RIGHT TOP = Nahum ~ Malachi
+  // index 33 ~ 38 = 6 books
+  // ----------------------------------------------------------
+
+  for (
+    var i = 33;
     i < 39;
     i++
   ) {
 
-    var button =
+    rightColumn.appendChild(
       createBookButton(
         BIBLE_BOOK_ORDER[i]
-      );
-
-    if (i < 28) {
-
-      leftColumn.appendChild(
-        button
-      );
-
-    } else {
-
-      rightColumn.appendChild(
-        button
-      );
-    }
+      )
+    );
   }
 
 
-  // NT heading
+  // NEW TESTAMENT HEADER
   var ntHeading =
     document.createElement(
       'h3'
@@ -1903,7 +1950,7 @@ function renderBibleBookPicker_() {
 
   ntHeading.style.cssText =
     'font-size:16px;' +
-    'margin:12px 0 12px 0;' +
+    'margin:12px 0 10px 0;' +
     'color:#2c3e50;';
 
   rightColumn.appendChild(
@@ -1911,7 +1958,10 @@ function renderBibleBookPicker_() {
   );
 
 
-  // NT 27권 → RIGHT 계속
+  // ----------------------------------------------------------
+  // RIGHT = Matthew ~ Revelation
+  // ----------------------------------------------------------
+
   for (
     var i = 39;
     i < BIBLE_BOOK_ORDER.length;
