@@ -10658,7 +10658,7 @@ function initBiblePeopleExplorer() {
 
 // SUBBLOCK 1585
 // ============================================================
-// People Explorer Start
+// Bible Tools Start
 // ============================================================
 
 setTimeout(
@@ -10671,10 +10671,20 @@ setTimeout(
 
     if (peopleBtn) {
       peopleBtn.disabled = false;
-      peopleBtn.removeAttribute(
-        'disabled'
-      );
+      peopleBtn.removeAttribute('disabled');
     }
+
+
+    var exploreBtn =
+      document.getElementById(
+        'bibleExploreToggle'
+      );
+
+    if (exploreBtn) {
+      exploreBtn.disabled = false;
+      exploreBtn.removeAttribute('disabled');
+    }
+
 
     initBiblePeopleExplorer();
 
