@@ -16,7 +16,7 @@ const TITLES = { anne: 'ANNE - Quiz' };
 
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({
-  '&': '&amp;',055
+  '&': '&amp;',
   '<': '&lt;',
   '>': '&gt;',
   '"': '&quot;',
