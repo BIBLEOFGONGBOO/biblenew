@@ -1283,22 +1283,23 @@ renderBibleBookPicker_();
 
 // SUBBLOCK 0430
 // ============================================================
-// Resume 카드 초기에는 숨김
+// Resume previous lesson
 // ============================================================
 
-  var resume =
-    document.querySelector(
-      '.card-resume'
-    );
+var resume =
+  document.querySelector(
+    '.card-resume'
+  );
 
-  if (resume) {
+if (resume) {
 
-    resume.hidden =
-      true;
+  resume.hidden =
+    false;
 
-    resume.style.display =
-      'none';
-  }
+  resume.style.display =
+    '';
+
+}
 
 
 // SUBBLOCK 0435
