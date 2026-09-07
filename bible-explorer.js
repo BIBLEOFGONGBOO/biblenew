@@ -1,5 +1,5 @@
-import { VectorMap25D } from './graphics/map25d/vector-map25d.js?v=9.07-map-place-hit-targets1';
-import { VectorScene25D, sceneFromGraphicObjects } from './graphics/map25d/vector-scene25d.js?v=9.23-pointer-click-selection1';
+import { VectorMap25D } from './graphics/map25d/vector-map25d.js?v=9.06-map-place-hit-targets1';
+import { VectorScene25D, sceneFromGraphicObjects } from './graphics/map25d/vector-scene25d.js?v=9.21-pointer-click-selection1';
 
 let initialized = false;
 let dataPromise = null;
@@ -428,54 +428,23 @@ function renderPlaceDetail(place) {
       if (!mapStatus) return;
       mapStatus.textContent = `Zoom ${event.detail.zoom.toFixed(2)} · ${event.detail.visiblePlaces} places · ${event.detail.visibleLabels} labels · ${event.detail.visibleRoads || 0} ancient roads`;
     });
-   mapHost.addEventListener('map25d:select', (event) => {
-
-  const selected =
-    event.detail &&
-    event.detail.place;
-
-  if (!selected) return;
-
-  console.log(
-    '[BIBLE MAP] selected:',
-    selected.name,
-    selected.id
-  );
-
-  const linkedPlace =
-    data.places.find(
-      (item) =>
-        item.id === selected.id
-    ) ||
-    findPlaceForVisibleLabel(
-      selected.name
-    );
-
-  if (!linkedPlace) {
-    console.warn(
-      '[BIBLE MAP] linked place not found:',
-      selected.name
-    );
-    return;
-  }
-
-  renderPlaceDetail(
-    linkedPlace
-  );
-
-  window.requestAnimationFrame(() => {
-
-    document
-      .getElementById(
-        'biblePlaceDetail'
-      )
-      ?.scrollIntoView({
-        behavior: 'auto',
-        block: 'start'
-      });
-
-  });
-});
+    mapHost.addEventListener('map25d:select', (event) => {
+      const selected = event.detail.place;
+      const linkedPlace = data.places.find((item) => item.id === selected.id) ||
+        findPlaceForVisibleLabel(selected.name);
+      if (linkedPlace) {
+        renderPlaceDetail(linkedPlace);
+        window.requestAnimationFrame(() => {
+          document.getElementById('biblePlaceDetail')?.scrollIntoView({
+            behavior: 'auto',
+            block: 'start'
+          });
+        });
+      }
+      if (mapStatus) {
+        mapStatus.textContent = `${selected.name} · ${selected.verse_reference_count || 0} verse references · ${selected.candidate_count || 0} location candidate(s)`;
+      }
+    });
     host.querySelector('[data-map25d-fit]')?.addEventListener('click', () => {
       activePlaceMap.fitToData();
       activePlaceMap.scheduleRender();
@@ -990,7 +959,6 @@ function renderJourney(index = 0) {
   const output = document.getElementById('bibleJourneyOutput');
   const journeyIndex = Number(index) || 0;
   const journey = data.journeys[journeyIndex];
-  console.log('[JOURNEY DATA]', journey);
   if (!output || !journey) return;
   if (activeJourneyScene) activeJourneyScene.destroy();
   output.replaceChildren();
@@ -1009,18 +977,11 @@ function renderJourney(index = 0) {
     labelFontSize: 12,
     selectableLabels: true
   });
-  
   activeJourneyScene.setScene(sceneFromGraphicObjects(journey.graphic));
   sceneHost.addEventListener('scene25d:select', (event) => {
     event.stopPropagation();
-    const nodeName = String(
-  event?.detail?.node?.label ||
-  event?.detail?.node?.name ||
-  ''
-)
-.replace(/^\s*\d+\.\s*/, '')
-.replace(/\s*\([^)]*\)\s*$/, '')
-.trim();
+    const nodeName = String(event?.detail?.node?.label || event?.detail?.node?.name || '')
+      .replace(/\s*\([^)]*\)\s*$/, '').trim();
     const place = findPlaceForVisibleLabel(nodeName);
     if (!place) return;
     selectTab('places');
@@ -1576,18 +1537,6 @@ function museumDisplayTitle(record) {
   return (!title || /^untitled work$/i.test(title)) ? objectName : title;
 }
 
-function museumObjectUrl(record) {
-  try {
-    const url = new URL(String(record && record.object_url || ''));
-    const host = url.hostname.toLowerCase();
-    if (host !== 'www.metmuseum.org' && host !== 'metmuseum.org') return '';
-    url.protocol = 'https:';
-    return url.href;
-  } catch (_) {
-    return '';
-  }
-}
-
 const museumPageSize = 80;
 let museumPage = 0;
 let museumLetter = '';
@@ -1639,7 +1588,6 @@ async function renderMuseum(selectedIndex = 0) {
     const show = (record) => {
       const displayTitle = museumDisplayTitle(record);
       const objectName = String(record.object_name || '').trim();
-      const objectUrl = museumObjectUrl(record);
       const subtitle = displayTitle && displayTitle !== objectName
         ? (objectName || record.culture || 'Met collection object')
         : (record.culture || record.object_date || 'Met collection object');
@@ -1662,7 +1610,6 @@ async function renderMuseum(selectedIndex = 0) {
           ${record.medium ? `<p><strong>Material:</strong> ${escapeHtml(record.medium)}</p>` : ''}
           ${record.credit_line ? `<p><strong>Collection credit:</strong> ${escapeHtml(record.credit_line)}</p>` : ''}
         </section>
-${objectUrl ? `<p><a href="${escapeHtml(objectUrl)}" target="_blank" rel="noopener noreferrer">View on The Met</a></p>` : ''}
         <p class="bible-museum-credit">Metadata and public-domain image: The Metropolitan Museum of Art Open Access.</p>
       </article>`;
     };
