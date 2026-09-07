@@ -3242,6 +3242,193 @@ function render() {
       ANNE_STATE.index
     ];
 
+  // SUBBLOCK 0604-025
+// ============================================================
+// Bible Passage Links
+// Places / Topics / Commentary
+// ============================================================
+
+function attachBiblePlacesButton_(q) {
+
+  var sourceCode =
+    String(
+      q?.sourceCode ||
+      q?.SOURCE_CODE ||
+      q?.subject ||
+      q?.SUBJECT ||
+      ''
+    ).trim();
+
+  if (
+    !/^(OT|NT)-/.test(
+      sourceCode
+    )
+  ) {
+    return;
+  }
+
+
+  var container =
+    document.getElementById(
+      'quizContent'
+    );
+
+  if (!container) {
+    return;
+  }
+
+
+  var card =
+    container.querySelector(
+      '.question-card'
+    );
+
+  if (
+    !card ||
+    card.querySelector(
+      '[data-bible-verse-places]'
+    )
+  ) {
+    return;
+  }
+
+
+  // Places
+  var button =
+    document.createElement(
+      'button'
+    );
+
+  button.type =
+    'button';
+
+  button.className =
+    'bible-verse-places-button';
+
+  button.setAttribute(
+    'data-bible-verse-places',
+    sourceCode
+  );
+
+  button.textContent =
+    '📍 Places in this passage';
+
+  button.addEventListener(
+    'click',
+    function() {
+
+      if (
+        typeof window.openBiblePlacesForSource ===
+        'function'
+      ) {
+
+        window.openBiblePlacesForSource(
+          sourceCode
+        );
+      }
+    }
+  );
+
+
+  var number =
+    card.querySelector(
+      '.q-num'
+    );
+
+  if (number) {
+    number.insertAdjacentElement(
+      'afterend',
+      button
+    );
+  } else {
+    card.prepend(button);
+  }
+
+
+  // Topics
+  var knowledgeButton =
+    document.createElement(
+      'button'
+    );
+
+  knowledgeButton.type =
+    'button';
+
+  knowledgeButton.className =
+    'bible-verse-knowledge-button';
+
+  knowledgeButton.setAttribute(
+    'data-bible-verse-knowledge',
+    sourceCode
+  );
+
+  knowledgeButton.textContent =
+    'Topics in this passage';
+
+  knowledgeButton.addEventListener(
+    'click',
+    function() {
+
+      if (
+        typeof window.openBibleKnowledgeForSource ===
+        'function'
+      ) {
+
+        window.openBibleKnowledgeForSource(
+          sourceCode
+        );
+      }
+    }
+  );
+
+  button.insertAdjacentElement(
+    'afterend',
+    knowledgeButton
+  );
+
+
+  // Commentary
+  var commentaryButton =
+    document.createElement(
+      'button'
+    );
+
+  commentaryButton.type =
+    'button';
+
+  commentaryButton.className =
+    'bible-verse-knowledge-button';
+
+  commentaryButton.setAttribute(
+    'data-bible-verse-commentary',
+    sourceCode
+  );
+
+  commentaryButton.textContent =
+    'Commentary';
+
+  commentaryButton.addEventListener(
+    'click',
+    function() {
+
+      if (
+        typeof window.openBibleCommentaryForSource ===
+        'function'
+      ) {
+
+        window.openBibleCommentaryForSource(
+          sourceCode
+        );
+      }
+    }
+  );
+
+  knowledgeButton.insertAdjacentElement(
+    'afterend',
+    commentaryButton
+  );
+}
+
 
   // SUBBLOCK 0604-03
   // ==========================================================
@@ -3397,6 +3584,7 @@ function render() {
 
     </div>
   `;
+  attachBiblePlacesButton_(q);
 
 
   // SUBBLOCK 0604-04
