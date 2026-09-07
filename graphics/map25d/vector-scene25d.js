@@ -93,11 +93,13 @@ export class VectorScene25D {
   }
 
   setZoom(zoom, x = this.host.clientWidth / 2, y = this.host.clientHeight / 2) {
+    const lockedCenterY = this.camera.centerY;
     const before = this.toWorld(x, y);
     this.camera.zoom = clamp(zoom, this.options.minimumZoom, this.options.maximumZoom);
     const after = this.toWorld(x, y);
     this.camera.centerX += before.x - after.x;
     this.camera.centerY += before.y - after.y;
+    if (this.options.lockVerticalPan) this.camera.centerY = lockedCenterY;
     this.schedule();
   }
 
@@ -112,6 +114,7 @@ export class VectorScene25D {
       this.setZoom(this.camera.zoom + 1, event.clientX - box.left, event.clientY - box.top);
     });
     this.svg.addEventListener('pointerdown', (event) => {
+      if (event.target.closest?.('.scene25d-node, .scene25d-label-selectable')) return;
       this.drag = { id: event.pointerId, x: event.clientX, y: event.clientY, centerX: this.camera.centerX, centerY: this.camera.centerY };
       this.svg.setPointerCapture(event.pointerId);
       this.svg.classList.add('is-dragging');
@@ -120,7 +123,9 @@ export class VectorScene25D {
       if (!this.drag || this.drag.id !== event.pointerId) return;
       const scale = this.camera.baseScale * 2 ** this.camera.zoom;
       this.camera.centerX = this.drag.centerX - (event.clientX - this.drag.x) / scale;
-      this.camera.centerY = this.drag.centerY - (event.clientY - this.drag.y) / scale * (this.options.invertY ? -1 : 1);
+      if (!this.options.lockVerticalPan) {
+        this.camera.centerY = this.drag.centerY - (event.clientY - this.drag.y) / scale * (this.options.invertY ? -1 : 1);
+      }
       this.schedule();
     });
     const finish = (event) => {
@@ -158,8 +163,22 @@ export class VectorScene25D {
     for (const node of this.scene.nodes.slice().sort((a, b) => Number(b.priority || 0) - Number(a.priority || 0))) {
       const point = this.toScreen([node.x, node.y]);
       if (point.x < -40 || point.x > width + 40 || point.y < -40 || point.y > height + 40) continue;
+      const selectNode = (event) => {
+        if (event) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        if (this.lastSelectedNodeId === node.id && event?.type === 'click') {
+          this.lastSelectedNodeId = null;
+          return;
+        }
+        this.lastSelectedNodeId = node.id;
+        queueMicrotask(() => { this.lastSelectedNodeId = null; });
+        this.host.dispatchEvent(new CustomEvent('scene25d:select', { detail: { node }, bubbles: false }));
+      };
       const circle = makeSvg('circle', { cx: point.x, cy: point.y, r: node.radius || 4, fill: node.color || '#60a5fa', stroke: node.stroke || '#1d4ed8', 'stroke-width': 1.5, class: 'scene25d-node' });
-      circle.addEventListener('click', () => this.host.dispatchEvent(new CustomEvent('scene25d:select', { detail: { node }, bubbles: true })));
+      circle.addEventListener('pointerdown', selectNode);
+      circle.addEventListener('click', selectNode);
       this.nodeLayer.appendChild(circle);
       const font = this.options.labelFontSize, estimated = Math.max(24, String(node.label || '').length * font * 0.56);
       const candidates = [[8, -8], [8, 18], [-estimated - 8, -8], [-estimated - 8, 18]];
@@ -170,40 +189,39 @@ export class VectorScene25D {
       }
       if (!placement) continue;
       boxes.push(placement.box);
+      if (this.options.selectableLabels) {
+        const hitPaddingX = 10;
+        const hitHeight = Math.max(36, font + 18);
+        const hitTarget = makeSvg('rect', {
+          x: placement.box.left - hitPaddingX,
+          y: point.y + placement.dy - font - ((hitHeight - font) / 2),
+          width: estimated + (hitPaddingX * 2),
+          height: hitHeight,
+          rx: 8,
+          fill: 'transparent',
+          class: 'scene25d-label-hit-target',
+          role: 'button',
+          tabindex: '0',
+          'aria-label': `Open ${node.label}`
+        });
+        hitTarget.addEventListener('pointerdown', selectNode);
+        hitTarget.addEventListener('click', selectNode);
+        hitTarget.addEventListener('keydown', (event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          selectNode(event);
+        });
+        this.labelLayer.appendChild(hitTarget);
+      }
       const text = makeSvg('text', {
-  x: point.x + placement.dx,
-  y: point.y + placement.dy,
-  'font-size': font,
-  class: 'scene25d-label'
-});
-
-text.textContent = node.label;
-
-text.style.pointerEvents = 'all';
-text.style.cursor = 'pointer';
-
-text.style.pointerEvents = 'all';
-text.style.cursor = 'pointer';
-
-text.onpointerdown = function(e) {
-  e.preventDefault();
-  e.stopPropagation();
-  e.stopImmediatePropagation();
-
-  var placeName =
-    text.textContent.trim();
-
-  if (
-    typeof window.openBibleContext === 'function'
-  ) {
-    window.openBibleContext({
-      tab: 'places',
-      placeName: placeName
-    });
-  }
-};
-
-this.labelLayer.appendChild(text);
+        x: point.x + placement.dx,
+        y: point.y + placement.dy,
+        'font-size': font,
+        class: this.options.selectableLabels ? 'scene25d-label scene25d-label-selectable' : 'scene25d-label'
+      });
+      text.textContent = node.label;
+      if (this.options.selectableLabels) text.style.pointerEvents = 'none';
+      this.labelLayer.appendChild(text);
     }
     for (const item of this.scene.texts) {
       const point = this.toScreen([item.x, item.y]);
