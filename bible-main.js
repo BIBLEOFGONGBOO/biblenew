@@ -8844,7 +8844,448 @@ function biblePeopleUniqueRelationships_(
     unique.values()
   );
 }
+// SUBBLOCK 1550
+// ============================================================
+// People Relationship Graph Payload
+// ============================================================
 
+function biblePeopleGraphPayload_(
+  person,
+  relationships
+) {
+
+  var related =
+    biblePeopleUniqueRelationships_(
+      relationships,
+      person.PERSON_ID
+    ).slice(0, 28);
+
+
+  var groups = {
+    parent: [],
+    partner: [],
+    sibling: [],
+    child: [],
+    other: []
+  };
+
+
+  related.forEach(
+    function(relationship) {
+
+      var type =
+        relationship.DISPLAY_TYPE;
+
+      if (groups[type]) {
+        groups[type].push(
+          relationship
+        );
+      } else {
+        groups.other.push(
+          relationship
+        );
+      }
+    }
+  );
+
+
+  var objects = [
+    {
+      id: 'center',
+
+      type: 'point',
+
+      coords: [0, 0],
+
+      name:
+        person.NAME_EN ||
+        person.PERSON_ID,
+
+      attributes: {
+        size: 6,
+        strokeColor: '#92400e',
+        fillColor: '#fbbf24',
+
+        label: {
+          fontSize: 14,
+          color: '#78350f',
+          offset: [10, 10]
+        }
+      }
+    }
+  ];
+
+
+  function addGroup(
+    groupName,
+    y,
+    color,
+    title
+  ) {
+
+    var members =
+      groups[groupName];
+
+    if (!members.length) {
+      return;
+    }
+
+
+    var spacing =
+      Math.min(
+        5.2,
+        20 /
+        Math.max(
+          1,
+          members.length
+        )
+      );
+
+
+    var startX =
+      -(
+        (
+          members.length - 1
+        ) *
+        spacing
+      ) / 2;
+
+
+    objects.push({
+      id:
+        'title_' +
+        groupName,
+
+      type:
+        'text',
+
+      position: [
+        -10.5,
+        y +
+        (
+          y >= 0
+            ? 1.25
+            : -1.25
+        )
+      ],
+
+      value:
+        title,
+
+      attributes: {
+        color: '#64748b',
+        fontSize: 11
+      }
+    });
+
+
+    members.forEach(
+      function(
+        relationship,
+        index
+      ) {
+
+        var coords = [
+          startX +
+          index *
+          spacing,
+
+          y
+        ];
+
+
+        var id =
+          groupName +
+          '_' +
+          index;
+
+
+        objects.push({
+          id:
+            id,
+
+          type:
+            'point',
+
+          coords:
+            coords,
+
+          name:
+            biblePeopleRelationshipName_(
+              relationship,
+              person.PERSON_ID
+            ) +
+            ' (' +
+            biblePeopleRelationshipRole_(
+              relationship,
+              person.PERSON_ID
+            ) +
+            ')',
+
+          attributes: {
+            size: 4,
+
+            strokeColor:
+              color.stroke,
+
+            fillColor:
+              color.fill,
+
+            label: {
+              fontSize: 12,
+              color: color.text,
+              offset: [8, 8]
+            }
+          },
+
+          metadata: {
+            personId:
+              relationship.RELATED_ID
+          }
+        });
+
+
+        objects.push({
+          id:
+            'line_' +
+            id,
+
+          type:
+            'segment',
+
+          from:
+            [0, 0],
+
+          to:
+            coords,
+
+          attributes: {
+            strokeColor:
+              color.line,
+
+            strokeWidth:
+              1.8
+          }
+        });
+      }
+    );
+  }
+
+
+  function addPartnerGroup() {
+
+    var members =
+      groups.partner;
+
+    if (!members.length) {
+      return;
+    }
+
+
+    var positions = [
+      -5,
+      5,
+      -9,
+      9,
+      -12,
+      12
+    ];
+
+
+    objects.push({
+      id:
+        'title_partner',
+
+      type:
+        'text',
+
+      position:
+        [-10.5, 1.35],
+
+      value:
+        'SPOUSE / PARTNER',
+
+      attributes: {
+        color: '#64748b',
+        fontSize: 11
+      }
+    });
+
+
+    members.forEach(
+      function(
+        relationship,
+        index
+      ) {
+
+        var coords = [
+          positions[index] ||
+          (
+            5 +
+            index * 3
+          ),
+
+          0
+        ];
+
+
+        var id =
+          'partner_' +
+          index;
+
+
+        objects.push({
+          id:
+            id,
+
+          type:
+            'point',
+
+          coords:
+            coords,
+
+          name:
+            biblePeopleRelationshipName_(
+              relationship,
+              person.PERSON_ID
+            ) +
+            ' (' +
+            biblePeopleRelationshipRole_(
+              relationship,
+              person.PERSON_ID
+            ) +
+            ')',
+
+          attributes: {
+            size: 4,
+
+            strokeColor:
+              '#be185d',
+
+            fillColor:
+              '#f9a8d4',
+
+            label: {
+              fontSize: 12,
+              color: '#831843',
+              offset: [8, -16]
+            }
+          },
+
+          metadata: {
+            personId:
+              relationship.RELATED_ID
+          }
+        });
+
+
+        objects.push({
+          id:
+            'line_' +
+            id,
+
+          type:
+            'segment',
+
+          from:
+            [0, 0],
+
+          to:
+            coords,
+
+          attributes: {
+            strokeColor:
+              '#f472b6',
+
+            strokeWidth:
+              1.8
+          }
+        });
+      }
+    );
+  }
+
+
+  addGroup(
+    'parent',
+    7,
+    {
+      stroke: '#6d28d9',
+      fill: '#c4b5fd',
+      text: '#4c1d95',
+      line: '#a78bfa'
+    },
+    'PARENTS'
+  );
+
+
+  addPartnerGroup();
+
+
+  addGroup(
+    'sibling',
+    -3.7,
+    {
+      stroke: '#1d4ed8',
+      fill: '#93c5fd',
+      text: '#1e3a8a',
+      line: '#60a5fa'
+    },
+    'SIBLINGS'
+  );
+
+
+  addGroup(
+    'child',
+    -7,
+    {
+      stroke: '#047857',
+      fill: '#6ee7b7',
+      text: '#064e3b',
+      line: '#34d399'
+    },
+    'CHILDREN'
+  );
+
+
+  addGroup(
+    'other',
+    -9.5,
+    {
+      stroke: '#475569',
+      fill: '#cbd5e1',
+      text: '#334155',
+      line: '#94a3b8'
+    },
+    'OTHER'
+  );
+
+
+  return {
+    schemaVersion:
+      '1.1',
+
+    engine:
+      'jsxgraph',
+
+    type:
+      'bible.people.relationships',
+
+    board: {
+      boundingbox:
+        [-12, 10, 12, -11],
+
+      axis:
+        false,
+
+      grid:
+        false
+    },
+
+    objects:
+      objects
+  };
+}
 
 // SUBBLOCK 1555
 // ============================================================
