@@ -454,13 +454,45 @@ export class VectorMap25D {
       if (!placement) continue;
       labelBoxes.push(placement.box);
       const text = svgElement('text', {
-        x: place.screen.x + placement.offsetX,
-        y: place.screen.y + placement.offsetY,
-        class: selected ? 'map25d-label is-selected' : 'map25d-label',
-        'font-size': fontSize
-      });
-      text.textContent = place.name;
-      this.labelLayer.appendChild(text);
+  x: place.screen.x + placement.offsetX,
+  y: place.screen.y + placement.offsetY,
+  class: selected ? 'map25d-label is-selected' : 'map25d-label',
+  'font-size': fontSize,
+  tabindex: 0,
+  'aria-label': place.name
+});
+
+text.textContent = place.name;
+
+text.style.pointerEvents = 'auto';
+text.style.cursor = 'pointer';
+
+text.addEventListener('click', (event) => {
+  event.preventDefault();
+  event.stopPropagation();
+
+  this.selectedId = place.id;
+  this.scheduleRender();
+
+  this.host.dispatchEvent(
+    new CustomEvent('map25d:select', {
+      detail: { place },
+      bubbles: true
+    })
+  );
+});
+
+text.addEventListener('keydown', (event) => {
+  if (
+    event.key === 'Enter' ||
+    event.key === ' '
+  ) {
+    event.preventDefault();
+    text.click();
+  }
+});
+
+this.labelLayer.appendChild(text);
     }
 
     this.host.dataset.zoom = this.camera.zoom.toFixed(2);
