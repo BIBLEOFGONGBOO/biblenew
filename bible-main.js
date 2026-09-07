@@ -4316,7 +4316,7 @@ function setButtonActive(btn) {
   }, 350);
 }
 
-// SUBBLOCK 1004
+// SUBBLOCK 1003
 // ============================================================
 // NAV buttons
 // PREV / SKIP / NEXT / QUIT
@@ -4456,6 +4456,32 @@ document.addEventListener(
     }
   }
 );
+
+// SUBBLOCK 1004
+// ============================================================
+// Bible Navigation
+// ============================================================
+
+function goNext() {
+
+  if (
+    ANNE_STATE.index <
+    ANNE_STATE.questions.length - 1
+  ) {
+    ANNE_STATE.index++;
+    render();
+  }
+}
+
+function goPrev() {
+
+  if (
+    ANNE_STATE.index > 0
+  ) {
+    ANNE_STATE.index--;
+    render();
+  }
+}
 
 // SUBBLOCK 1005
 document.addEventListener('keydown', function(e) {
