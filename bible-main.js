@@ -1270,12 +1270,8 @@ function languageRecord(
 
 // SUBBLOCK 2055
 // ============================================================
-// Passage Version 선택 처리
-//
-// KJV
-// WEB
-// ModEng / ENG
-// KOR / KO_WEB
+// Bible Passage Version
+// KJV / MODERN / KOR
 // ============================================================
 
 function biblePassageText_(
@@ -1284,16 +1280,12 @@ function biblePassageText_(
 ) {
 
   code =
-    String(
-      code || ''
-    )
-    .trim()
-    .toUpperCase();
+    String(code || '')
+      .trim()
+      .toUpperCase();
 
 
-  if (
-    code === 'KJV'
-  ) {
+  if (code === 'KJV') {
 
     return (
       translations.en &&
@@ -1315,7 +1307,7 @@ function biblePassageText_(
   }
 
 
-  // ENG / WEB / MODENG
+  // MODERN / WEB / ENG
   return (
     translations.en &&
     (
@@ -1328,7 +1320,7 @@ function biblePassageText_(
 
 // SUBBLOCK 2060
 // ============================================================
-// Anne linesData 호환
+// KJV / MODERN / KOR lines
 // ============================================================
 
 function linesData(
@@ -1341,102 +1333,69 @@ function linesData(
       'biblePrimaryTextSelector'
     );
 
-
   var secondary =
     document.getElementById(
       'bibleSecondaryTextSelector'
     );
 
 
-  var values =
-    [
+  var values = [
 
-      primary
-        ? primary.value
-        : 'ENG',
+    primary
+      ? primary.value
+      : 'MODERN',
 
-      secondary
-        ? secondary.value
-        : 'NONE'
-
-    ];
+    secondary
+      ? secondary.value
+      : 'NONE'
+  ];
 
 
-  var seen =
-    {};
+  var seen = {};
 
 
   return values
 
-    .filter(
-      function(code) {
+    .filter(function(code) {
 
-        code =
-          String(
-            code || ''
-          )
+      code =
+        String(code || '')
           .trim()
           .toUpperCase();
 
-
-        if (
-          !code ||
-          code === 'NONE' ||
-          seen[code]
-        ) {
-
-          return false;
-        }
-
-
-        seen[code] =
-          true;
-
-        return true;
+      if (
+        !code ||
+        code === 'NONE' ||
+        seen[code]
+      ) {
+        return false;
       }
-    )
 
-    .map(
-      function(code) {
+      seen[code] = true;
 
-        var upper =
-          String(
-            code || ''
-          ).toUpperCase();
+      return true;
+    })
 
+    .map(function(code) {
 
-        var text =
-          '';
+      var upper =
+        String(code || '')
+          .toUpperCase();
 
-
-        if (
-          field === 'passage'
-        ) {
-
-          text =
-            biblePassageText_(
-              translations,
-              upper
-            );
-
-        } else {
-
-          var record =
-            languageRecord(
-              translations,
-              upper
-            );
+      var text = '';
 
 
-          text =
-            record
-              ? record[field] ||
-                ''
-              : '';
-        }
+      if (field === 'passage') {
 
+        text =
+          biblePassageText_(
+            translations,
+            upper
+          );
 
-        var outputCode =
+      } else {
+
+        var languageCode =
           (
             upper === 'KOR' ||
             upper === 'KO' ||
@@ -1446,25 +1405,44 @@ function linesData(
             : 'ENG';
 
 
-        return {
+        var record =
+          languageRecord(
+            translations,
+            languageCode
+          );
 
-          code:
-            outputCode,
 
-          text:
-            text
-        };
+        text =
+          record
+            ? record[field] || ''
+            : '';
       }
-    )
 
-    .filter(
-      function(item) {
 
-        return !!String(
-          item.text || ''
-        ).trim();
-      }
-    );
+      return {
+
+        code:
+          (
+            upper === 'KOR' ||
+            upper === 'KO' ||
+            upper === 'KO_WEB'
+          )
+            ? 'KOR'
+            : upper === 'KJV'
+              ? 'KJV'
+              : 'MODERN',
+
+        text:
+          text
+      };
+    })
+
+    .filter(function(item) {
+
+      return !!String(
+        item.text || ''
+      ).trim();
+    });
 }
 
 
