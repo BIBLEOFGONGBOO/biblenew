@@ -206,16 +206,25 @@ export class VectorMap25D {
       { passive: false }
     );
     this.svg.addEventListener('pointerdown', (event) => {
-      this.drag = {
-        pointerId: event.pointerId,
-        x: event.clientX,
-        y: event.clientY,
-        centerX: this.camera.centerX,
-        centerY: this.camera.centerY
-      };
-      this.svg.setPointerCapture(event.pointerId);
-      this.svg.classList.add('is-dragging');
-    });
+
+  if (
+    event.target.closest('.map25d-label') ||
+    event.target.closest('.map25d-point')
+  ) {
+    return;
+  }
+
+  this.drag = {
+    pointerId: event.pointerId,
+    x: event.clientX,
+    y: event.clientY,
+    centerX: this.camera.centerX,
+    centerY: this.camera.centerY
+  };
+
+  this.svg.setPointerCapture(event.pointerId);
+  this.svg.classList.add('is-dragging');
+});
     this.svg.addEventListener('pointermove', (event) => {
       if (!this.drag || this.drag.pointerId !== event.pointerId) return;
       const scale = 256 * 2 ** this.camera.zoom;
