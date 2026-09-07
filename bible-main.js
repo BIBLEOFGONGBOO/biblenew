@@ -10213,8 +10213,3 @@ setTimeout(
   200
 );
 
-  if (!query) return;
-
-
-  var requestId =
-    ++bible
