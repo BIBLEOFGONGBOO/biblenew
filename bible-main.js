@@ -1669,7 +1669,8 @@ function bibleBookDisplayName_(
 
 // SUBBLOCK 0530
 // ============================================================
-// 66권 목록 생성
+// 66권 목록 - 좌우 2열 고정
+// 기존 Bible 방식
 // ============================================================
 
 function renderBibleBookPicker_() {
@@ -1707,180 +1708,231 @@ function renderBibleBookPicker_() {
       'div'
     );
 
-  grid.className =
-    'bible-book-grid';
+  grid.style.cssText =
+    'display:grid;' +
+    'grid-template-columns:1fr 1fr;' +
+    'gap:22px;' +
+    'width:100%;' +
+    'align-items:start;';
 
 
-  // 기존 Bible과 같은 2-column 방식
-  var midpoint =
-    Math.ceil(
-      BIBLE_BOOK_ORDER.length /
-      2
+  var leftColumn =
+    document.createElement(
+      'div'
+    );
+
+  var rightColumn =
+    document.createElement(
+      'div'
     );
 
 
-  [
-    BIBLE_BOOK_ORDER.slice(
-      0,
-      midpoint
-    ),
+  // ----------------------------------------------------------
+  // LEFT
+  // Genesis ~ Micah
+  // ----------------------------------------------------------
 
-    BIBLE_BOOK_ORDER.slice(
-      midpoint
-    )
+  var leftHeading =
+    document.createElement(
+      'h3'
+    );
 
-  ].forEach(
-    function(
-      books,
-      columnIndex
-    ) {
+  leftHeading.innerHTML =
+    '<span>Old Testament</span>' +
+    '<small style="float:right;">39 books</small>';
 
-      var column =
-        document.createElement(
-          'section'
-        );
+  leftHeading.style.cssText =
+    'font-size:16px;' +
+    'margin:0 0 12px 0;' +
+    'color:#2c3e50;';
 
-      column.className =
-        'bible-book-column';
-
-
-      var previousTestament =
-        '';
-
-
-      books.forEach(
-        function(bookName) {
-
-          var testament =
-            getBibleTestament_(
-              bookName
-            );
-
-
-          if (
-            testament !==
-              previousTestament ||
-            (
-              columnIndex === 1 &&
-              !previousTestament
-            )
-          ) {
-
-            var heading =
-              document.createElement(
-                'h3'
-              );
-
-            heading.className =
-              'bible-testament-title';
-
-
-            if (
-              testament === 'NT'
-            ) {
-
-              heading.innerHTML =
-                '<span>New Testament</span>' +
-                '<small>27 books</small>';
-
-            } else {
-
-              heading.innerHTML =
-                '<span>Old Testament' +
-                (
-                  columnIndex === 1
-                    ? ' · continued'
-                    : ''
-                ) +
-                '</span>' +
-                '<small>39 books</small>';
-            }
-
-
-            column.appendChild(
-              heading
-            );
-
-            previousTestament =
-              testament;
-          }
-
-
-          var button =
-            document.createElement(
-              'button'
-            );
-
-          button.type =
-            'button';
-
-          button.className =
-            'bible-book-button';
-
-          button.textContent =
-            bibleBookDisplayName_(
-              bookName
-            );
-
-          button.dataset.book =
-            bookName;
-
-          button.dataset.testament =
-            testament;
-
-
-          button.onclick =
-            function() {
-
-              BIBLE_SELECTED_BOOK =
-                bookName;
-
-              BIBLE_SELECTED_TESTAMENT =
-                testament;
-
-
-              bookHost
-                .querySelectorAll(
-                  '.bible-book-button'
-                )
-                .forEach(
-                  function(item) {
-
-                    item.classList.toggle(
-                      'is-selected',
-                      item === button
-                    );
-                  }
-                );
-
-
-              renderBibleChapterPicker_(
-                bookName
-              );
-
-
-              // 선택한 Book 바로 밑에
-              // Chapter 삽입
-              button.insertAdjacentElement(
-                'afterend',
-                chapterHost
-              );
-            };
-
-
-          column.appendChild(
-            button
-          );
-        }
-      );
-
-
-      grid.appendChild(
-        column
-      );
-    }
+  leftColumn.appendChild(
+    leftHeading
   );
 
+
+  // ----------------------------------------------------------
+  // RIGHT
+  // Nahum ~ Malachi + New Testament
+  // ----------------------------------------------------------
+
+  var rightOldHeading =
+    document.createElement(
+      'h3'
+    );
+
+  rightOldHeading.innerHTML =
+    '<span>Old Testament · continued</span>' +
+    '<small style="float:right;">39 books</small>';
+
+  rightOldHeading.style.cssText =
+    'font-size:16px;' +
+    'margin:0 0 12px 0;' +
+    'color:#2c3e50;';
+
+  rightColumn.appendChild(
+    rightOldHeading
+  );
+
+
+  function createBookButton(
+    bookName
+  ) {
+
+    var testament =
+      getBibleTestament_(
+        bookName
+      );
+
+    var button =
+      document.createElement(
+        'button'
+      );
+
+    button.type =
+      'button';
+
+    button.textContent =
+      bibleBookDisplayName_(
+        bookName
+      );
+
+    button.dataset.book =
+      bookName;
+
+    button.dataset.testament =
+      testament;
+
+    button.style.cssText =
+      'display:block;' +
+      'width:100%;' +
+      'padding:10px 4px;' +
+      'border:0;' +
+      'border-bottom:1px solid #dbe3ec;' +
+      'background:transparent;' +
+      'text-align:left;' +
+      'color:#2c3e50;' +
+      'font-size:15px;' +
+      'cursor:pointer;';
+
+
+    button.onclick =
+      function() {
+
+        BIBLE_SELECTED_BOOK =
+          bookName;
+
+        BIBLE_SELECTED_TESTAMENT =
+          testament;
+
+
+        bookHost
+          .querySelectorAll(
+            '[data-book]'
+          )
+          .forEach(
+            function(item) {
+
+              item.style.background =
+                item === button
+                  ? '#eef5ff'
+                  : 'transparent';
+
+              item.style.color =
+                item === button
+                  ? '#2563eb'
+                  : '#2c3e50';
+            }
+          );
+
+
+        renderBibleChapterPicker_(
+          bookName
+        );
+
+
+        button.insertAdjacentElement(
+          'afterend',
+          chapterHost
+        );
+      };
+
+
+    return button;
+  }
+
+
+  // OT 39권
+  // 앞 28권 → LEFT
+  // 나머지 11권 → RIGHT
+  for (
+    var i = 0;
+    i < 39;
+    i++
+  ) {
+
+    var button =
+      createBookButton(
+        BIBLE_BOOK_ORDER[i]
+      );
+
+    if (i < 28) {
+
+      leftColumn.appendChild(
+        button
+      );
+
+    } else {
+
+      rightColumn.appendChild(
+        button
+      );
+    }
+  }
+
+
+  // NT heading
+  var ntHeading =
+    document.createElement(
+      'h3'
+    );
+
+  ntHeading.innerHTML =
+    '<span>New Testament</span>' +
+    '<small style="float:right;">27 books</small>';
+
+  ntHeading.style.cssText =
+    'font-size:16px;' +
+    'margin:12px 0 12px 0;' +
+    'color:#2c3e50;';
+
+  rightColumn.appendChild(
+    ntHeading
+  );
+
+
+  // NT 27권 → RIGHT 계속
+  for (
+    var i = 39;
+    i < BIBLE_BOOK_ORDER.length;
+    i++
+  ) {
+
+    rightColumn.appendChild(
+      createBookButton(
+        BIBLE_BOOK_ORDER[i]
+      )
+    );
+  }
+
+
+  grid.appendChild(
+    leftColumn
+  );
+
+  grid.appendChild(
+    rightColumn
+  );
 
   bookHost.appendChild(
     grid
