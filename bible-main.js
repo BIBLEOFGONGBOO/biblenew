@@ -144,31 +144,86 @@ var BIBLE_CHAPTER_CATALOG =
 
 // SUBBLOCK 0210
 // ============================================================
-// Bible API request
-//
-// 현재 biblenew는 로그인 구조를 아직 이식하지 않았으므로
-// session_token 없이 먼저 사용.
-// 기존 API가 token을 요구하면 다음 단계에서 auth만 추가.
+// Existing Bible API Request
+// POST + session_token
 // ============================================================
+
+function getBibleSessionToken_() {
+
+  try {
+
+    var user =
+      JSON.parse(
+        localStorage.getItem(
+          'quiz_current_user_v1'
+        ) || 'null'
+      );
+
+    return String(
+      user &&
+      user.session_token ||
+      ''
+    ).trim();
+
+  } catch (e) {
+
+    return '';
+  }
+}
+
 
 async function bibleApiRequest_(
   params
 ) {
 
-  var url =
-    BIBLE_API_URL +
-    '?' +
-    params.toString();
+  var token =
+    getBibleSessionToken_();
+
+
+  if (!token) {
+
+    throw new Error(
+      'LOGIN_REQUIRED'
+    );
+  }
+
+
+  var body =
+    {};
+
+
+  params.forEach(
+    function(
+      value,
+      key
+    ) {
+
+      body[key] =
+        value;
+    }
+  );
+
+
+  body.session_token =
+    token;
+
 
   var response =
     await fetch(
-      url,
+      BIBLE_API_URL,
       {
         method:
-          'GET',
+          'POST',
 
-        cache:
-          'no-store'
+        headers: {
+          'Content-Type':
+            'text/plain;charset=utf-8'
+        },
+
+        body:
+          JSON.stringify(
+            body
+          )
       }
     );
 
@@ -210,14 +265,13 @@ async function bibleApiRequest_(
   if (
     data &&
     (
-      data.status ===
-        'error' ||
-      data.success ===
-        false
+      data.status === 'error' ||
+      data.success === false
     )
   ) {
 
     throw new Error(
+      data.code ||
       data.message ||
       'Bible API error'
     );
