@@ -1612,8 +1612,7 @@ window.loadBibleChapter =
         );
 
 
-      ANNE_STATE._currentDayStart =
-        ANNE_STATE.baseOffset;
+      ANNE_STATE._currentDayStart = 0;
 
 
       ANNE_STATE._currentDayCount =
