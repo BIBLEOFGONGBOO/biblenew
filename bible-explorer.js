@@ -990,6 +990,7 @@ function renderJourney(index = 0) {
   const output = document.getElementById('bibleJourneyOutput');
   const journeyIndex = Number(index) || 0;
   const journey = data.journeys[journeyIndex];
+  console.log('[JOURNEY DATA]', journey);
   if (!output || !journey) return;
   if (activeJourneyScene) activeJourneyScene.destroy();
   output.replaceChildren();
