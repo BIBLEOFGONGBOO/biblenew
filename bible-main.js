@@ -176,17 +176,7 @@ async function bibleApiRequest_(
   params
 ) {
 
-  var token =
-    getBibleSessionToken_();
-
-
-  if (!token) {
-
-    throw new Error(
-      'LOGIN_REQUIRED'
-    );
-  }
-
+  
 
   var body =
     {};
@@ -204,10 +194,7 @@ async function bibleApiRequest_(
   );
 
 
-  body.session_token =
-    token;
-
-
+  
   var response =
     await fetch(
       BIBLE_API_URL,
