@@ -428,23 +428,54 @@ function renderPlaceDetail(place) {
       if (!mapStatus) return;
       mapStatus.textContent = `Zoom ${event.detail.zoom.toFixed(2)} · ${event.detail.visiblePlaces} places · ${event.detail.visibleLabels} labels · ${event.detail.visibleRoads || 0} ancient roads`;
     });
-    mapHost.addEventListener('map25d:select', (event) => {
-      const selected = event.detail.place;
-      const linkedPlace = data.places.find((item) => item.id === selected.id) ||
-        findPlaceForVisibleLabel(selected.name);
-      if (linkedPlace) {
-        renderPlaceDetail(linkedPlace);
-        window.requestAnimationFrame(() => {
-          document.getElementById('biblePlaceDetail')?.scrollIntoView({
-            behavior: 'auto',
-            block: 'start'
-          });
-        });
-      }
-      if (mapStatus) {
-        mapStatus.textContent = `${selected.name} · ${selected.verse_reference_count || 0} verse references · ${selected.candidate_count || 0} location candidate(s)`;
-      }
-    });
+   mapHost.addEventListener('map25d:select', (event) => {
+
+  const selected =
+    event.detail &&
+    event.detail.place;
+
+  if (!selected) return;
+
+  console.log(
+    '[BIBLE MAP] selected:',
+    selected.name,
+    selected.id
+  );
+
+  const linkedPlace =
+    data.places.find(
+      (item) =>
+        item.id === selected.id
+    ) ||
+    findPlaceForVisibleLabel(
+      selected.name
+    );
+
+  if (!linkedPlace) {
+    console.warn(
+      '[BIBLE MAP] linked place not found:',
+      selected.name
+    );
+    return;
+  }
+
+  renderPlaceDetail(
+    linkedPlace
+  );
+
+  window.requestAnimationFrame(() => {
+
+    document
+      .getElementById(
+        'biblePlaceDetail'
+      )
+      ?.scrollIntoView({
+        behavior: 'auto',
+        block: 'start'
+      });
+
+  });
+});
     host.querySelector('[data-map25d-fit]')?.addEventListener('click', () => {
       activePlaceMap.fitToData();
       activePlaceMap.scheduleRender();
