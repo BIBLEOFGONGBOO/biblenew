@@ -124,129 +124,496 @@ function htmlLines(lines) {
 
 // ============================================================
 // BLOCK 0200: bible-data.js
-// Existing Bible Catalog / Question Loader
-// Anne engine compatible
+// Supabase Edge Function Bible Loader
+// Anne UI compatible
 // ============================================================
 
 
-// SUBBLOCK 0205
+// SUBBLOCK 2005
 // ============================================================
-// Existing Bible API
+// Bible Loader State
 // ============================================================
-
-var BIBLE_API_URL =
-  'https://script.google.com/macros/s/' +
-  'AKfycbxY57qwgS363Gfg-H1xzMJ1CKjCeB1xl51Ydw4x_fUj3I6_-g5y6y5anhHK_ioGFL7djw/exec';
 
 var BIBLE_CHAPTER_CATALOG =
+  window.BIBLE_CHAPTER_CATALOG ||
   [];
 
+var BIBLE_CATALOG_LOADING =
+  null;
 
-// SUBBLOCK 0210
+
+// SUBBLOCK 2010
 // ============================================================
-// Existing Bible API Request
-// POST + session_token
+// Supabase Provider 확인
 // ============================================================
 
-function getBibleSessionToken_() {
+function bibleProviderReady_() {
 
-  try {
-
-    var user =
-      JSON.parse(
-        localStorage.getItem(
-          'quiz_current_user_v1'
-        ) || 'null'
-      );
-
-    return String(
-      user &&
-      user.session_token ||
-      ''
-    ).trim();
-
-  } catch (e) {
-
-    return '';
-  }
+  return !!(
+    window.BibleSupabaseProvider &&
+    typeof window.BibleSupabaseProvider.request ===
+      'function'
+  );
 }
 
 
-async function bibleApiRequest_(
-  params
+// SUBBLOCK 2015
+// ============================================================
+// Supabase Provider 요청
+// 실제 공개 Bible과 동일한 통신 경로
+// ============================================================
+
+async function bibleProviderRequest_(
+  payload,
+  signal
 ) {
 
-  
+  if (!bibleProviderReady_()) {
 
-  var body =
-    {};
-
-
-  params.forEach(
-    function(
-      value,
-      key
-    ) {
-
-      body[key] =
-        value;
-    }
-  );
-
-
-  
-  var response =
-    await fetch(
-      BIBLE_API_URL,
-      {
-        method:
-          'POST',
-
-        headers: {
-          'Content-Type':
-            'text/plain;charset=utf-8'
-        },
-
-        body:
-          JSON.stringify(
-            body
-          )
-      }
+    throw new Error(
+      'Bible Supabase Provider is not loaded.'
     );
+  }
+
+
+  var response =
+    await window.BibleSupabaseProvider.request(
+      payload || {},
+      signal
+    );
+
+
+  if (!response) {
+
+    throw new Error(
+      'Bible Supabase Provider returned no response.'
+    );
+  }
 
 
   if (!response.ok) {
 
-    throw new Error(
+    var message =
       'Bible API HTTP ' +
-      response.status
+      response.status;
+
+
+    try {
+
+      var errorData =
+        await response.clone().json();
+
+
+      if (
+        errorData &&
+        errorData.message
+      ) {
+
+        message =
+          errorData.message;
+      }
+
+    } catch (e) {}
+
+
+    throw new Error(
+      message
     );
   }
 
 
-  var text =
-    await response.text();
+  return response;
+}
 
+
+// SUBBLOCK 2020
+// ============================================================
+// Bible Chapter Catalog
+//
+// 실제 공개 Bible:
+// action = catalog
+// sheet  = bible
+//
+// OT + NT 전체 Chapter catalog를 한번에 받는다.
+// ============================================================
+
+async function loadBibleChapterCatalog_() {
 
   if (
-    text.trim().startsWith(
-      '<!DOCTYPE'
-    ) ||
-    text.trim().startsWith(
-      '<html'
-    )
+    BIBLE_CHAPTER_CATALOG.length &&
+    !BIBLE_CHAPTER_CATALOG[0].__instant
   ) {
 
+    return BIBLE_CHAPTER_CATALOG;
+  }
+
+
+  if (BIBLE_CATALOG_LOADING) {
+
+    return BIBLE_CATALOG_LOADING;
+  }
+
+
+  BIBLE_CATALOG_LOADING =
+    (async function() {
+
+      console.log(
+        '[BIBLE] loading catalog'
+      );
+
+
+      var response =
+        await bibleProviderRequest_({
+
+          action:
+            'catalog',
+
+          sheet:
+            'bible',
+
+          _:
+            String(
+              Date.now()
+            )
+        });
+
+
+      var data =
+        await response.json();
+
+
+      if (
+        data &&
+        (
+          data.status === 'error' ||
+          data.success === false
+        )
+      ) {
+
+        throw new Error(
+          data.message ||
+          'Failed to load Bible catalog.'
+        );
+      }
+
+
+      var seen =
+        {};
+
+
+      var catalog =
+        (
+          Array.isArray(
+            data.catalog
+          )
+            ? data.catalog
+            : []
+        )
+
+        .filter(
+          function(chapter) {
+
+            var code =
+              String(
+                chapter &&
+                chapter.CODE ||
+                ''
+              );
+
+            if (
+              !code ||
+              seen[code]
+            ) {
+
+              return false;
+            }
+
+
+            seen[code] =
+              true;
+
+            return true;
+          }
+        )
+
+        .map(
+          function(chapter) {
+
+            var code =
+              String(
+                chapter.CODE ||
+                ''
+              ).toUpperCase();
+
+
+            return Object.assign(
+              {},
+              chapter,
+              {
+
+                TESTAMENT:
+                  code.indexOf(
+                    'NT-'
+                  ) === 0
+                    ? 'NT'
+                    : 'OT'
+              }
+            );
+          }
+        );
+
+
+      if (!catalog.length) {
+
+        throw new Error(
+          'Bible catalog is empty.'
+        );
+      }
+
+
+      BIBLE_CHAPTER_CATALOG =
+        catalog;
+
+
+      window.BIBLE_CHAPTER_CATALOG =
+        BIBLE_CHAPTER_CATALOG;
+
+
+      console.log(
+        '[BIBLE] ✅ catalog loaded:',
+        BIBLE_CHAPTER_CATALOG.length
+      );
+
+
+      return BIBLE_CHAPTER_CATALOG;
+
+    })();
+
+
+  try {
+
+    return await BIBLE_CATALOG_LOADING;
+
+  } finally {
+
+    BIBLE_CATALOG_LOADING =
+      null;
+  }
+}
+
+
+// SUBBLOCK 2025
+// ============================================================
+// Catalog에서 특정 Book / Chapter 찾기
+// ============================================================
+
+function findBibleChapterCatalog_(
+  testament,
+  bookName,
+  chapterNumber
+) {
+
+  var targetBook =
+    String(
+      bookName || ''
+    )
+    .trim()
+    .toLowerCase();
+
+
+  var targetChapter =
+    parseInt(
+      chapterNumber,
+      10
+    ) || 1;
+
+
+  var targetTestament =
+    String(
+      testament || ''
+    )
+    .trim()
+    .toUpperCase();
+
+
+  return (
+    BIBLE_CHAPTER_CATALOG.find(
+      function(item) {
+
+        var itemBook =
+          String(
+            item.BOOK_EN ||
+            item.BOOK_KO ||
+            ''
+          )
+          .trim()
+          .toLowerCase();
+
+
+        var itemChapter =
+          parseInt(
+            item.CHAPTER,
+            10
+          ) || 0;
+
+
+        var itemTestament =
+          String(
+            item.TESTAMENT ||
+            ''
+          )
+          .trim()
+          .toUpperCase();
+
+
+        return (
+          itemBook ===
+            targetBook &&
+          itemChapter ===
+            targetChapter &&
+          (
+            !targetTestament ||
+            itemTestament ===
+              targetTestament
+          )
+        );
+      }
+    ) ||
+    null
+  );
+}
+
+
+// SUBBLOCK 2030
+// ============================================================
+// Bible Testament → 실제 Supabase sheet
+// ============================================================
+
+function bibleSheetForTestament_(
+  testament
+) {
+
+  return (
+    String(
+      testament || ''
+    )
+    .toUpperCase() === 'NT'
+  )
+    ? 'bible-nt'
+    : 'bible-ot';
+}
+
+
+// SUBBLOCK 2035
+// ============================================================
+// Chapter 문제 Rows 요청
+//
+// 실제 Bible과 동일:
+// start = START_ROW
+// limit = QUESTION_COUNT
+// sheet = bible-ot / bible-nt
+// ============================================================
+
+async function loadBibleChapterRows_(
+  catalogItem
+) {
+
+  if (!catalogItem) {
+
     throw new Error(
-      'Bible API returned HTML'
+      'Bible catalog item is missing.'
     );
   }
+
+
+  var testament =
+    String(
+      catalogItem.TESTAMENT ||
+      (
+        String(
+          catalogItem.CODE ||
+          ''
+        ).toUpperCase()
+          .indexOf(
+            'NT-'
+          ) === 0
+          ? 'NT'
+          : 'OT'
+      )
+    ).toUpperCase();
+
+
+  var start =
+    Math.max(
+      1,
+      parseInt(
+        catalogItem.START_ROW,
+        10
+      ) ||
+      parseInt(
+        catalogItem.START,
+        10
+      ) ||
+      1
+    );
+
+
+  var limit =
+    Math.max(
+      1,
+      parseInt(
+        catalogItem.QUESTION_COUNT,
+        10
+      ) ||
+      1
+    );
+
+
+  var sheet =
+    bibleSheetForTestament_(
+      testament
+    );
+
+
+  console.log(
+    '[BIBLE] requesting questions:',
+    {
+      code:
+        catalogItem.CODE,
+
+      sheet:
+        sheet,
+
+      start:
+        start,
+
+      limit:
+        limit
+    }
+  );
+
+
+  var response =
+    await bibleProviderRequest_({
+
+      start:
+        String(start),
+
+      limit:
+        String(limit),
+
+      sheet:
+        sheet,
+
+      _:
+        String(
+          Date.now()
+        )
+    });
 
 
   var data =
-    JSON.parse(
-      text
-    );
+    await response.json();
 
 
   if (
@@ -258,746 +625,10 @@ async function bibleApiRequest_(
   ) {
 
     throw new Error(
-      data.code ||
       data.message ||
-      'Bible API error'
+      'Failed to load Bible questions.'
     );
   }
-
-
-  return data;
-}
-
-
-// SUBBLOCK 0215
-// ============================================================
-// Bible Catalog
-// OT = bible-ot
-// NT = bible-nt
-// ============================================================
-
-async function loadBibleChapterCatalog_(
-  testament
-) {
-
-  var sheet =
-    String(
-      testament || ''
-    ).toUpperCase() === 'NT'
-      ? 'bible-nt'
-      : 'bible-ot';
-
-
-  var params =
-    new URLSearchParams();
-
-
-  params.set(
-    'action',
-    'catalog'
-  );
-
-
-  params.set(
-    'sheet',
-    sheet
-  );
-
-
-  params.set(
-    '_',
-    String(
-      Date.now()
-    )
-  );
-
-
-  var data =
-    await bibleApiRequest_(
-      params
-    );
-
-
-  BIBLE_CHAPTER_CATALOG =
-    Array.isArray(
-      data.catalog
-    )
-      ? data.catalog
-      : [];
-
-
-  console.log(
-    '[BIBLE] catalog:',
-    sheet,
-    BIBLE_CHAPTER_CATALOG.length
-  );
-
-
-  return BIBLE_CHAPTER_CATALOG;
-}
-
-
-// SUBBLOCK 0220
-// ============================================================
-// Catalog에서 특정 Chapter 찾기
-// ============================================================
-
-function findBibleChapterCatalog_(
-  testament,
-  bookName,
-  chapter
-) {
-
-  var normalizedBook =
-    String(
-      bookName || ''
-    )
-    .replace(
-      /-/g,
-      ' '
-    )
-    .trim()
-    .toLowerCase();
-
-
-  var chapterNumber =
-    Number(
-      chapter
-    );
-
-
-  var wantedPrefix =
-    String(
-      testament || ''
-    ).toUpperCase() +
-    '-';
-
-
-  for (
-    var i = 0;
-    i <
-      BIBLE_CHAPTER_CATALOG.length;
-    i++
-  ) {
-
-    var item =
-      BIBLE_CHAPTER_CATALOG[
-        i
-      ];
-
-
-    var catalogBook =
-      String(
-        item.BOOK_EN ||
-        ''
-      )
-      .replace(
-        /-/g,
-        ' '
-      )
-      .trim()
-      .toLowerCase();
-
-
-    var catalogChapter =
-      Number(
-        item.CHAPTER
-      );
-
-
-    var code =
-      String(
-        item.CODE ||
-        ''
-      );
-
-
-    if (
-      catalogBook ===
-        normalizedBook &&
-      catalogChapter ===
-        chapterNumber &&
-      (
-        !code ||
-        code.indexOf(
-          wantedPrefix
-        ) === 0
-      )
-    ) {
-
-      return item;
-    }
-  }
-
-
-  return null;
-}
-
-
-// SUBBLOCK 0225
-// ============================================================
-// Existing Bible standard schema helpers
-// ============================================================
-
-function normalizeBibleSchemaKey_(
-  key
-) {
-
-  return String(
-    key === null ||
-    key === undefined
-      ? ''
-      : key
-  )
-  .replace(
-    /^\uFEFF/,
-    ''
-  )
-  .trim()
-  .toUpperCase();
-}
-
-
-function buildBibleNormalizedRow_(
-  row
-) {
-
-  var map =
-    {};
-
-
-  if (
-    !row ||
-    typeof row !==
-      'object'
-  ) {
-
-    return map;
-  }
-
-
-  Object.keys(
-    row
-  ).forEach(
-    function(key) {
-
-      map[
-        normalizeBibleSchemaKey_(
-          key
-        )
-      ] =
-        row[key];
-    }
-  );
-
-
-  return map;
-}
-
-
-function readBibleSchema_(
-  row,
-  map,
-  key
-) {
-
-  if (
-    row &&
-    Object.prototype
-      .hasOwnProperty.call(
-        row,
-        key
-      )
-  ) {
-
-    return row[key];
-  }
-
-
-  var normalized =
-    normalizeBibleSchemaKey_(
-      key
-    );
-
-
-  if (
-    Object.prototype
-      .hasOwnProperty.call(
-        map,
-        normalized
-      )
-  ) {
-
-    return (
-      map[
-        normalized
-      ]
-    );
-  }
-
-
-  return '';
-}
-
-
-function cleanBibleText_(
-  value
-) {
-
-  if (
-    value === null ||
-    value === undefined
-  ) {
-
-    return '';
-  }
-
-
-  return String(
-    value
-  )
-  .replace(
-    /\n/g,
-    '<br>'
-  )
-  .trim();
-}
-
-
-// SUBBLOCK 0230
-// ============================================================
-// Existing Bible row → ANNE compatible question
-//
-// 기존 Bible의 표준 스키마 그대로 읽고,
-// Anne 엔진이 이해하는 translations 배열도 같이 생성.
-// ============================================================
-
-function convertBibleApiRows_(
-  rows,
-  chapterCode
-) {
-
-  var questions =
-    [];
-
-
-  rows.forEach(
-    function(row, index) {
-
-      if (
-        !row ||
-        typeof row !==
-          'object'
-      ) {
-        return;
-      }
-
-
-      var map =
-        buildBibleNormalizedRow_(
-          row
-        );
-
-
-      var sourceCode =
-        readBibleSchema_(
-          row,
-          map,
-          'SOURCE_CODE'
-        ) ||
-        readBibleSchema_(
-          row,
-          map,
-          'SUBJECT'
-        ) ||
-        chapterCode;
-
-
-      var qEn =
-        cleanBibleText_(
-          readBibleSchema_(
-            row,
-            map,
-            'Q_EN'
-          )
-        );
-
-
-      var qKo =
-        cleanBibleText_(
-          readBibleSchema_(
-            row,
-            map,
-            'Q_KO'
-          )
-        );
-
-
-      var pKjv =
-        cleanBibleText_(
-          readBibleSchema_(
-            row,
-            map,
-            'P_KJV'
-          )
-        );
-
-
-      var pWeb =
-        cleanBibleText_(
-          readBibleSchema_(
-            row,
-            map,
-            'P_WEB'
-          ) ||
-          readBibleSchema_(
-            row,
-            map,
-            'P_EN'
-          )
-        );
-
-
-      var pKo =
-        cleanBibleText_(
-          readBibleSchema_(
-            row,
-            map,
-            'P_KO_WEB'
-          ) ||
-          readBibleSchema_(
-            row,
-            map,
-            'P_KO'
-          )
-        );
-
-
-      var eEn =
-        cleanBibleText_(
-          readBibleSchema_(
-            row,
-            map,
-            'E_EN'
-          )
-        );
-
-
-      var eKo =
-        cleanBibleText_(
-          readBibleSchema_(
-            row,
-            map,
-            'E_KO'
-          )
-        );
-
-
-      var choicesEn =
-        {};
-
-      var choicesKo =
-        {};
-
-
-      for (
-        var c = 1;
-        c <= 4;
-        c++
-      ) {
-
-        choicesEn[c] =
-          cleanBibleText_(
-            readBibleSchema_(
-              row,
-              map,
-              c + '_EN'
-            )
-          );
-
-
-        choicesKo[c] =
-          cleanBibleText_(
-            readBibleSchema_(
-              row,
-              map,
-              c + '_KO'
-            )
-          );
-      }
-
-
-      var answer =
-        String(
-          readBibleSchema_(
-            row,
-            map,
-            'A'
-          ) ||
-          '1'
-        )
-        .trim();
-
-
-      var letterToNumber =
-        {
-          A: '1',
-          B: '2',
-          C: '3',
-          D: '4'
-        };
-
-
-      if (
-        letterToNumber[
-          answer.toUpperCase()
-        ]
-      ) {
-
-        answer =
-          letterToNumber[
-            answer.toUpperCase()
-          ];
-      }
-
-
-      var translations =
-        [];
-
-
-      translations.push({
-
-        language_code:
-          'en',
-
-        passage:
-          pWeb,
-
-        passage_kjv:
-          pKjv,
-
-        passage_web:
-          pWeb,
-
-        question_text:
-          qEn,
-
-        option_1:
-          choicesEn[1],
-
-        option_2:
-          choicesEn[2],
-
-        option_3:
-          choicesEn[3],
-
-        option_4:
-          choicesEn[4],
-
-        explanation:
-          eEn
-      });
-
-
-      if (
-        qKo ||
-        pKo
-      ) {
-
-        translations.push({
-
-          language_code:
-            'ko',
-
-          passage:
-            pKo,
-
-          question_text:
-            qKo,
-
-          option_1:
-            choicesKo[1],
-
-          option_2:
-            choicesKo[2],
-
-          option_3:
-            choicesKo[3],
-
-          option_4:
-            choicesKo[4],
-
-          explanation:
-            eKo
-        });
-      }
-
-
-      questions.push({
-
-        id:
-          index + 1,
-
-        date:
-          chapterCode,
-
-        category:
-          'BIBLE',
-
-        contentId:
-          String(
-            readBibleSchema_(
-              row,
-              map,
-              'N'
-            ) ||
-            sourceCode +
-            '-' +
-            (index + 1)
-          ),
-
-        recordId:
-          String(
-            readBibleSchema_(
-              row,
-              map,
-              'N'
-            ) ||
-            sourceCode +
-            '-' +
-            (index + 1)
-          ),
-
-        sourceCode:
-          sourceCode,
-
-        subject:
-          sourceCode,
-
-        answer:
-          Number(
-            answer
-          ),
-
-        A:
-          answer,
-
-        passageVersions: {
-
-          KJV:
-            pKjv,
-
-          WEB:
-            pWeb,
-
-          KO_WEB:
-            pKo
-        },
-
-        license_question_translations:
-          translations,
-
-        raw:
-          row
-      });
-    }
-  );
-
-
-  console.log(
-    '[BIBLE] converted:',
-    questions.length
-  );
-
-
-  return questions;
-}
-
-
-// SUBBLOCK 0235
-// ============================================================
-// Chapter question rows load
-//
-// Catalog의 START_ROW + QUESTION_COUNT 사용
-// ============================================================
-
-async function loadBibleChapterQuestions_(
-  catalog
-) {
-
-  var start =
-    Math.max(
-      1,
-      parseInt(
-        catalog.START_ROW,
-        10
-      ) ||
-      parseInt(
-        catalog.START,
-        10
-      ) ||
-      1
-    );
-
-
-  var limit =
-    Math.max(
-      1,
-      parseInt(
-        catalog.QUESTION_COUNT,
-        10
-      ) ||
-      1
-    );
-
-
-  var params =
-    new URLSearchParams();
-
-
-  params.set(
-    'start',
-    String(start)
-  );
-
-
-  params.set(
-    'limit',
-    String(limit)
-  );
-
-
-  params.set(
-    'sheet',
-    String(
-      catalog.SHEET ||
-      catalog.DATA_SHEET ||
-      (
-        String(
-          catalog.CODE ||
-          ''
-        ).indexOf(
-          'NT-'
-        ) === 0
-          ? 'bible-nt'
-          : 'bible-ot'
-      )
-    )
-  );
-
-
-  params.set(
-    '_',
-    String(
-      Date.now()
-    )
-  );
-
-
-  var data =
-    await bibleApiRequest_(
-      params
-    );
 
 
   var rows =
@@ -1045,39 +676,564 @@ async function loadBibleChapterQuestions_(
   }
 
 
-  if (
-    !rows.length
-  ) {
+  if (!rows.length) {
 
     throw new Error(
-      'No Bible questions returned.'
+      'No Bible questions were returned.'
     );
   }
+
+
+  console.log(
+    '[BIBLE] rows received:',
+    rows.length
+  );
 
 
   return rows;
 }
 
 
-// SUBBLOCK 0240
+// SUBBLOCK 2040
 // ============================================================
-// Existing ANNE render helpers 유지
+// 표준 Bible Schema 유틸리티
 // ============================================================
 
-function trData(q) {
+function normalizeBibleSchemaKey_(
+  key
+) {
+
+  return String(
+    key === null ||
+    key === undefined
+      ? ''
+      : key
+  )
+  .replace(
+    /^\uFEFF/,
+    ''
+  )
+  .trim()
+  .toUpperCase();
+}
+
+
+function buildBibleRowMap_(
+  row
+) {
+
+  var map =
+    {};
+
+
+  if (
+    !row ||
+    typeof row !==
+      'object'
+  ) {
+
+    return map;
+  }
+
+
+  Object.keys(
+    row
+  ).forEach(
+    function(key) {
+
+      map[
+        normalizeBibleSchemaKey_(
+          key
+        )
+      ] =
+        row[key];
+    }
+  );
+
+
+  return map;
+}
+
+
+function readBibleValue_(
+  row,
+  map,
+  key
+) {
+
+  if (
+    row &&
+    Object.prototype
+      .hasOwnProperty.call(
+        row,
+        key
+      )
+  ) {
+
+    return row[key];
+  }
+
+
+  var normalized =
+    normalizeBibleSchemaKey_(
+      key
+    );
+
+
+  if (
+    map &&
+    Object.prototype
+      .hasOwnProperty.call(
+        map,
+        normalized
+      )
+  ) {
+
+    return map[
+      normalized
+    ];
+  }
+
+
+  return '';
+}
+
+
+function cleanBibleText_(
+  value
+) {
+
+  if (
+    value === null ||
+    value === undefined
+  ) {
+
+    return '';
+  }
+
+
+  return String(
+    value
+  )
+  .replace(
+    /\r\n/g,
+    '\n'
+  )
+  .trim();
+}
+
+
+// SUBBLOCK 2045
+// ============================================================
+// Bible Row → Anne Question 구조
+//
+// Anne의 기존 render / TTS / MIC / AUTO를
+// 그대로 사용하기 위한 변환층
+// ============================================================
+
+function convertBibleRowsToAnne_(
+  rows,
+  catalogItem
+) {
+
+  var chapterCode =
+    String(
+      catalogItem.CODE ||
+      ''
+    );
+
+
+  var questions =
+    [];
+
+
+  rows.forEach(
+    function(row, index) {
+
+      if (
+        !row ||
+        typeof row !==
+          'object'
+      ) {
+
+        return;
+      }
+
+
+      var map =
+        buildBibleRowMap_(
+          row
+        );
+
+
+      var sourceCode =
+        cleanBibleText_(
+          readBibleValue_(
+            row,
+            map,
+            'SOURCE_CODE'
+          ) ||
+          readBibleValue_(
+            row,
+            map,
+            'SUBJECT'
+          ) ||
+          chapterCode
+        );
+
+
+      var originalNumber =
+        readBibleValue_(
+          row,
+          map,
+          'N'
+        ) ||
+        index + 1;
+
+
+      var qEn =
+        cleanBibleText_(
+          readBibleValue_(
+            row,
+            map,
+            'Q_EN'
+          )
+        );
+
+
+      var qKo =
+        cleanBibleText_(
+          readBibleValue_(
+            row,
+            map,
+            'Q_KO'
+          )
+        );
+
+
+      var pEn =
+        cleanBibleText_(
+          readBibleValue_(
+            row,
+            map,
+            'P_EN'
+          )
+        );
+
+
+      var pKo =
+        cleanBibleText_(
+          readBibleValue_(
+            row,
+            map,
+            'P_KO'
+          )
+        );
+
+
+      var pKjv =
+        cleanBibleText_(
+          readBibleValue_(
+            row,
+            map,
+            'P_KJV'
+          )
+        );
+
+
+      var pWeb =
+        cleanBibleText_(
+          readBibleValue_(
+            row,
+            map,
+            'P_WEB'
+          ) ||
+          pEn
+        );
+
+
+      var pKoWeb =
+        cleanBibleText_(
+          readBibleValue_(
+            row,
+            map,
+            'P_KO_WEB'
+          ) ||
+          pKo
+        );
+
+
+      var eEn =
+        cleanBibleText_(
+          readBibleValue_(
+            row,
+            map,
+            'E_EN'
+          )
+        );
+
+
+      var eKo =
+        cleanBibleText_(
+          readBibleValue_(
+            row,
+            map,
+            'E_KO'
+          )
+        );
+
+
+      var enOptions =
+        {};
+
+
+      var koOptions =
+        {};
+
+
+      for (
+        var choiceIndex = 1;
+        choiceIndex <= 4;
+        choiceIndex++
+      ) {
+
+        enOptions[
+          choiceIndex
+        ] =
+          cleanBibleText_(
+            readBibleValue_(
+              row,
+              map,
+              choiceIndex +
+              '_EN'
+            )
+          );
+
+
+        koOptions[
+          choiceIndex
+        ] =
+          cleanBibleText_(
+            readBibleValue_(
+              row,
+              map,
+              choiceIndex +
+              '_KO'
+            )
+          );
+      }
+
+
+      var rawAnswer =
+        String(
+          readBibleValue_(
+            row,
+            map,
+            'A'
+          ) ||
+          '1'
+        )
+        .trim();
+
+
+      var letterToNumber =
+        {
+          A: 1,
+          B: 2,
+          C: 3,
+          D: 4
+        };
+
+
+      var answer =
+        letterToNumber[
+          rawAnswer.toUpperCase()
+        ] ||
+        parseInt(
+          rawAnswer,
+          10
+        ) ||
+        1;
+
+
+      var translations =
+        [];
+
+
+      // English / Modern English
+      translations.push({
+
+        language_code:
+          'en',
+
+        passage:
+          pWeb ||
+          pEn,
+
+        passage_kjv:
+          pKjv,
+
+        passage_web:
+          pWeb ||
+          pEn,
+
+        question_text:
+          qEn,
+
+        option_1:
+          enOptions[1],
+
+        option_2:
+          enOptions[2],
+
+        option_3:
+          enOptions[3],
+
+        option_4:
+          enOptions[4],
+
+        explanation:
+          eEn
+      });
+
+
+      // Korean
+      if (
+        qKo ||
+        pKoWeb ||
+        pKo ||
+        koOptions[1] ||
+        koOptions[2] ||
+        koOptions[3] ||
+        koOptions[4]
+      ) {
+
+        translations.push({
+
+          language_code:
+            'ko',
+
+          passage:
+            pKoWeb ||
+            pKo,
+
+          question_text:
+            qKo,
+
+          option_1:
+            koOptions[1],
+
+          option_2:
+            koOptions[2],
+
+          option_3:
+            koOptions[3],
+
+          option_4:
+            koOptions[4],
+
+          explanation:
+            eKo
+        });
+      }
+
+
+      questions.push({
+
+        id:
+          index + 1,
+
+        N:
+          originalNumber,
+
+        originalNumber:
+          originalNumber,
+
+        category:
+          'BIBLE',
+
+        date:
+          chapterCode,
+
+        subject:
+          sourceCode,
+
+        sourceCode:
+          sourceCode,
+
+        contentId:
+          sourceCode +
+          '-' +
+          originalNumber,
+
+        recordId:
+          sourceCode +
+          '-' +
+          originalNumber,
+
+        answer:
+          answer,
+
+        A:
+          rawAnswer,
+
+        passageVersions: {
+
+          KJV:
+            pKjv,
+
+          WEB:
+            pWeb ||
+            pEn,
+
+          KO_WEB:
+            pKoWeb ||
+            pKo
+        },
+
+        license_question_translations:
+          translations,
+
+        raw:
+          row
+      });
+    }
+  );
+
+
+  console.log(
+    '[BIBLE] converted for Anne:',
+    questions.length
+  );
+
+
+  return questions;
+}
+
+
+// SUBBLOCK 2050
+// ============================================================
+// Anne Translation Helpers
+// 기존 Anne renderer가 사용
+// ============================================================
+
+function trData(
+  q
+) {
 
   return Object.fromEntries(
 
     (
-      q
-        ?.license_question_translations ||
-      []
+      q &&
+      q.license_question_translations
+        ? q.license_question_translations
+        : []
     ).map(
-      function(x) {
+      function(item) {
 
         return [
-          x.language_code,
-          x
+          item.language_code,
+          item
         ];
       }
     )
@@ -1086,48 +1242,128 @@ function trData(q) {
 
 
 function languageRecord(
-  t,
+  translations,
   code
 ) {
 
   code =
     String(
       code || ''
-    ).toUpperCase();
+    )
+    .trim()
+    .toUpperCase();
 
 
   if (
     code === 'KOR' ||
+    code === 'KO' ||
     code === 'KO_WEB'
   ) {
 
-    return t.ko;
+    return translations.ko;
   }
 
 
-  return t.en;
+  return translations.en;
 }
 
 
+// SUBBLOCK 2055
+// ============================================================
+// Passage Version 선택 처리
+//
+// KJV
+// WEB
+// ModEng / ENG
+// KOR / KO_WEB
+// ============================================================
+
+function biblePassageText_(
+  translations,
+  code
+) {
+
+  code =
+    String(
+      code || ''
+    )
+    .trim()
+    .toUpperCase();
+
+
+  if (
+    code === 'KJV'
+  ) {
+
+    return (
+      translations.en &&
+      translations.en.passage_kjv
+    ) || '';
+  }
+
+
+  if (
+    code === 'KOR' ||
+    code === 'KO' ||
+    code === 'KO_WEB'
+  ) {
+
+    return (
+      translations.ko &&
+      translations.ko.passage
+    ) || '';
+  }
+
+
+  // ENG / WEB / MODENG
+  return (
+    translations.en &&
+    (
+      translations.en.passage_web ||
+      translations.en.passage
+    )
+  ) || '';
+}
+
+
+// SUBBLOCK 2060
+// ============================================================
+// Anne linesData 호환
+// ============================================================
+
 function linesData(
-  t,
+  translations,
   field
 ) {
+
+  var primary =
+    document.getElementById(
+      'biblePrimaryTextSelector'
+    );
+
+
+  var secondary =
+    document.getElementById(
+      'bibleSecondaryTextSelector'
+    );
+
 
   var values =
     [
 
-      $('biblePrimaryTextSelector')
-        ?.value,
+      primary
+        ? primary.value
+        : 'ENG',
 
-      $('bibleSecondaryTextSelector')
-        ?.value
+      secondary
+        ? secondary.value
+        : 'NONE'
 
     ];
 
 
   var seen =
-    new Set();
+    {};
 
 
   return values
@@ -1135,107 +1371,85 @@ function linesData(
     .filter(
       function(code) {
 
-        return (
-          code &&
-          code !==
-            'NONE' &&
-          !seen.has(code) &&
-          seen.add(code)
-        );
+        code =
+          String(
+            code || ''
+          )
+          .trim()
+          .toUpperCase();
+
+
+        if (
+          !code ||
+          code === 'NONE' ||
+          seen[code]
+        ) {
+
+          return false;
+        }
+
+
+        seen[code] =
+          true;
+
+        return true;
       }
     )
 
     .map(
       function(code) {
 
-        var normalized =
+        var upper =
           String(
             code || ''
           ).toUpperCase();
-
-
-        var record =
-          languageRecord(
-            t,
-            normalized
-          );
 
 
         var text =
           '';
 
 
-        // Passage는 Bible Version 선택 지원
         if (
-          field ===
-          'passage'
+          field === 'passage'
         ) {
 
-          if (
-            normalized ===
-            'KJV'
-          ) {
-
-            text =
-              t.en
-                ?.passage_kjv ||
-              '';
-
-          } else if (
-            normalized ===
-            'WEB' ||
-            normalized ===
-            'ENG'
-          ) {
-
-            text =
-              t.en
-                ?.passage_web ||
-              t.en
-                ?.passage ||
-              '';
-
-          } else if (
-            normalized ===
-            'KO_WEB' ||
-            normalized ===
-            'KOR'
-          ) {
-
-            text =
-              t.ko
-                ?.passage ||
-              '';
-          }
+          text =
+            biblePassageText_(
+              translations,
+              upper
+            );
 
         } else {
 
+          var record =
+            languageRecord(
+              translations,
+              upper
+            );
+
+
           text =
             record
-              ? record[
-                  field
-                ] ||
+              ? record[field] ||
                 ''
               : '';
         }
 
 
+        var outputCode =
+          (
+            upper === 'KOR' ||
+            upper === 'KO' ||
+            upper === 'KO_WEB'
+          )
+            ? 'KOR'
+            : 'ENG';
+
+
         return {
 
           code:
-            (
-              normalized ===
-              'KO_WEB'
-            )
-              ? 'KOR'
-              : (
-                  normalized ===
-                  'WEB' ||
-                  normalized ===
-                  'KJV'
-                    ? 'ENG'
-                    : normalized
-                ),
+            outputCode,
 
           text:
             text
@@ -1246,56 +1460,61 @@ function linesData(
     .filter(
       function(item) {
 
-        return !!item.text;
+        return !!String(
+          item.text || ''
+        ).trim();
       }
     );
 }
 
 
+// SUBBLOCK 2065
+// ============================================================
+// Anne HTML Lines 호환
+// ============================================================
+
 function htmlLinesData(
-  rows
+  lines
 ) {
 
-  return rows
-    .map(
-      function(item) {
+  return lines.map(
+    function(item) {
 
-        var cls =
-          item.code ===
-            'KOR'
-            ? 'ko'
-            : 'en';
+      var langClass =
+        item.code ===
+          'KOR'
+          ? 'ko'
+          : 'en';
 
 
-        return (
-          '<div ' +
-          'class="language-line language-line-' +
-          cls +
-          '" ' +
-          'data-language="' +
-          item.code +
-          '">' +
-          esc(
-            item.text
-          ) +
-          '</div>'
-        );
-      }
-    )
-    .join('');
+      return (
+        '<div ' +
+        'class="language-line language-line-' +
+        langClass +
+        '" ' +
+        'data-language="' +
+        item.code +
+        '">' +
+        esc(
+          item.text
+        ) +
+        '</div>'
+      );
+    }
+  ).join('');
 }
 
 
-// SUBBLOCK 0245
+// SUBBLOCK 2070
 // ============================================================
-// Chapter click → Catalog → Questions → ANNE engine
+// Chapter 선택 → 실제 로딩
 // ============================================================
 
 window.loadBibleChapter =
   async function(
     testament,
     bookName,
-    chapter
+    chapterNumber
   ) {
 
     try {
@@ -1304,94 +1523,78 @@ window.loadBibleChapter =
         '[BIBLE] loading chapter:',
         testament,
         bookName,
-        chapter
+        chapterNumber
       );
 
 
-     if (
-  !BIBLE_CHAPTER_CATALOG.length ||
-  !BIBLE_CHAPTER_CATALOG.some(
-    function(item) {
+      // ------------------------------------------------------
+      // 1. Exact catalog 준비
+      // ------------------------------------------------------
 
-      return String(
-        item.CODE || ''
-      ).indexOf(
-        testament + '-'
-      ) === 0;
-    }
-  )
-) {
+      await loadBibleChapterCatalog_();
 
-  await loadBibleChapterCatalog_(
-    testament
-  );
-}
 
-      var catalog =
+      // ------------------------------------------------------
+      // 2. 해당 Chapter 찾기
+      // ------------------------------------------------------
+
+      var catalogItem =
         findBibleChapterCatalog_(
           testament,
           bookName,
-          chapter
+          chapterNumber
         );
 
 
-      if (!catalog) {
+      if (!catalogItem) {
 
         throw new Error(
-          'Bible chapter catalog not found: ' +
+          'Bible chapter not found: ' +
           bookName +
           ' ' +
-          chapter
+          chapterNumber
         );
       }
 
 
       console.log(
-        '[BIBLE] catalog item:',
-        catalog
+        '[BIBLE] chapter catalog:',
+        catalogItem
       );
 
 
+      // ------------------------------------------------------
+      // 3. Chapter 문제 로딩
+      // ------------------------------------------------------
+
       var rows =
-        await loadBibleChapterQuestions_(
-          catalog
+        await loadBibleChapterRows_(
+          catalogItem
         );
 
 
-      var chapterCode =
-        String(
-          catalog.CODE ||
-          (
-            testament +
-            '-' +
-            bookName +
-            '-' +
-            String(
-              chapter
-            ).padStart(
-              2,
-              '0'
-            )
-          )
-        );
-
+      // ------------------------------------------------------
+      // 4. Anne 구조로 변환
+      // ------------------------------------------------------
 
       var questions =
-        convertBibleApiRows_(
+        convertBibleRowsToAnne_(
           rows,
-          chapterCode
+          catalogItem
         );
 
 
-      if (
-        !questions.length
-      ) {
+      if (!questions.length) {
 
         throw new Error(
           'No valid Bible questions.'
         );
       }
 
+
+      // ------------------------------------------------------
+      // 5. Anne State에 주입
+      // ------------------------------------------------------
 
       ANNE_STATE.product =
         'bible';
@@ -1411,12 +1614,28 @@ window.loadBibleChapter =
         0;
 
 
+      ANNE_STATE.baseOffset =
+        Math.max(
+          0,
+          (
+            parseInt(
+              catalogItem.START_ROW,
+              10
+            ) ||
+            1
+          ) - 1
+        );
+
+
       ANNE_STATE._currentDate =
-        chapterCode;
+        String(
+          catalogItem.CODE ||
+          ''
+        );
 
 
       ANNE_STATE._currentDayStart =
-        0;
+        ANNE_STATE.baseOffset;
 
 
       ANNE_STATE._currentDayCount =
@@ -1431,8 +1650,14 @@ window.loadBibleChapter =
         true;
 
 
+      // ------------------------------------------------------
+      // 6. Bible 선택 상태
+      // ------------------------------------------------------
+
       window.__bibleSelectedTestament =
-        testament;
+        String(
+          testament
+        ).toUpperCase();
 
 
       window.__bibleSelectedBook =
@@ -1440,19 +1665,58 @@ window.loadBibleChapter =
 
 
       window.__bibleSelectedChapter =
-        chapter;
+        parseInt(
+          chapterNumber,
+          10
+        ) || 1;
+
+
+      // ------------------------------------------------------
+      // 7. 저장
+      // ------------------------------------------------------
+
+      try {
+
+        localStorage.setItem(
+          'gongboo.biblenew.lastChapter',
+          JSON.stringify({
+
+            testament:
+              window.__bibleSelectedTestament,
+
+            book:
+              bookName,
+
+            chapter:
+              window.__bibleSelectedChapter,
+
+            code:
+              catalogItem.CODE ||
+              '',
+
+            savedAt:
+              Date.now()
+          })
+        );
+
+      } catch (e) {}
 
 
       console.log(
-        '[BIBLE] ✅ loaded:',
-        chapterCode,
+        '[BIBLE] ✅ chapter loaded:',
+        catalogItem.CODE,
         questions.length
       );
 
 
+      // ------------------------------------------------------
+      // 8. Anne Quiz 화면 진입
+      // ------------------------------------------------------
+
       enterQuiz(
         0
       );
+
 
     } catch (error) {
 
@@ -1463,11 +1727,38 @@ window.loadBibleChapter =
 
 
       alert(
-        error.message ||
-        'Bible data load failed.'
+        error &&
+        error.message
+          ? error.message
+          : 'Bible data load failed.'
       );
     }
   };
+
+
+// SUBBLOCK 2075
+// ============================================================
+// 초기 Provider 상태 확인
+// ============================================================
+
+(function() {
+
+  if (
+    bibleProviderReady_()
+  ) {
+
+    console.log(
+      '[BIBLE] ✅ Supabase Provider ready'
+    );
+
+  } else {
+
+    console.warn(
+      '[BIBLE] Supabase Provider not ready'
+    );
+  }
+
+})();
 
 
 // ============================================================
