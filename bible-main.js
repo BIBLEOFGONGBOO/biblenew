@@ -4342,7 +4342,7 @@ if (prevBtn) {
     setButtonActive(this);
 
     if (ANNE_STATE.index > 0) {
-      go(-1);
+      goPrev();
     }
   };
 }
@@ -4367,7 +4367,7 @@ if (skipBtn) {
       ANNE_STATE.index <
       ANNE_STATE.questions.length - 1
     ) {
-      go(1);
+      goNext();
     }
   };
 }
@@ -4382,7 +4382,7 @@ if (nextBtn) {
       ANNE_STATE.index <
       ANNE_STATE.questions.length - 1
     ) {
-      go(1);
+      goNext();
     }
   };
 }
@@ -4430,7 +4430,7 @@ document.addEventListener(
           setButtonActive(nextBtn);
         }
 
-        go(1);
+        goNext();
       }
 
       return;
@@ -4451,7 +4451,7 @@ document.addEventListener(
           setButtonActive(prevBtn);
         }
 
-        go(-1);
+        goPrev();
       }
     }
   }
@@ -4465,13 +4465,13 @@ document.addEventListener('keydown', function(e) {
       ANNE_STATE.index < ANNE_STATE.questions.length - 1) {
     e.preventDefault();
     if (nextBtn) { setButtonActive(nextBtn); }
-    go(1);
+    goNext();
   }
   if ((e.key === 'ArrowLeft' || e.key.toLowerCase() === 'p') && 
       ANNE_STATE.index > 0) {
     e.preventDefault();
     if (prevBtn) { setButtonActive(prevBtn); }
-    go(-1);
+    goPrev();
   }
   if (e.key === 'Enter' && ANNE_STATE.index === ANNE_STATE.questions.length - 1) {
     e.preventDefault();
@@ -5976,7 +5976,7 @@ function startAnneRecognition() {
           return;
         }
 
-        go(1);
+        goNext();
 
         setTimeout(
           function() {
@@ -7046,7 +7046,7 @@ function readTextsWithHighlight(
           if (
             typeof go === 'function'
           ) {
-            go(1);
+            goNext();
           }
         },
         500
