@@ -1223,129 +1223,62 @@ function setupHome() {
 // SUBBLOCK 0420
 // ============================================================
 // NEW LESSON
-// OT / NT
+// 66 Books → Chapter
 // ============================================================
 
-  var card =
-    document.querySelector(
-      '.card-new'
-    );
+var card =
+  document.querySelector(
+    '.card-new'
+  );
 
-  if (card) {
+if (card) {
 
-    card.innerHTML = `
+  card.innerHTML = `
 
-      <div class="card-icon">
-        📖
-      </div>
+    <div
+      id="resumeQuickContainer"
+      class="resume-quick"
+      hidden
+    ></div>
 
-      <div
-        class="card-title card-title-new"
-      >
-        NEW LESSON
-      </div>
+    <div class="card-icon">
+      📖
+    </div>
 
-      <div
-        class="card-sub"
-        style="
-          margin-bottom:16px;
-        "
-      >
-        Choose a Testament
-      </div>
+    <div
+      class="card-title card-title-new"
+    >
+      NEW LESSON
+    </div>
 
-      <div
-        id="bibleTestamentArea"
-        style="
-          width:100%;
-          display:grid;
-          grid-template-columns:
-            1fr 1fr;
-          gap:10px;
-        "
-      >
+    <div class="card-sub">
+      Choose a book, then choose a chapter
+    </div>
 
-        <button
-          type="button"
-          id="bibleOldTestamentBtn"
-          class="btn-start"
-          style="
-            margin-top:0;
-          "
-        >
-          OLD TESTAMENT
-        </button>
+    <div
+      id="bibleChapterPicker"
+      class="bible-chapter-picker"
+      aria-label="Bible chapters"
+      aria-live="polite"
+      hidden
+    ></div>
 
-        <button
-          type="button"
-          id="bibleNewTestamentBtn"
-          class="btn-start"
-          style="
-            margin-top:0;
-          "
-        >
-          NEW TESTAMENT
-        </button>
+    <div
+      id="bibleBookPicker"
+      class="bible-book-picker"
+      aria-label="Bible books"
+    ></div>
 
-      </div>
-
-      <div
-        id="licenseSetArea"
-        hidden
-      ></div>
-
-    `;
-  }
+  `;
+}
 
 
 // SUBBLOCK 0425
 // ============================================================
-// OT / NT 버튼
-//
-// 아직 기존 Bible Loader를 이식하기 전이므로
-// 현재 단계에서는 클릭 확인만 한다.
-// 다음 단계에서 기존 Bible Book/Chapter Loader 연결.
+// Bible Book Picker 최초 표시
 // ============================================================
 
-  var otBtn =
-    document.getElementById(
-      'bibleOldTestamentBtn'
-    );
-
-  var ntBtn =
-    document.getElementById(
-      'bibleNewTestamentBtn'
-    );
-
-
-  if (otBtn) {
-
-    otBtn.onclick =
-      function() {
-
-        console.log(
-          '[BIBLE] OLD TESTAMENT selected'
-        );
-
-        window.__bibleSelectedTestament =
-          'OT';
-      };
-  }
-
-
-  if (ntBtn) {
-
-    ntBtn.onclick =
-      function() {
-
-        console.log(
-          '[BIBLE] NEW TESTAMENT selected'
-        );
-
-        window.__bibleSelectedTestament =
-          'NT';
-      };
-  }
+renderBibleBookPicker_();
 
 
 // SUBBLOCK 0430
@@ -1580,702 +1513,586 @@ function setupHome() {
 
 
 // ============================================================
-// BLOCK 0500: anne-navigation.js
+// BLOCK 0500: bible-navigation.js
+// Book → Chapter
 // ============================================================
-// ============================================================
 
-// SUBBLOCK 0501
-async function choose(code) {
-  ANNE_STATE.product = code;
-  const selected = document.querySelector(`[data-product="${code}"]`) ||
-    document.querySelector(`[data-product="${code.toLowerCase()}"]`) ||
-    document.querySelector(`[data-product="${code.toUpperCase()}"]`);
-  const area = $('licenseSetArea');
-  const cardNew = document.querySelector('.card-new');
-  if (cardNew) {
-    cardNew.appendChild(area);
-  } else {
-    selected.after(area);
-  }
-  document.querySelectorAll('[data-product]').forEach(b =>
-    b.classList.toggle('is-selected', b === selected)
-  );
-  area.hidden = false;
-  area.innerHTML = '<div class="loading">Loading questions...</div>';
-
-  try {
-    const d = await apiData({ action: 'catalog', product: code });
-    const dates = (d.products && d.products[0] && d.products[0].dates) ? d.products[0].dates : [];
-    window.__currentDates = dates;
-
-    var anneBtn = document.querySelector('[data-product="anne"]') || document.querySelector('[data-product="ANNE"]');
-    if (anneBtn) { anneBtn.style.display = 'none'; }
-
-    area.innerHTML = `
-      <div style="width:100%; margin:0; padding:0; display:grid; grid-template-columns:1fr 1fr; gap:2px 8px;">
-        ${dates.length > 0
-          ? dates.map((dateObj, i) => `
-              <div class="date-item" data-index="${i}" style="padding:3px 2px; border-bottom:1px solid #eee; cursor:pointer; font-size:15px; font-weight:400; transition:all 0.12s; color:#2c3e50;"
-                   onmouseover="this.style.background='#f5f9ff'; this.style.paddingLeft='6px';"
-                   onmouseout="this.style.background=''; this.style.paddingLeft='2px';"
-                   onclick="selectDate(${i});">
-                ${dateObj.date}
-              </div>
-            `).join('')
-          : '<div style="padding:20px; text-align:center; color:#999;">No dates found</div>'}
-      </div>
-      <input type="hidden" id="licenseSetSelector" value="0">
-    `;
-    
-    ANNE_STATE._selectedDateIndex = 0;
-    
-    if ($('licenseInlineLogin')) {
-      $('licenseInlineLogin').onclick = () => location.href = './login.html?return=license';
-    }
-  } catch (e) {
-    area.innerHTML = `<div class="error-msg" style="display:block">${esc(e.message)}</div>`;
-  }
-}
-
-// SUBBLOCK 0502
-function selectDate(index) {
-  console.log('[ANNE] 📅 날짜 선택:', index);
-  ANNE_STATE._selectedDateIndex = index;
-  var dateItems = document.querySelectorAll('.date-item');
-  dateItems.forEach(function(item, i) {
-    if (i === index) {
-      item.style.background = '#f5f9ff';
-      item.style.fontWeight = 'bold';
-      item.style.color = '#f5a623';
-      item.textContent = '⏳ Loading...';
-    } else {
-      item.style.background = '';
-      item.style.fontWeight = 'normal';
-      item.style.color = '#2c3e50';
-    }
-  });
-  startFixedSet();
-}
-
-// SUBBLOCK 0503
-function resumeLastSession() {
-  console.log('[ANNE] resumeLastSession() 실행...');
-  
-  var savedSettings = {};
-  try { 
-    savedSettings = JSON.parse(localStorage.getItem('gongboo.license.lastSettings') || '{}'); 
-  } catch(e) {}
-
-  if (!savedSettings.lastProduct || !savedSettings.lastDate) {
-    console.warn('[ANNE] 저장된 세션이 없음');
-    return;
-  }
-
-  var dates = window.__currentDates || [];
-  var dateIndex = -1;
-  for (var i = 0; i < dates.length; i++) {
-    if (dates[i].date === savedSettings.lastDate) {
-      dateIndex = i;
-      break;
-    }
-  }
-
-  if (dateIndex === -1) {
-    console.warn('[ANNE] 저장된 날짜를 찾을 수 없음:', savedSettings.lastDate);
-    return;
-  }
-
-  ANNE_STATE.product = savedSettings.lastProduct;
-  ANNE_STATE._currentDate = savedSettings.lastDate;
-  ANNE_STATE.index = savedSettings.lastIndex || 0;
-  ANNE_STATE._currentDayStart = savedSettings.lastDayStart || 0;
-  ANNE_STATE._selectedDateIndex = dateIndex;
-
-  var dateItems = document.querySelectorAll('.date-item');
-  if (dateItems[dateIndex]) {
-    dateItems[dateIndex].click();
-  } else {
-    var selector = $('licenseSetSelector');
-    if (selector) { selector.value = dateIndex; }
-    startFixedSet();
-  }
-}
-
-// SUBBLOCK 0504
-async function startFixedSet() {
-
-  var setIndex =
-    ANNE_STATE._selectedDateIndex !== undefined
-      ? ANNE_STATE._selectedDateIndex
-      : Number($('licenseSetSelector').value);
-
-  var dates =
-    window.__currentDates || [];
-
-  if (
-    !dates.length ||
-    !dates[setIndex]
-  ) {
-    return;
-  }
-
-  var offset = 0;
-
-  for (
-    var i = 0;
-    i < setIndex;
-    i++
-  ) {
-    offset += dates[i].count;
-  }
-
-  var maxSets =
-    Math.min(
-      setIndex + 5,
-      dates.length
-    );
-
-  var size = 0;
-
-  for (
-    var i = setIndex;
-    i < maxSets;
-    i++
-  ) {
-    size += dates[i].count;
-  }
-
-  try {
-
-    var d =
-      await loadData(
-        ANNE_STATE.product,
-        offset,
-        size
-      );
-
-    ANNE_STATE.questions =
-      d.data || [];
-
-    ANNE_STATE.answers =
-      new Array(
-        ANNE_STATE.questions.length
-      ).fill(null);
-
-    ANNE_STATE.baseOffset =
-      offset;
-
-    // 로딩된 5 SET 안에서는 local index 사용
-    ANNE_STATE.index = 0;
-
-    ANNE_STATE._currentDayStart = 0;
-
-    ANNE_STATE._currentDayCount =
-      dates[setIndex].count;
-
-    ANNE_STATE._currentDate =
-      dates[setIndex].date;
-
-    ANNE_STATE._selectedDateIndex =
-      setIndex;
-
-    if (
-      !ANNE_STATE.questions.length
-    ) {
-      throw Error(
-        'No questions in this set.'
-      );
-    }
-
-    enterQuiz(0);
-
-  } catch (e) {
-
-    alert(e.message);
-
-  }
-}
 
 // SUBBLOCK 0505
-function enterQuiz(at) {
-  var actualIndex = ANNE_STATE._currentDayStart || 0;
-  ANNE_STATE.index = actualIndex + at;
-  
-  $('setupSection').style.display = 'none';
-  $('quizMain').style.display = 'block';
-  $('quizContent').style.display = 'block';
-  document.querySelector('.progress-area').style.display = 'block';
-  $('satTutorPanel').classList.add('is-license-active');
-  document.querySelector('.sat-title').textContent = TITLES[ANNE_STATE.product];
-  
-  $('biblePassageToggle').disabled = false;
-  $('bibleQuizToggle').disabled = false;
-  
-  ANNE_STATE.annePassageVisible = true;
-  ANNE_STATE.anneQuizVisible = true;
-  
-  syncAnneToggleButtons();
-  setPlaybackEnabled(true);
-  
-  const helpBtn = document.getElementById('bibleGuideToggle');
-  if (helpBtn) { helpBtn.disabled = false; }
-  
-  render();
-  
-  if (ANNE_STATE.auto && !ANNE_STATE.micMode) {
-    setTimeout(function() {
-      if (window.__licenseSpeechState) window.__licenseSpeechState('licensePlay');
-      speakWithDyslexiaSupport();
-    }, 500);
-  }
+// ============================================================
+// Bible 66 Books
+// ============================================================
+
+var BIBLE_BOOK_ORDER = [
+
+  'Genesis',
+  'Exodus',
+  'Leviticus',
+  'Numbers',
+  'Deuteronomy',
+  'Joshua',
+  'Judges',
+  'Ruth',
+  '1-Samuel',
+  '2-Samuel',
+  '1-Kings',
+  '2-Kings',
+  '1-Chronicles',
+  '2-Chronicles',
+  'Ezra',
+  'Nehemiah',
+  'Esther',
+  'Job',
+  'Psalms',
+  'Proverbs',
+  'Ecclesiastes',
+  'Song-of-Solomon',
+  'Isaiah',
+  'Jeremiah',
+  'Lamentations',
+  'Ezekiel',
+  'Daniel',
+  'Hosea',
+  'Joel',
+  'Amos',
+  'Obadiah',
+  'Jonah',
+  'Micah',
+  'Nahum',
+  'Habakkuk',
+  'Zephaniah',
+  'Haggai',
+  'Zechariah',
+  'Malachi',
+
+  'Matthew',
+  'Mark',
+  'Luke',
+  'John',
+  'Acts',
+  'Romans',
+  '1-Corinthians',
+  '2-Corinthians',
+  'Galatians',
+  'Ephesians',
+  'Philippians',
+  'Colossians',
+  '1-Thessalonians',
+  '2-Thessalonians',
+  '1-Timothy',
+  '2-Timothy',
+  'Titus',
+  'Philemon',
+  'Hebrews',
+  'James',
+  '1-Peter',
+  '2-Peter',
+  '1-John',
+  '2-John',
+  '3-John',
+  'Jude',
+  'Revelation'
+];
+
+
+// SUBBLOCK 0510
+// ============================================================
+// 각 Book Chapter 수
+// ============================================================
+
+var BIBLE_BOOK_CHAPTER_COUNTS = [
+
+  50,40,27,36,34,24,21,4,31,24,
+  22,25,29,36,10,13,10,42,150,31,
+  12,8,66,52,5,48,12,14,3,9,
+  1,4,7,3,3,3,2,14,4,
+
+  28,16,24,21,28,16,16,13,6,6,
+  4,4,5,3,6,4,3,1,13,5,
+  5,3,5,1,1,1,22
+];
+
+
+// SUBBLOCK 0515
+// ============================================================
+// 현재 선택 상태
+// ============================================================
+
+var BIBLE_SELECTED_BOOK =
+  '';
+
+var BIBLE_SELECTED_CHAPTER =
+  0;
+
+var BIBLE_SELECTED_TESTAMENT =
+  '';
+
+
+// SUBBLOCK 0520
+// ============================================================
+// Testament 판정
+// ============================================================
+
+function getBibleTestament_(
+  bookName
+) {
+
+  var index =
+    BIBLE_BOOK_ORDER.indexOf(
+      bookName
+    );
+
+  return index >= 39
+    ? 'NT'
+    : 'OT';
 }
 
-// SUBBLOCK 0506
-function goHome() {
-  $('setupSection').style.display = '';
-  $('quizMain').style.display = 'none';
-  $('quizContent').style.display = 'none';
-  document.querySelector('.progress-area').style.display = 'none';
-  $('biblePassageToggle').disabled = true;
-  $('bibleQuizToggle').disabled = true;
-  ANNE_STATE.index = 0;
-  ANNE_STATE.questions = [];
-  ANNE_STATE.answers = [];
-  ANNE_STATE.annePassageVisible = true;
-  ANNE_STATE.anneQuizVisible = true;
-  syncAnneToggleButtons();
+
+// SUBBLOCK 0525
+// ============================================================
+// Book 이름 화면 표시
+// ============================================================
+
+function bibleBookDisplayName_(
+  bookName
+) {
+
+  return String(
+    bookName || ''
+  ).replace(
+    /-/g,
+    ' '
+  );
 }
 
-// SUBBLOCK 0507
-function go(d) {
 
-  var currentDate =
-    ANNE_STATE._currentDate;
+// SUBBLOCK 0530
+// ============================================================
+// 66권 목록 생성
+// ============================================================
 
-  var loadedDates = [];
+function renderBibleBookPicker_() {
 
-  ANNE_STATE.questions.forEach(function(q) {
-    if (
-      q.date &&
-      loadedDates.indexOf(q.date) === -1
-    ) {
-      loadedDates.push(q.date);
-    }
-  });
+  var bookHost =
+    document.getElementById(
+      'bibleBookPicker'
+    );
 
-  var loadedIndex =
-    loadedDates.indexOf(currentDate);
-
-  if (loadedIndex < 0) {
-    return;
-  }
-
-
-  // SUBBLOCK 0507-01
-  // ==========================================================
-  // PSG MODE
-  // 현재 Passage → 다음 Passage
-  // 마지막 로딩 SET이면 다음 5 SET 로딩
-  // PSG 상태 유지
-  // ==========================================================
-
-  if (!ANNE_STATE.annePassageVisible) {
-
-    var nextLoadedIndex =
-      loadedIndex + d;
-
-
-    // 현재 로딩된 마지막 SET 이후
-    if (
-      d > 0 &&
-      nextLoadedIndex >= loadedDates.length
-    ) {
-
-      loadNextSets('passage');
-
-      return;
-    }
-
-
-    if (
-      nextLoadedIndex < 0 ||
-      nextLoadedIndex >= loadedDates.length
-    ) {
-      return;
-    }
-
-
-    var nextDate =
-      loadedDates[nextLoadedIndex];
-
-
-    var newStartIndex = 0;
-
-    for (
-      var i = 0;
-      i < ANNE_STATE.questions.length;
-      i++
-    ) {
-
-      if (
-        ANNE_STATE.questions[i].date ===
-        nextDate
-      ) {
-
-        newStartIndex = i;
-
-        break;
-      }
-    }
-
-
-    ANNE_STATE._currentDate =
-      nextDate;
-
-    ANNE_STATE._currentDayStart =
-      newStartIndex;
-
-    ANNE_STATE._currentDayCount =
-      ANNE_STATE.questions.filter(function(q) {
-        return q.date === nextDate;
-      }).length;
-
-    ANNE_STATE.index =
-      newStartIndex;
-
-    ANNE_STATE._selectedDateIndex +=
-      d;
-
-
-    // PSG 상태 유지
-    ANNE_STATE.annePassageVisible =
-      false;
-
-
-    syncAnneToggleButtons();
-
-    render();
-
-
-    if (
-      ANNE_STATE.auto &&
-      !ANNE_STATE.micMode
-    ) {
-
-      setTimeout(function() {
-
-        if (
-          window.__licenseSpeechState
-        ) {
-
-          window.__licenseSpeechState(
-            'licensePlay'
-          );
-        }
-
-        speakWithDyslexiaSupport();
-
-      }, 350);
-    }
-
-    return;
-  }
-
-
-  // SUBBLOCK 0507-02
-  // ==========================================================
-  // QZ MODE
-  // 현재 SET 내부에서 문제 이동
-  // 마지막 문제에서는 go()로 다음 SET 이동 안 함
-  // SUBMIT → RESULT → NEXT SET 흐름 사용
-  // ==========================================================
-
-  var dayQuestions =
-    ANNE_STATE.questions.filter(function(q) {
-      return q.date === currentDate;
-    });
-
-  var dayIndex =
-    ANNE_STATE.index -
-    ANNE_STATE._currentDayStart;
-
-  var newDayIndex =
-    dayIndex + d;
-
+  var chapterHost =
+    document.getElementById(
+      'bibleChapterPicker'
+    );
 
   if (
-    newDayIndex >= 0 &&
-    newDayIndex < dayQuestions.length
+    !bookHost ||
+    !chapterHost
   ) {
-
-    ANNE_STATE.index =
-      ANNE_STATE._currentDayStart +
-      newDayIndex;
+    return;
+  }
 
 
-    syncAnneToggleButtons();
+  chapterHost.hidden =
+    true;
 
-    render();
+  chapterHost.innerHTML =
+    '';
+
+  bookHost.innerHTML =
+    '';
 
 
-    if (
-      ANNE_STATE.auto &&
-      !ANNE_STATE.micMode
+  var grid =
+    document.createElement(
+      'div'
+    );
+
+  grid.className =
+    'bible-book-grid';
+
+
+  // 기존 Bible과 같은 2-column 방식
+  var midpoint =
+    Math.ceil(
+      BIBLE_BOOK_ORDER.length /
+      2
+    );
+
+
+  [
+    BIBLE_BOOK_ORDER.slice(
+      0,
+      midpoint
+    ),
+
+    BIBLE_BOOK_ORDER.slice(
+      midpoint
+    )
+
+  ].forEach(
+    function(
+      books,
+      columnIndex
     ) {
 
-      setTimeout(function() {
+      var column =
+        document.createElement(
+          'section'
+        );
 
-        if (
-          window.__licenseSpeechState
-        ) {
+      column.className =
+        'bible-book-column';
 
-          window.__licenseSpeechState(
-            'licensePlay'
+
+      var previousTestament =
+        '';
+
+
+      books.forEach(
+        function(bookName) {
+
+          var testament =
+            getBibleTestament_(
+              bookName
+            );
+
+
+          if (
+            testament !==
+              previousTestament ||
+            (
+              columnIndex === 1 &&
+              !previousTestament
+            )
+          ) {
+
+            var heading =
+              document.createElement(
+                'h3'
+              );
+
+            heading.className =
+              'bible-testament-title';
+
+
+            if (
+              testament === 'NT'
+            ) {
+
+              heading.innerHTML =
+                '<span>New Testament</span>' +
+                '<small>27 books</small>';
+
+            } else {
+
+              heading.innerHTML =
+                '<span>Old Testament' +
+                (
+                  columnIndex === 1
+                    ? ' · continued'
+                    : ''
+                ) +
+                '</span>' +
+                '<small>39 books</small>';
+            }
+
+
+            column.appendChild(
+              heading
+            );
+
+            previousTestament =
+              testament;
+          }
+
+
+          var button =
+            document.createElement(
+              'button'
+            );
+
+          button.type =
+            'button';
+
+          button.className =
+            'bible-book-button';
+
+          button.textContent =
+            bibleBookDisplayName_(
+              bookName
+            );
+
+          button.dataset.book =
+            bookName;
+
+          button.dataset.testament =
+            testament;
+
+
+          button.onclick =
+            function() {
+
+              BIBLE_SELECTED_BOOK =
+                bookName;
+
+              BIBLE_SELECTED_TESTAMENT =
+                testament;
+
+
+              bookHost
+                .querySelectorAll(
+                  '.bible-book-button'
+                )
+                .forEach(
+                  function(item) {
+
+                    item.classList.toggle(
+                      'is-selected',
+                      item === button
+                    );
+                  }
+                );
+
+
+              renderBibleChapterPicker_(
+                bookName
+              );
+
+
+              // 선택한 Book 바로 밑에
+              // Chapter 삽입
+              button.insertAdjacentElement(
+                'afterend',
+                chapterHost
+              );
+            };
+
+
+          column.appendChild(
+            button
           );
         }
+      );
 
-        speakWithDyslexiaSupport();
 
-      }, 350);
-    }
-  }
-}
-
-// SUBBLOCK 0508
-// ============================================================
-// RESULT → NEXT SET
-// ============================================================
-
-function goNextSet() {
-
-  var loadedDates = [];
-
-  ANNE_STATE.questions.forEach(
-    function(q) {
-
-      if (
-        q.date &&
-        loadedDates.indexOf(q.date) === -1
-      ) {
-        loadedDates.push(q.date);
-      }
-
+      grid.appendChild(
+        column
+      );
     }
   );
 
-  var currentLoadedIndex =
-    loadedDates.indexOf(
-      ANNE_STATE._currentDate
-    );
 
-  if (
-    currentLoadedIndex ===
-    loadedDates.length - 1
-  ) {
-
-    loadNextSets(
-      'quiz'
-    );
-
-    return;
-  }
-
-  var nextDate =
-    loadedDates[
-      currentLoadedIndex + 1
-    ];
-
-  var newStartIndex = 0;
-
-  for (
-    var i = 0;
-    i < ANNE_STATE.questions.length;
-    i++
-  ) {
-
-    if (
-      ANNE_STATE.questions[i].date ===
-      nextDate
-    ) {
-
-      newStartIndex = i;
-
-      break;
-    }
-  }
-
-  ANNE_STATE._selectedDateIndex++;
-
-  ANNE_STATE._currentDate =
-    nextDate;
-
-  ANNE_STATE._currentDayStart =
-    newStartIndex;
-
-  ANNE_STATE._currentDayCount =
-    ANNE_STATE.questions.filter(
-      function(q) {
-        return q.date === nextDate;
-      }
-    ).length;
-
-  ANNE_STATE.index =
-    newStartIndex;
-
-  ANNE_STATE.annePassageVisible =
-    true;
-
-  ANNE_STATE.anneQuizVisible =
-    true;
-
-  var modal =
-    document.getElementById(
-      'resultModal'
-    );
-
-  if (modal) {
-    modal.style.display =
-      'none';
-  }
-
-  syncAnneToggleButtons();
-
-  render();
+  bookHost.appendChild(
+    grid
+  );
 }
 
 
+// SUBBLOCK 0535
 // ============================================================
-// 다음 묶음 SET 로딩
-// 현재는 최대 5 SET,
-// 나중에 다른 책에서는 개수만 변경 가능
+// Chapter 목록 생성
 // ============================================================
 
-async function loadNextSets(
-  viewMode
+function renderBibleChapterPicker_(
+  bookName
 ) {
 
-  var dates =
-    window.__currentDates || [];
+  var chapterHost =
+    document.getElementById(
+      'bibleChapterPicker'
+    );
 
-  var nextSetIndex =
-    ANNE_STATE._selectedDateIndex + 1;
+  if (!chapterHost) {
+    return;
+  }
 
-  if (
-    nextSetIndex >= dates.length
+
+  var bookIndex =
+    BIBLE_BOOK_ORDER.indexOf(
+      bookName
+    );
+
+
+  if (bookIndex < 0) {
+    return;
+  }
+
+
+  var chapterCount =
+    BIBLE_BOOK_CHAPTER_COUNTS[
+      bookIndex
+    ] || 1;
+
+
+  chapterHost.innerHTML =
+    '';
+
+  chapterHost.hidden =
+    false;
+
+
+  var grid =
+    document.createElement(
+      'div'
+    );
+
+  grid.className =
+    'bible-chapter-grid';
+
+
+  for (
+    var chapter = 1;
+    chapter <= chapterCount;
+    chapter++
   ) {
 
-    goHome();
+    (function(chapterNumber) {
+
+      var button =
+        document.createElement(
+          'button'
+        );
+
+      button.type =
+        'button';
+
+      button.className =
+        'bible-chapter-button';
+
+      button.textContent =
+        String(
+          chapterNumber
+        );
+
+
+      button.setAttribute(
+        'aria-label',
+        bibleBookDisplayName_(
+          bookName
+        ) +
+        ' Chapter ' +
+        chapterNumber
+      );
+
+
+      button.onclick =
+        function() {
+
+          chapterHost
+            .querySelectorAll(
+              '.bible-chapter-button'
+            )
+            .forEach(
+              function(item) {
+
+                item.classList.toggle(
+                  'is-selected',
+                  item === button
+                );
+              }
+            );
+
+
+          BIBLE_SELECTED_BOOK =
+            bookName;
+
+          BIBLE_SELECTED_CHAPTER =
+            chapterNumber;
+
+          BIBLE_SELECTED_TESTAMENT =
+            getBibleTestament_(
+              bookName
+            );
+
+
+          console.log(
+            '[BIBLE] selected:',
+            BIBLE_SELECTED_TESTAMENT,
+            BIBLE_SELECTED_BOOK,
+            BIBLE_SELECTED_CHAPTER
+          );
+
+
+          openBibleChapter_(
+            bookName,
+            chapterNumber
+          );
+        };
+
+
+      grid.appendChild(
+        button
+      );
+
+    })(chapter);
+  }
+
+
+  chapterHost.appendChild(
+    grid
+  );
+}
+
+
+// SUBBLOCK 0540
+// ============================================================
+// Chapter 선택 후 진입
+//
+// 다음 단계에서 실제 Bible Supabase Loader를
+// 이 함수에 연결한다.
+// ============================================================
+
+function openBibleChapter_(
+  bookName,
+  chapter
+) {
+
+  var testament =
+    getBibleTestament_(
+      bookName
+    );
+
+
+  window.__bibleSelectedTestament =
+    testament;
+
+  window.__bibleSelectedBook =
+    bookName;
+
+  window.__bibleSelectedChapter =
+    chapter;
+
+
+  console.log(
+    '[BIBLE] chapter ready:',
+    testament +
+    '-' +
+    bookName +
+    '-' +
+    String(chapter)
+      .padStart(2, '0')
+  );
+
+
+  // 실제 Bible Loader가 연결되면
+  // 자동 호출
+  if (
+    typeof window.loadBibleChapter ===
+    'function'
+  ) {
+
+    window.loadBibleChapter(
+      testament,
+      bookName,
+      chapter
+    );
 
     return;
   }
 
-  var offset = 0;
 
-  for (
-    var i = 0;
-    i < nextSetIndex;
-    i++
-  ) {
-
-    offset +=
-      dates[i].count;
-  }
-
-  // 현재 ANNE는 한번에 최대 5 SET 로딩
-  var loadSetCount = 5;
-
-  var endIndex =
-    Math.min(
-      nextSetIndex + loadSetCount,
-      dates.length
-    );
-
-  var size = 0;
-
-  for (
-    var i = nextSetIndex;
-    i < endIndex;
-    i++
-  ) {
-
-    size +=
-      dates[i].count;
-  }
-
-  try {
-
-    var d =
-      await loadData(
-        ANNE_STATE.product,
-        offset,
-        size
-      );
-
-    ANNE_STATE.questions =
-      d.data || [];
-
-    ANNE_STATE.answers =
-      new Array(
-        ANNE_STATE.questions.length
-      ).fill(null);
-
-    ANNE_STATE.baseOffset =
-      offset;
-
-    ANNE_STATE.index =
-      0;
-
-    ANNE_STATE._selectedDateIndex =
-      nextSetIndex;
-
-    ANNE_STATE._currentDate =
-      dates[nextSetIndex].date;
-
-    ANNE_STATE._currentDayStart =
-      0;
-
-    ANNE_STATE._currentDayCount =
-      dates[nextSetIndex].count;
-
-    if (
-      viewMode === 'passage'
-    ) {
-
-      ANNE_STATE.annePassageVisible =
-        false;
-
-    } else {
-
-      ANNE_STATE.annePassageVisible =
-        true;
-
-      ANNE_STATE.anneQuizVisible =
-        true;
-    }
-
-    var modal =
-      document.getElementById(
-        'resultModal'
-      );
-
-    if (modal) {
-      modal.style.display =
-        'none';
-    }
-
-    syncAnneToggleButtons();
-
-    render();
-
-  } catch (e) {
-
-    console.error(
-      '[ANNE] 다음 SET 로딩 실패:',
-      e
-    );
-
-    alert(e.message);
-  }
+  console.log(
+    '[BIBLE] Loader connection is next step'
+  );
 }
 
 
