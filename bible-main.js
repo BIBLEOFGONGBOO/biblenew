@@ -7863,3 +7863,1088 @@ if (
     100
   );
 }
+
+// ============================================================
+// BLOCK 1500: Bible People DB Explorer
+// biblenew / Supabase Edge Function version
+// ============================================================
+
+
+// SUBBLOCK 1505
+// ============================================================
+// State
+// ============================================================
+
+var biblePeopleExplorerInitialized = false;
+var biblePeopleSelectedId = '';
+var biblePeopleSearchTimer = null;
+var biblePeopleSearchRequestId = 0;
+var biblePeopleDirectoryLoaded = false;
+var biblePeopleLetter = 'A';
+
+var biblePeopleNameIndex = {};
+var biblePeopleNameIndexPromise = null;
+
+var bibleContextLinks = null;
+var bibleContextLinksPromise = null;
+
+var biblePeopleRelationshipScene = null;
+
+
+// SUBBLOCK 1510
+// ============================================================
+// Escape helper
+// ============================================================
+
+function biblePeopleEsc_(value) {
+
+  if (typeof escapeHtml === 'function') {
+    return escapeHtml(value);
+  }
+
+  if (typeof esc === 'function') {
+    return esc(value);
+  }
+
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+
+// SUBBLOCK 1515
+// ============================================================
+// People API
+// BibleSupabaseProvider → bible-content Edge Function
+// ============================================================
+
+async function biblePeopleApi_(action, values) {
+
+  if (
+    !window.BibleSupabaseProvider ||
+    typeof window.BibleSupabaseProvider.request !== 'function'
+  ) {
+    throw new Error(
+      'Bible Supabase Provider is not loaded.'
+    );
+  }
+
+  var payload = {
+    action: action
+  };
+
+  Object.keys(values || {}).forEach(
+    function(key) {
+
+      if (
+        values[key] !== null &&
+        values[key] !== undefined &&
+        values[key] !== ''
+      ) {
+        payload[key] =
+          String(values[key]);
+      }
+    }
+  );
+
+  var response =
+    await window.BibleSupabaseProvider.request(
+      payload
+    );
+
+  if (!response || !response.ok) {
+
+    var message =
+      'Bible People request failed.';
+
+    try {
+
+      var errorData =
+        await response.clone().json();
+
+      if (errorData) {
+        message =
+          errorData.message ||
+          errorData.error ||
+          message;
+      }
+
+    } catch (e) {}
+
+    throw new Error(message);
+  }
+
+  var data =
+    await response.json();
+
+  if (
+    !data ||
+    data.status === 'error' ||
+    data.success === false
+  ) {
+    throw new Error(
+      data &&
+      (
+        data.message ||
+        data.error
+      ) ||
+      'Bible People request could not be completed.'
+    );
+  }
+
+  return data.data !== undefined
+    ? data.data
+    : data;
+}
+
+
+// SUBBLOCK 1520
+// ============================================================
+// People name index
+// ============================================================
+
+function biblePeopleLoadNameIndex_() {
+
+  if (biblePeopleNameIndexPromise) {
+    return biblePeopleNameIndexPromise;
+  }
+
+  var request;
+
+  if (
+    window.BibleSupabaseProvider &&
+    typeof window.BibleSupabaseProvider.fetchContent === 'function'
+  ) {
+
+    request =
+      window.BibleSupabaseProvider.fetchContent(
+        'content/people-index.json'
+      );
+
+  } else {
+
+    request =
+      fetch(
+        './content/people-index.json'
+      );
+  }
+
+  biblePeopleNameIndexPromise =
+    request
+
+      .then(function(response) {
+
+        if (!response.ok) {
+          throw new Error(
+            'Bible person names could not be loaded.'
+          );
+        }
+
+        return response.json();
+      })
+
+      .then(function(index) {
+
+        biblePeopleNameIndex =
+          index || {};
+
+        return biblePeopleNameIndex;
+      })
+
+      .catch(function(error) {
+
+        console.warn(
+          '[BIBLE PEOPLE]',
+          error.message
+        );
+
+        return {};
+      });
+
+  return biblePeopleNameIndexPromise;
+}
+
+
+// SUBBLOCK 1525
+// ============================================================
+// Context links
+// ============================================================
+
+function biblePeopleLoadContextLinks_() {
+
+  if (bibleContextLinksPromise) {
+    return bibleContextLinksPromise;
+  }
+
+  var request;
+
+  if (
+    window.BibleSupabaseProvider &&
+    typeof window.BibleSupabaseProvider.fetchContent === 'function'
+  ) {
+
+    request =
+      window.BibleSupabaseProvider.fetchContent(
+        'content/bible-context-links.json'
+      );
+
+  } else {
+
+    request =
+      fetch(
+        './content/bible-context-links.json'
+      );
+  }
+
+  bibleContextLinksPromise =
+    request
+
+      .then(function(response) {
+
+        if (!response.ok) {
+          throw new Error(
+            'Bible context links could not be loaded.'
+          );
+        }
+
+        return response.json();
+      })
+
+      .then(function(value) {
+
+        bibleContextLinks =
+          value || {};
+
+        return bibleContextLinks;
+      })
+
+      .catch(function(error) {
+
+        console.warn(
+          '[BIBLE PEOPLE]',
+          error.message
+        );
+
+        return {};
+      });
+
+  return bibleContextLinksPromise;
+}
+
+
+// SUBBLOCK 1530
+// ============================================================
+// Status
+// ============================================================
+
+function biblePeopleSetStatus_(
+  message,
+  isError
+) {
+
+  var status =
+    document.getElementById(
+      'biblePeopleStatus'
+    );
+
+  if (!status) return;
+
+  status.textContent =
+    message || '';
+
+  status.classList.toggle(
+    'is-error',
+    !!isError
+  );
+}
+
+
+// SUBBLOCK 1535
+// ============================================================
+// Open / Close
+// ============================================================
+
+function biblePeopleOpen_() {
+
+  var panel =
+    document.getElementById(
+      'biblePeoplePanel'
+    );
+
+  var toggle =
+    document.getElementById(
+      'biblePeopleToggle'
+    );
+
+  if (!panel) return;
+
+  panel.hidden = false;
+
+  document.body.classList.add(
+    'bible-people-open'
+  );
+
+  if (toggle) {
+    toggle.setAttribute(
+      'aria-expanded',
+      'true'
+    );
+  }
+
+  setTimeout(
+    function() {
+
+      var input =
+        document.getElementById(
+          'biblePeopleSearchInput'
+        );
+
+      if (input) {
+        input.focus();
+      }
+    },
+    0
+  );
+
+  if (!biblePeopleDirectoryLoaded) {
+
+    biblePeopleDirectoryLoaded =
+      true;
+
+    biblePeopleSetStatus_(
+      'Loading names...'
+    );
+
+    var first =
+      document.querySelector(
+        '#biblePeopleAlphabet [data-people-letter="A"]'
+      );
+
+    if (first) {
+      first.click();
+    }
+  }
+}
+
+
+function biblePeopleClose_() {
+
+  var panel =
+    document.getElementById(
+      'biblePeoplePanel'
+    );
+
+  var toggle =
+    document.getElementById(
+      'biblePeopleToggle'
+    );
+
+  if (panel) {
+    panel.hidden = true;
+  }
+
+  document.body.classList.remove(
+    'bible-people-open'
+  );
+
+  if (toggle) {
+
+    toggle.setAttribute(
+      'aria-expanded',
+      'false'
+    );
+
+    toggle.focus();
+  }
+}
+
+
+// SUBBLOCK 1540
+// ============================================================
+// Search results
+// ============================================================
+
+function biblePeopleRenderResults_(
+  people
+) {
+
+  var results =
+    document.getElementById(
+      'biblePeopleResults'
+    );
+
+  if (!results) return;
+
+  if (
+    !Array.isArray(people) ||
+    !people.length
+  ) {
+
+    results.innerHTML =
+      '<div class="bible-people-empty">' +
+      '<strong>No results</strong>' +
+      '<span>Try another English name or alias.</span>' +
+      '</div>';
+
+    return;
+  }
+
+  var visibleCount =
+    Math.min(
+      80,
+      people.length
+    );
+
+
+  function paintPeople() {
+
+    results.innerHTML =
+      people
+        .slice(
+          0,
+          visibleCount
+        )
+        .map(
+          function(person) {
+
+            var aliases =
+              person.MATCH_KIND === 'alias' &&
+              Array.isArray(person.ALIASES) &&
+              person.ALIASES.length
+
+                ? 'Alias match: ' +
+                  person.ALIASES
+                    .slice(0, 3)
+                    .join(', ')
+
+                : (
+                    Array.isArray(person.ALIASES) &&
+                    person.ALIASES.length
+
+                      ? 'Aliases: ' +
+                        person.ALIASES
+                          .slice(0, 3)
+                          .join(', ')
+
+                      : (
+                          person.ROLES ||
+                          person.GENDER ||
+                          'Bible person'
+                        )
+                  );
+
+            return (
+              '<button type="button" ' +
+              'class="bible-person-result' +
+              (
+                person.PERSON_ID ===
+                biblePeopleSelectedId
+                  ? ' is-active'
+                  : ''
+              ) +
+              '" data-person-id="' +
+              biblePeopleEsc_(
+                person.PERSON_ID
+              ) +
+              '">' +
+
+              '<strong>' +
+              biblePeopleEsc_(
+                person.NAME_EN ||
+                person.PERSON_ID
+              ) +
+              '</strong>' +
+
+              (
+                person.NAME_KO
+                  ? '<span>' +
+                    biblePeopleEsc_(
+                      person.NAME_KO
+                    ) +
+                    '</span>'
+                  : ''
+              ) +
+
+              '<span>' +
+              biblePeopleEsc_(
+                aliases
+              ) +
+              '</span>' +
+
+              '</button>'
+            );
+          }
+        )
+        .join('') +
+
+      '<div class="bible-sermon-scroll-note" ' +
+      'data-people-load-sentinel>' +
+
+      (
+        visibleCount < people.length
+          ? 'Loading ahead · ' +
+            visibleCount +
+            ' of ' +
+            people.length
+          : 'All ' +
+            people.length +
+            ' results shown'
+      ) +
+
+      '</div>';
+
+
+    results
+      .querySelectorAll(
+        '[data-person-id]'
+      )
+      .forEach(
+        function(button) {
+
+          button.addEventListener(
+            'click',
+            function() {
+
+              biblePeopleLoadDetail_(
+                button.getAttribute(
+                  'data-person-id'
+                )
+              );
+            }
+          );
+        }
+      );
+
+
+    var sentinel =
+      results.querySelector(
+        '[data-people-load-sentinel]'
+      );
+
+
+    if (
+      sentinel &&
+      visibleCount < people.length &&
+      typeof IntersectionObserver ===
+        'function'
+    ) {
+
+      var observer =
+        new IntersectionObserver(
+          function(entries) {
+
+            if (
+              entries.some(
+                function(entry) {
+                  return entry.isIntersecting;
+                }
+              )
+            ) {
+
+              observer.disconnect();
+
+              visibleCount =
+                Math.min(
+                  visibleCount + 80,
+                  people.length
+                );
+
+              paintPeople();
+            }
+          },
+          {
+            root: results,
+            rootMargin:
+              '0px 0px 420px 0px'
+          }
+        );
+
+      observer.observe(
+        sentinel
+      );
+    }
+  }
+
+  paintPeople();
+}
+
+
+// SUBBLOCK 1545
+// ============================================================
+// Alphabet
+// ============================================================
+
+function biblePeopleRenderAlphabet_() {
+
+  var alphabet =
+    document.getElementById(
+      'biblePeopleAlphabet'
+    );
+
+  if (!alphabet) return;
+
+  alphabet.innerHTML =
+    ['All']
+      .concat(
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+          .split('')
+      )
+      .map(
+        function(label) {
+
+          var value =
+            label === 'All'
+              ? ''
+              : label;
+
+          return (
+            '<button type="button" ' +
+            'data-people-letter="' +
+            value +
+            '" class="' +
+            (
+              biblePeopleLetter === value
+                ? 'is-active'
+                : ''
+            ) +
+            '">' +
+            label +
+            '</button>'
+          );
+        }
+      )
+      .join('');
+
+
+  alphabet
+    .querySelectorAll(
+      '[data-people-letter]'
+    )
+    .forEach(
+      function(button) {
+
+        button.addEventListener(
+          'click',
+          function() {
+
+            biblePeopleLetter =
+              button.getAttribute(
+                'data-people-letter'
+              ) || '';
+
+            var input =
+              document.getElementById(
+                'biblePeopleSearchInput'
+              );
+
+            if (input) {
+              input.value =
+                biblePeopleLetter;
+            }
+
+            biblePeopleRenderAlphabet_();
+
+
+            biblePeopleLoadNameIndex_()
+              .then(
+                function(index) {
+
+                  var people =
+                    Object.keys(index)
+
+                      .map(
+                        function(personId) {
+
+                          var item =
+                            index[personId] ||
+                            {};
+
+                          return {
+
+                            PERSON_ID:
+                              personId,
+
+                            NAME_EN:
+                              item.name,
+
+                            NAME_KO:
+                              item.name_ko,
+
+                            GENDER:
+                              item.gender,
+
+                            ALIASES:
+                              []
+                          };
+                        }
+                      )
+
+                      .filter(
+                        function(person) {
+
+                          return (
+                            !biblePeopleLetter ||
+                            String(
+                              person.NAME_EN ||
+                              ''
+                            )
+                            .trim()
+                            .toUpperCase()
+                            .startsWith(
+                              biblePeopleLetter
+                            )
+                          );
+                        }
+                      )
+
+                      .sort(
+                        function(a, b) {
+
+                          return String(
+                            a.NAME_EN
+                          ).localeCompare(
+                            String(
+                              b.NAME_EN
+                            )
+                          );
+                        }
+                      );
+
+
+                  biblePeopleRenderResults_(
+                    people
+                  );
+
+
+                  biblePeopleSetStatus_(
+                    people.length +
+                    ' ' +
+                    (
+                      biblePeopleLetter ||
+                      'A-Z'
+                    ) +
+                    ' people available.'
+                  );
+                }
+              );
+          }
+        );
+      }
+    );
+}
+
+
+// SUBBLOCK 1550
+// ============================================================
+// Relationships helpers
+// ============================================================
+
+function biblePeopleRelationshipName_(
+  relationship,
+  personId
+) {
+
+  var relatedId =
+    relationship.RELATED_ID ||
+    (
+      relationship.FROM_ID ===
+      personId
+        ? relationship.TO_ID
+        : relationship.FROM_ID
+    );
+
+
+  var displayName =
+    relationship.RELATED_NAME_EN ||
+    (
+      biblePeopleNameIndex[
+        relatedId
+      ] &&
+      biblePeopleNameIndex[
+        relatedId
+      ].name
+        ? biblePeopleNameIndex[
+            relatedId
+          ].name
+        : relatedId
+    );
+
+
+  return String(
+    displayName || ''
+  ).replace(
+    /^PER-/i,
+    ''
+  );
+}
+
+
+function biblePeopleRelationshipType_(
+  relationship,
+  personId
+) {
+
+  var type =
+    String(
+      relationship.RELATIONSHIP_TYPE ||
+      'related'
+    ).toLowerCase();
+
+
+  var fromSelected =
+    relationship.FROM_ID ===
+    personId;
+
+
+  if (fromSelected) {
+
+    if (
+      type === 'father' ||
+      type === 'mother'
+    ) {
+      return 'parent';
+    }
+
+    return type;
+  }
+
+
+  if (type === 'child') {
+    return 'parent';
+  }
+
+  if (
+    type === 'father' ||
+    type === 'mother'
+  ) {
+    return 'child';
+  }
+
+  return type;
+}
+
+
+function biblePeopleRelationshipRole_(
+  relationship,
+  personId
+) {
+
+  var type =
+    relationship.DISPLAY_TYPE ||
+    biblePeopleRelationshipType_(
+      relationship,
+      personId
+    );
+
+
+  var relatedId =
+    relationship.RELATED_ID ||
+    (
+      relationship.FROM_ID ===
+      personId
+        ? relationship.TO_ID
+        : relationship.FROM_ID
+    );
+
+
+  var gender =
+    String(
+      biblePeopleNameIndex[
+        relatedId
+      ] &&
+      biblePeopleNameIndex[
+        relatedId
+      ].gender ||
+      ''
+    ).toLowerCase();
+
+
+  if (type === 'parent') {
+    return gender === 'male'
+      ? 'Father'
+      : gender === 'female'
+        ? 'Mother'
+        : 'Parent';
+  }
+
+  if (type === 'partner') {
+    return gender === 'male'
+      ? 'Husband'
+      : gender === 'female'
+        ? 'Wife'
+        : 'Spouse';
+  }
+
+  if (type === 'sibling') {
+    return gender === 'male'
+      ? 'Brother'
+      : gender === 'female'
+        ? 'Sister'
+        : 'Sibling';
+  }
+
+  if (type === 'child') {
+    return gender === 'male'
+      ? 'Son'
+      : gender === 'female'
+        ? 'Daughter'
+        : 'Child';
+  }
+
+
+  return String(
+    type || 'Related'
+  )
+  .replace(
+    /_/g,
+    ' '
+  )
+  .replace(
+    /\b\w/g,
+    function(letter) {
+      return letter.toUpperCase();
+    }
+  );
+}
+
+
+function biblePeopleUniqueRelationships_(
+  relationships,
+  personId
+) {
+
+  var unique =
+    new Map();
+
+
+  (relationships || [])
+    .forEach(
+      function(relationship) {
+
+        var relatedId =
+          relationship.RELATED_ID ||
+          (
+            relationship.FROM_ID ===
+            personId
+              ? relationship.TO_ID
+              : relationship.FROM_ID
+          );
+
+
+        if (
+          !relatedId ||
+          relatedId === personId
+        ) {
+          return;
+        }
+
+
+        var type =
+          biblePeopleRelationshipType_(
+            relationship,
+            personId
+          );
+
+
+        var key =
+          relatedId +
+          '|' +
+          type;
+
+
+        if (!unique.has(key)) {
+
+          unique.set(
+            key,
+            Object.assign(
+              {},
+              relationship,
+              {
+                RELATED_ID:
+                  relatedId,
+
+                DISPLAY_TYPE:
+                  type
+              }
+            )
+          );
+        }
+      }
+    );
+
+
+  return Array.from(
+    unique.values()
+  );
+}
+
+
+// SUBBLOCK 1555
+// ============================================================
+// Relationship graph payload
+// ============================================================
+
+function biblePeopleGraphPayload_(
+  person,
+  relationships
+) {
+
+  var related =
+    biblePeopleUniqueRelationships_(
+      relationships,
+      person.PERSON_ID
+    ).slice(
+      0,
+      28
+    );
+
+
+  var groups = {
+    parent: [],
+    partner: [],
+    sibling: [],
+    child: [],
+    other: []
+  };
+
+
+  related.forEach(
+    function(relationship) {
+
+      var type =
+        relationship.DISPLAY_TYPE;
+
+      if (groups[type]) {
+        groups[type].push(
+          relationship
+        );
+      } else {
+        groups.other.push(
+          relationship
+        );
+      }
+    }
+  );
+
+
+  var objects = [
+    {
+      id: 'center',
+
+      type: 'point',
+
+      coords: [0, 0],
+
+      name:
+        person.NAME_EN ||
+        person.PERSON_ID,
+
+      attributes: {
+        size: 6,
+        strokeColor: '#92400e',
+        fillColor: '#fbbf24',
+
+        label: {
