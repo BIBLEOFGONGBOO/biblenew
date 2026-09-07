@@ -4059,30 +4059,74 @@ function retryWrong() {
 
 // SUBBLOCK 0801
 function installLanguages() {
+
   var pairs = [
-    ['biblePrimaryTextSelector', 'ENG'],
+    ['biblePrimaryTextSelector', 'MODERN'],
     ['bibleSecondaryTextSelector', 'KOR']
   ];
+
   for (var p = 0; p < pairs.length; p++) {
+
     var id = pairs[p][0];
     var first = pairs[p][1];
-    var s = document.getElementById(id);
+
+    var s =
+      document.getElementById(id);
+
     if (!s) continue;
+
     s.innerHTML = `
-      <option value="ENG">ENG</option>
+      <option value="KJV">KJV</option>
+      <option value="MODERN">MODERN</option>
       <option value="KOR">KOR</option>
-      <option value="JPN">JPN</option>
       <option value="NONE">NONE</option>
     `;
+
     s.value = first;
-    s.onchange = function(selectorId) {
-      return function() {
-        var otherId = selectorId === 'biblePrimaryTextSelector' ? 'bibleSecondaryTextSelector' : 'biblePrimaryTextSelector';
-        var other = document.getElementById(otherId);
-        if (s.value === other.value) { other.value = 'NONE'; }
-        if (ANNE_STATE.questions.length) { render(); }
-      };
-    }(id);
+
+    s.onchange =
+      function(selectorId) {
+
+        return function() {
+
+          var current =
+            document.getElementById(
+              selectorId
+            );
+
+          var otherId =
+            selectorId ===
+            'biblePrimaryTextSelector'
+              ? 'bibleSecondaryTextSelector'
+              : 'biblePrimaryTextSelector';
+
+          var other =
+            document.getElementById(
+              otherId
+            );
+
+          if (
+            current &&
+            other &&
+            current.value ===
+              other.value
+          ) {
+
+            other.value =
+              'NONE';
+          }
+
+          if (
+            ANNE_STATE.questions.length
+          ) {
+
+            render();
+          }
+
+          saveLastSettings();
+        };
+
+      }(id);
   }
 }
 
