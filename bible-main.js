@@ -16,7 +16,7 @@ const TITLES = { anne: 'ANNE - Quiz' };
 
 const $ = id => document.getElementById(id);
 const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({
-  '&': '&amp;',
+  '&': '&amp;',055
   '<': '&lt;',
   '>': '&gt;',
   '"': '&quot;',
@@ -2975,6 +2975,39 @@ function enterQuiz(at) {
   render();
 }
 
+// SUBBLOCK 0555
+function go(d) {
+
+  var currentDate =
+    ANNE_STATE._currentDate;
+
+  var dayQuestions =
+    ANNE_STATE.questions.filter(function(q) {
+      return q.date === currentDate;
+    });
+
+  var dayIndex =
+    ANNE_STATE.index -
+    ANNE_STATE._currentDayStart;
+
+  var newDayIndex =
+    dayIndex + d;
+
+  if (
+    newDayIndex < 0 ||
+    newDayIndex >= dayQuestions.length
+  ) {
+    return;
+  }
+
+  ANNE_STATE.index =
+    ANNE_STATE._currentDayStart +
+    newDayIndex;
+
+  syncAnneToggleButtons();
+
+  render();
+}
 // ============================================================
 // BLOCK 0600: anne-render.js
 // ============================================================
