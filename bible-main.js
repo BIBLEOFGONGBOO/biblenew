@@ -285,9 +285,21 @@ async function bibleApiRequest_(
 // SUBBLOCK 0215
 // ============================================================
 // Bible Catalog
+// OT = bible-ot
+// NT = bible-nt
 // ============================================================
 
-async function loadBibleChapterCatalog_() {
+async function loadBibleChapterCatalog_(
+  testament
+) {
+
+  var sheet =
+    String(
+      testament || ''
+    ).toUpperCase() === 'NT'
+      ? 'bible-nt'
+      : 'bible-ot';
+
 
   var params =
     new URLSearchParams();
@@ -299,11 +311,9 @@ async function loadBibleChapterCatalog_() {
   );
 
 
-  // 기존 Bible과 동일
-  // OT / NT catalog 모두 필요
   params.set(
     'sheet',
-    'bible'
+    sheet
   );
 
 
@@ -331,13 +341,12 @@ async function loadBibleChapterCatalog_() {
 
   console.log(
     '[BIBLE] catalog:',
+    sheet,
     BIBLE_CHAPTER_CATALOG.length
   );
 
 
-  return (
-    BIBLE_CHAPTER_CATALOG
-  );
+  return BIBLE_CHAPTER_CATALOG;
 }
 
 
