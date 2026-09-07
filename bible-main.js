@@ -10692,3 +10692,271 @@ setTimeout(
   200
 );
 
+// SUBBLOCK 1590
+// ============================================================
+// Scripture Reference → Bible Question
+// ============================================================
+
+function bibleSourceCodeParts_(sourceCode) {
+
+  var parts =
+    String(sourceCode || '')
+      .trim()
+      .split('-');
+
+  if (parts.length < 4) {
+    return null;
+  }
+
+  var testament =
+    String(parts[0]).toUpperCase();
+
+  if (
+    testament !== 'OT' &&
+    testament !== 'NT'
+  ) {
+    return null;
+  }
+
+  var verse =
+    parseInt(
+      parts[parts.length - 1],
+      10
+    );
+
+  var chapter =
+    parseInt(
+      parts[parts.length - 2],
+      10
+    );
+
+  var book =
+    parts
+      .slice(1, -2)
+      .join('-');
+
+  if (
+    !book ||
+    !chapter ||
+    !verse
+  ) {
+    return null;
+  }
+
+  return {
+    testament: testament,
+    book: book,
+    chapter: chapter,
+    verse: verse,
+    sourceCode: sourceCode
+  };
+}
+
+
+async function openBibleScriptureReference_(
+  sourceCode
+) {
+
+  var parts =
+    bibleSourceCodeParts_(
+      sourceCode
+    );
+
+  if (!parts) {
+
+    alert(
+      'This Scripture reference is not recognized: ' +
+      sourceCode
+    );
+
+    return false;
+  }
+
+
+  // People 창 닫기
+  var peoplePanel =
+    document.getElementById(
+      'biblePeoplePanel'
+    );
+
+  if (
+    peoplePanel &&
+    !peoplePanel.hidden
+  ) {
+
+    if (
+      typeof biblePeopleClose_ ===
+      'function'
+    ) {
+      biblePeopleClose_();
+    } else {
+      peoplePanel.hidden = true;
+    }
+  }
+
+
+  // Atlas / Context 창 닫기
+  var explorePanel =
+    document.getElementById(
+      'bibleExplorePanel'
+    );
+
+  if (
+    explorePanel &&
+    !explorePanel.hidden
+  ) {
+
+    explorePanel.hidden = true;
+
+    document.body.classList.remove(
+      'bible-people-open'
+    );
+
+    var exploreToggle =
+      document.getElementById(
+        'bibleExploreToggle'
+      );
+
+    if (exploreToggle) {
+      exploreToggle.setAttribute(
+        'aria-expanded',
+        'false'
+      );
+    }
+  }
+
+
+  // 해당 장 전체 문제 로딩
+  await window.loadBibleChapter(
+    parts.testament,
+    parts.book,
+    parts.chapter
+  );
+
+
+  var wanted =
+    String(
+      parts.sourceCode
+    ).toLowerCase();
+
+
+  // 정확한 절의 첫 문제 찾기
+  var targetIndex =
+    ANNE_STATE.questions.findIndex(
+      function(question) {
+
+        return String(
+          question.sourceCode ||
+          question.subject ||
+          ''
+        ).toLowerCase() === wanted;
+      }
+    );
+
+
+  // 정확한 절 문제가 없으면
+  // 같은 장에서 가장 가까운 절 찾기
+  if (targetIndex < 0) {
+
+    var nearestDistance =
+      Infinity;
+
+
+    ANNE_STATE.questions.forEach(
+      function(
+        question,
+        index
+      ) {
+
+        var code =
+          String(
+            question.sourceCode ||
+            question.subject ||
+            ''
+          );
+
+        if (!code) return;
+
+
+        var qParts =
+          bibleSourceCodeParts_(
+            code
+          );
+
+        if (!qParts) return;
+
+
+        if (
+          qParts.testament !==
+            parts.testament ||
+          qParts.book !==
+            parts.book ||
+          qParts.chapter !==
+            parts.chapter
+        ) {
+          return;
+        }
+
+
+        var distance =
+          Math.abs(
+            qParts.verse -
+            parts.verse
+          );
+
+
+        if (
+          distance <
+          nearestDistance
+        ) {
+
+          nearestDistance =
+            distance;
+
+          targetIndex =
+            index;
+        }
+      }
+    );
+  }
+
+
+  if (targetIndex < 0) {
+    targetIndex = 0;
+  }
+
+
+  ANNE_STATE.index =
+    targetIndex;
+
+  render();
+
+
+  var quizContent =
+    document.getElementById(
+      'quizContent'
+    );
+
+  if (quizContent) {
+
+    quizContent.scrollIntoView({
+      behavior: 'smooth',
+      block: 'start'
+    });
+  }
+
+
+  console.log(
+    '[BIBLE REF] opened:',
+    sourceCode,
+    'index:',
+    targetIndex
+  );
+
+
+  return true;
+}
+
+
+window.openBibleScriptureReference =
+  openBibleScriptureReference_;
