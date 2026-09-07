@@ -4118,6 +4118,7 @@ function attachBibleEnglishEntityLinks_(q) {
     </div>
   `;
   attachBiblePlacesButton_(q);
+  attachBibleEnglishEntityLinks_(q);
 
 
   // SUBBLOCK 0604-04
