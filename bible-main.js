@@ -5281,25 +5281,36 @@ document.addEventListener(
 
 
     if (
-      e.key === 'ArrowRight'
-    ) {
+  e.key === 'ArrowRight'
+) {
 
-      e.preventDefault();
+  e.preventDefault();
 
-      if (
-        ANNE_STATE.index <
-        ANNE_STATE.questions.length - 1
-      ) {
+  if (nextBtn) {
+    setButtonActive(nextBtn);
+  }
 
-        if (nextBtn) {
-          setButtonActive(nextBtn);
-        }
+  // PASSAGE MODE
+  // NEXT SET 버튼과 동일하게 → 다음 장
+  if (!ANNE_STATE.annePassageVisible) {
 
-        go(1);
-      }
+    goBiblePassage_(1);
 
-      return;
-    }
+    return;
+  }
+
+  // QUIZ MODE
+  // 다음 문제
+  if (
+    ANNE_STATE.index <
+    ANNE_STATE.questions.length - 1
+  ) {
+
+    go(1);
+  }
+
+  return;
+}
 
 
     if (
