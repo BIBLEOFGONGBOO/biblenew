@@ -5239,31 +5239,7 @@ function goPrev() {
   }
 }
 
-// SUBBLOCK 1005
-document.addEventListener('keydown', function(e) {
-  if (e.target.matches('input,select,textarea')) return;
-  
-  if ((e.key === 'ArrowRight' || e.key.toLowerCase() === 'n') && 
-      ANNE_STATE.index < ANNE_STATE.questions.length - 1) {
-    e.preventDefault();
-    if (nextBtn) { setButtonActive(nextBtn); }
-    go(1);
-  }
-  if ((e.key === 'ArrowLeft' || e.key.toLowerCase() === 'p') && 
-      ANNE_STATE.index > 0) {
-    e.preventDefault();
-    if (prevBtn) { setButtonActive(prevBtn); }
-    go(-1);
-  }
-  if (e.key === 'Enter' && ANNE_STATE.index === ANNE_STATE.questions.length - 1) {
-    e.preventDefault();
-    var submitBtn = document.getElementById('submitBtn');
-    if (submitBtn) { setButtonActive(submitBtn); }
-    if (typeof showResults === 'function') {
-      showResults();
-    }
-  }
-});
+
 
 console.log('[ANNE] ✅ NAV 버튼 이벤트 바인딩 완료');
 
