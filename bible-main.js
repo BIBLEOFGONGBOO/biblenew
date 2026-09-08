@@ -5215,10 +5215,17 @@ if (skipBtn) {
 
 
 if (nextBtn) {
-  nextBtn.onclick = function() {
+  nextBtn.onclick = async function() {
 
     setButtonActive(this);
 
+    // PSG ON → 다음 PASSAGE = 다음 장
+    if (ANNE_STATE.annePassageVisible) {
+      await goBiblePassage_(1);
+      return;
+    }
+
+    // PSG OFF → 다음 문제
     if (
       ANNE_STATE.index <
       ANNE_STATE.questions.length - 1
