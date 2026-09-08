@@ -3009,6 +3009,52 @@ function go(d) {
 
   render();
 }
+
+async function goBiblePassage_(direction) {
+
+  await loadBibleChapterCatalog_();
+
+  var currentCode =
+    String(
+      ANNE_STATE._currentDate ||
+      ''
+    );
+
+  var currentIndex =
+    BIBLE_CHAPTER_CATALOG.findIndex(
+      function(item) {
+        return String(item.CODE || '') === currentCode;
+      }
+    );
+
+  if (currentIndex < 0) {
+    return;
+  }
+
+  var nextIndex =
+    currentIndex + direction;
+
+  if (
+    nextIndex < 0 ||
+    nextIndex >= BIBLE_CHAPTER_CATALOG.length
+  ) {
+    return;
+  }
+
+  var next =
+    BIBLE_CHAPTER_CATALOG[nextIndex];
+
+  await window.loadBibleChapter(
+    String(next.CODE).startsWith('OT-')
+      ? 'OT'
+      : 'NT',
+
+    next.BOOK_EN,
+
+    Number(next.CHAPTER)
+  );
+}
+
 // ============================================================
 // BLOCK 0600: anne-render.js
 // ============================================================
