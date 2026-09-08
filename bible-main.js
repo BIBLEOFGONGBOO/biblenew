@@ -4053,10 +4053,15 @@ var chunkKo =
   '';
 
             return chunkText
-              ? '<div style="padding:6px 0; font-size:15px; line-height:1.8; color:#2d2d2d; border-bottom:1px solid #f0ebe5;">• ' +
-                chunkText +
-                '</div>'
-              : '';
+  ? '<div style="padding:6px 0; font-size:15px; line-height:1.8; color:#2d2d2d; border-bottom:1px solid #f0ebe5;">' +
+      '• <strong>' + chunkText + '</strong>' +
+      (chunkKo
+        ? '<span style="margin-left:10px; color:#666;">' +
+          chunkKo +
+          '</span>'
+        : '') +
+    '</div>'
+  : '';
 
           }).join('')
         }
