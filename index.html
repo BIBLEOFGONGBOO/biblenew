@@ -36,74 +36,7 @@
   <div class="bar-track"><div class="bar-fill" id="splashBar"></div></div>
   <div class="status-text" id="splashStatus">Loading...</div>
   <div class="error-msg" id="splashError">Load Failed</div>
-  <button class="retry-btn" id="splashRetry">Retry</button>.gongboo-local-nav {
-  position: relative;
-  display: inline-block;
-}
-
-.gongboo-nav-button {
-  height: 32px;
-  min-width: 138px;
-
-  background: #ffb020;
-  color: #102a43;
-
-  border: 1.6px solid #ffd166;
-  border-radius: 9px;
-
-  padding: 0 14px;
-
-  font-size: 14px;
-  font-weight: 850;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  cursor: pointer;
-}
-
-.gongboo-nav-menu {
-  position: absolute;
-  top: 44px;
-  left: 0;
-
-  z-index: 10000;
-
-  width: 170px;
-
-  background: white;
-  border: 1px solid #cbd5e1;
-  border-radius: 9px;
-
-  padding: 5px;
-
-  box-shadow: 0 6px 18px rgba(0,0,0,.18);
-}
-
-.gongboo-nav-menu button {
-  width: 100%;
-  height: 38px;
-
-  border: 0;
-  border-radius: 6px;
-
-  background: transparent;
-  color: #102a43;
-
-  padding: 0 10px;
-
-  text-align: left;
-  font-size: 14px;
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-.gongboo-nav-menu button:hover {
-  background: #fff3d6;
-}
+  <button class="retry-btn" id="splashRetry">Retry</button>
 </div>
 
 <!-- ============================================================ -->
@@ -114,36 +47,7 @@
   <!-- ===== BLOCK 04-1: 헤더 ===== -->
   <div class="quiz-header">
     <div class="sat-logo">
-     <div class="gongboo-local-nav">
-
-  <button
-    id="gongbooNavButton"
-    class="gongboo-nav-button"
-    type="button"
-  >
-    <span class="gongboo-nav-label">Bible</span>
-    <span>▾</span>
-  </button>
-
-  <div
-    id="gongbooNavMenu"
-    class="gongboo-nav-menu"
-    hidden
-  >
-    <button type="button" data-nav-target="bible">
-      Bible
-    </button>
-
-    <button type="button" data-nav-target="easy">
-      Easy Learning
-    </button>
-
-    <button type="button" data-nav-target="license">
-      License
-    </button>
-  </div>
-
-</div>
+      <span class="sat-title">Bib | Gen <span id="currentSetTitle">1</span></span>
       <div class="bible-top-control-strip">
         <div class="bible-header-nav" aria-label="Bible reference tools">
           <button type="button" id="bibleExploreToggle" class="quiz-tool-toggle bible-explore-toggle persistent-explore-toggle" aria-label="Open Bible Atlas" title="Bible Atlas" aria-controls="bibleExplorePanel" aria-expanded="false">🌐</button>
@@ -535,85 +439,6 @@
 [data-related-person-id] {
   cursor: pointer;
 } 
-/* ============================================================
-   GONGBOO LOCAL NAVIGATOR
-   ============================================================ */
-
-.gongboo-local-nav {
-  position: relative;
-  display: inline-block;
-}
-
-.gongboo-nav-button {
-  height: 32px;
-  min-width: 138px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  padding: 0 14px;
-
-  background: #ffb020;
-  color: #102a43;
-
-  border: 1.6px solid #ffd166;
-  border-radius: 9px;
-
-  font-size: 14px;
-  font-weight: 850;
-
-  cursor: pointer;
-}
-
-.gongboo-nav-menu {
-  position: absolute;
-  top: 36px;
-  left: 0;
-  z-index: 10000;
-
-  width: 170px;
-
-  padding: 5px;
-
-  background: #ffffff;
-
-  border: 1px solid #cbd5e1;
-  border-radius: 9px;
-
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-}
-
-.gongboo-nav-menu[hidden] {
-  display: none !important;
-}
-
-.gongboo-nav-menu button {
-  width: 100%;
-  height: 30px;
-
-  display: block;
-
-  padding: 0 10px;
-
-  background: transparent;
-  color: #102a43;
-
-  border: 0;
-  border-radius: 6px;
-
-  text-align: left;
-  font-size: 14px;
-  font-weight: 700;
-
-  cursor: pointer;
-}
-
-.gongboo-nav-menu button:hover {
-  background: #fff3d6;
-}
-  
   * {
     margin: 0;
     padding: 0;
@@ -2072,22 +1897,6 @@ html:not(.admin-user) .admin-preview-panel {
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.js"></script> -->
 
 <!-- 2. GitHub main.js 불러오기 + 초기화 -->
-/* ============================================================
-   Initial UI Flash Guard
-   Prevent hidden tools / menus from flashing before JS setup
-   ============================================================ */
-
-html:not(.app-ready) body {
-  visibility: hidden;
-}
-
-html:not(.app-ready) #splashScreen {
-  visibility: visible;
-}
-
-html.app-ready body {
-  visibility: visible;
-}
 <style>
   .bible-people-toggle{display:flex!important;width:auto!important;min-width:56px;padding:0 8px!important;font-size:12px!important;font-weight:800}
   .bible-explore-toggle{display:flex!important;width:auto!important;min-width:52px;padding:0 8px!important;font-size:12px!important;font-weight:800}
