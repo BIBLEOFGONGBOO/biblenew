@@ -4037,27 +4037,20 @@ function attachBibleEnglishEntityLinks_(q) {
     'WEB'
   ).toUpperCase();
 
-var chunkText = '';
+var chunkText =
+  q.raw?.[
+    'CHUNK_' + n + '_EN'
+  ] ||
+  '';
 
-if (lang === 'KO' || lang === 'KO_WEB') {
-
-  chunkText =
-    q.raw?.[
-      'CHUNK_' + n + '_KO'
-    ] ||
-    q.raw?.[
-      'chunk_' + n + '_ko'
-    ] ||
-    '';
-
-} else {
-
-  chunkText =
-    q.raw?.[
-      'CHUNK_' + n + '_EN'
-    ] ||
-    '';
-}
+var chunkKo =
+  q.raw?.[
+    'CHUNK_' + n + '_KO'
+  ] ||
+  q.raw?.[
+    'chunk_' + n + '_ko'
+  ] ||
+  '';
 
             return chunkText
               ? '<div style="padding:6px 0; font-size:15px; line-height:1.8; color:#2d2d2d; border-bottom:1px solid #f0ebe5;">• ' +
