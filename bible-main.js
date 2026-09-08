@@ -2984,33 +2984,26 @@ function enterQuiz(at) {
 }
 
 // SUBBLOCK 0555
+// ============================================================
+// Question Navigation
+// Move exactly one QUESTION at a time
+// ============================================================
+
 function go(d) {
 
-  var currentDate =
-    ANNE_STATE._currentDate;
-
-  var dayQuestions =
-    ANNE_STATE.questions.filter(function(q) {
-      return q.date === currentDate;
-    });
-
-  var dayIndex =
-    ANNE_STATE.index -
-    ANNE_STATE._currentDayStart;
-
-  var newDayIndex =
-    dayIndex + d;
+  var newIndex =
+    ANNE_STATE.index + d;
 
   if (
-    newDayIndex < 0 ||
-    newDayIndex >= dayQuestions.length
+    newIndex < 0 ||
+    newIndex >=
+      ANNE_STATE.questions.length
   ) {
     return;
   }
 
   ANNE_STATE.index =
-    ANNE_STATE._currentDayStart +
-    newDayIndex;
+    newIndex;
 
   syncAnneToggleButtons();
 
