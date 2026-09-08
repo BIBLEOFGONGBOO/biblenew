@@ -2319,17 +2319,19 @@ if (resumeQuick) {
   saveLastSettings();
 
   console.log(
-    '[BIBLE] ✅ setupHome complete'
-  );
-}
+  '[BIBLE] ✅ setupHome complete'
+);
+
 // ============================================================
 // Initial UI Flash Guard Release
-// setupHome 완료 후 실제 화면 표시
+// setupHome이 실제로 끝난 뒤 화면 표시
 // ============================================================
 
 document.documentElement.classList.add(
   'app-ready'
 );
+
+}
 
 // ============================================================
 // BLOCK 0500: bible-navigation.js
