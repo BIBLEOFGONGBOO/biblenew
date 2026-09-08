@@ -5219,13 +5219,13 @@ if (nextBtn) {
 
     setButtonActive(this);
 
-    // PSG ON → 다음 PASSAGE = 다음 장
-    if (ANNE_STATE.annePassageVisible) {
+    // PASSAGE MODE → 다음 장
+    if (!ANNE_STATE.annePassageVisible) {
       await goBiblePassage_(1);
       return;
     }
 
-    // PSG OFF → 다음 문제
+    // QUIZ MODE → 다음 문제
     if (
       ANNE_STATE.index <
       ANNE_STATE.questions.length - 1
