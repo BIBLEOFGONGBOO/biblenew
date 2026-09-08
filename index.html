@@ -2088,6 +2088,22 @@ html:not(.admin-user) .admin-preview-panel {
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-chtml.js"></script> -->
 
 <!-- 2. GitHub main.js 불러오기 + 초기화 -->
+/* ============================================================
+   Initial UI Flash Guard
+   Prevent hidden tools / menus from flashing before JS setup
+   ============================================================ */
+
+html:not(.app-ready) body {
+  visibility: hidden;
+}
+
+html:not(.app-ready) #splashScreen {
+  visibility: visible;
+}
+
+html.app-ready body {
+  visibility: visible;
+}
 <style>
   .bible-people-toggle{display:flex!important;width:auto!important;min-width:56px;padding:0 8px!important;font-size:12px!important;font-weight:800}
   .bible-explore-toggle{display:flex!important;width:auto!important;min-width:52px;padding:0 8px!important;font-size:12px!important;font-weight:800}
