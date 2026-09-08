@@ -3023,7 +3023,9 @@ async function goBiblePassage_(direction) {
   var currentIndex =
     BIBLE_CHAPTER_CATALOG.findIndex(
       function(item) {
-        return String(item.CODE || '') === currentCode;
+        return String(
+          item.CODE || ''
+        ) === currentCode;
       }
     );
 
@@ -3036,13 +3038,16 @@ async function goBiblePassage_(direction) {
 
   if (
     nextIndex < 0 ||
-    nextIndex >= BIBLE_CHAPTER_CATALOG.length
+    nextIndex >=
+      BIBLE_CHAPTER_CATALOG.length
   ) {
     return;
   }
 
   var next =
-    BIBLE_CHAPTER_CATALOG[nextIndex];
+    BIBLE_CHAPTER_CATALOG[
+      nextIndex
+    ];
 
   await window.loadBibleChapter(
     String(next.CODE).startsWith('OT-')
@@ -3053,6 +3058,18 @@ async function goBiblePassage_(direction) {
 
     Number(next.CHAPTER)
   );
+
+  // ANNE PASSAGE MODE 상태 그대로 유지
+  ANNE_STATE.annePassageVisible =
+    false;
+
+  ANNE_STATE.anneQuizVisible =
+    true;
+
+  ANNE_STATE.index =
+    ANNE_STATE._currentDayStart;
+
+  render();
 }
 
 // ============================================================
