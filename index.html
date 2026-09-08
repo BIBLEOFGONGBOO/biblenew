@@ -535,6 +535,10 @@
 [data-related-person-id] {
   cursor: pointer;
 } 
+/* ============================================================
+   GONGBOO LOCAL NAVIGATOR
+   ============================================================ */
+
 .gongboo-local-nav {
   position: relative;
   display: inline-block;
@@ -544,21 +548,21 @@
   height: 32px;
   min-width: 138px;
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 0 14px;
+
   background: #ffb020;
   color: #102a43;
 
   border: 1.6px solid #ffd166;
   border-radius: 9px;
 
-  padding: 0 14px;
-
   font-size: 14px;
   font-weight: 850;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
 
   cursor: pointer;
 }
@@ -567,31 +571,37 @@
   position: absolute;
   top: 36px;
   left: 0;
-
   z-index: 10000;
 
   width: 170px;
 
-  background: white;
+  padding: 5px;
+
+  background: #ffffff;
+
   border: 1px solid #cbd5e1;
   border-radius: 9px;
 
-  padding: 5px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
 
-  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+.gongboo-nav-menu[hidden] {
+  display: none !important;
 }
 
 .gongboo-nav-menu button {
   width: 100%;
   height: 30px;
 
-  border: 0;
-  border-radius: 6px;
+  display: block;
+
+  padding: 0 10px;
 
   background: transparent;
   color: #102a43;
 
-  padding: 0 10px;
+  border: 0;
+  border-radius: 6px;
 
   text-align: left;
   font-size: 14px;
@@ -602,32 +612,6 @@
 
 .gongboo-nav-menu button:hover {
   background: #fff3d6;
-}
-
-.gongboo-nav-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  z-index: 9999;
-  min-width: 150px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 5px;
-  box-shadow: 0 4px 12px rgba(0,0,0,.15);
-}
-
-.gongboo-nav-menu button {
-  width: 100%;
-  border: 0;
-  background: transparent;
-  padding: 8px 10px;
-  text-align: left;
-  cursor: pointer;
-}
-
-.gongboo-nav-menu button:hover {
-  background: #f5f5f5;
 }
   
   * {
