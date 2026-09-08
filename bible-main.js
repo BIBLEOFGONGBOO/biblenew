@@ -4031,15 +4031,33 @@ function attachBibleEnglishEntityLinks_(q) {
         ${
           [1,2,3,4,5].map(function(n) {
 
-            var chunkText =
-              linesData(
-                t,
-                'chunk_' + n
-              )
-              .map(function(x) {
-                return x.text;
-              })
-              .join(' ');
+            var lang =
+  String(
+    $('biblePrimaryTextSelector')?.value ||
+    'WEB'
+  ).toUpperCase();
+
+var chunkText = '';
+
+if (lang === 'KO' || lang === 'KO_WEB') {
+
+  chunkText =
+    q.raw?.[
+      'CHUNK_' + n + '_KO'
+    ] ||
+    q.raw?.[
+      'chunk_' + n + '_ko'
+    ] ||
+    '';
+
+} else {
+
+  chunkText =
+    q.raw?.[
+      'CHUNK_' + n + '_EN'
+    ] ||
+    '';
+}
 
             return chunkText
               ? '<div style="padding:6px 0; font-size:15px; line-height:1.8; color:#2d2d2d; border-bottom:1px solid #f0ebe5;">• ' +
