@@ -36,7 +36,74 @@
   <div class="bar-track"><div class="bar-fill" id="splashBar"></div></div>
   <div class="status-text" id="splashStatus">Loading...</div>
   <div class="error-msg" id="splashError">Load Failed</div>
-  <button class="retry-btn" id="splashRetry">Retry</button>
+  <button class="retry-btn" id="splashRetry">Retry</button>.gongboo-local-nav {
+  position: relative;
+  display: inline-block;
+}
+
+.gongboo-nav-button {
+  height: 40px;
+  min-width: 138px;
+
+  background: #ffb020;
+  color: #102a43;
+
+  border: 1.6px solid #ffd166;
+  border-radius: 9px;
+
+  padding: 0 14px;
+
+  font-size: 14px;
+  font-weight: 850;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  cursor: pointer;
+}
+
+.gongboo-nav-menu {
+  position: absolute;
+  top: 44px;
+  left: 0;
+
+  z-index: 10000;
+
+  width: 170px;
+
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+
+  padding: 5px;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+}
+
+.gongboo-nav-menu button {
+  width: 100%;
+  height: 38px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+  color: #102a43;
+
+  padding: 0 10px;
+
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gongboo-nav-menu button:hover {
+  background: #fff3d6;
+}
 </div>
 
 <!-- ============================================================ -->
@@ -474,14 +541,67 @@
 }
 
 .gongboo-nav-button {
+  height: 40px;
+  min-width: 138px;
+
   background: #ffb020;
   color: #102a43;
+
   border: 1.6px solid #ffd166;
   border-radius: 9px;
-  padding: 0 10px;
-  font-size: 13px;
+
+  padding: 0 14px;
+
+  font-size: 14px;
   font-weight: 850;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
   cursor: pointer;
+}
+
+.gongboo-nav-menu {
+  position: absolute;
+  top: 44px;
+  left: 0;
+
+  z-index: 10000;
+
+  width: 170px;
+
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+
+  padding: 5px;
+
+  box-shadow: 0 6px 18px rgba(0,0,0,.18);
+}
+
+.gongboo-nav-menu button {
+  width: 100%;
+  height: 38px;
+
+  border: 0;
+  border-radius: 6px;
+
+  background: transparent;
+  color: #102a43;
+
+  padding: 0 10px;
+
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.gongboo-nav-menu button:hover {
+  background: #fff3d6;
 }
 
 .gongboo-nav-menu {
