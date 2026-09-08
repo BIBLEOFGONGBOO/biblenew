@@ -1921,16 +1921,31 @@ function setupHome() {
 // Header title
 // ============================================================
 
-  var satTitle =
-    document.querySelector(
-      '.sat-title'
+var satTitle =
+  document.querySelector(
+    '.sat-title'
+  );
+
+if (satTitle) {
+
+  satTitle.innerHTML =
+    '<span id="currentSetTitle">BIBLE</span>';
+
+}
+
+requestAnimationFrame(function() {
+
+  var currentSetTitle =
+    document.getElementById(
+      'currentSetTitle'
     );
 
-  if (satTitle) {
-
-    satTitle.innerHTML =
-      '<span id="currentSetTitle">BIBLE</span>';
+  if (currentSetTitle) {
+    currentSetTitle.textContent =
+      'BIBLE';
   }
+
+});
 
 
 // SUBBLOCK 0415
