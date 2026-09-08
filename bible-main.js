@@ -3179,50 +3179,73 @@ function render() {
     trData(q);
 
 
-  // SUBBLOCK 0604-01
-  // ==========================================================
-  // 하루 전체 PASSAGE
-  // 현재 선택 언어 그대로 생성
-  // ==========================================================
+ // SUBBLOCK 0604-01
+// ==========================================================
+// 하루 전체 PASSAGE
+// 현재 선택 언어 그대로 생성
+// 같은 성경절(sourceCode)은 PASSAGE에서 1번만 표시
+// ==========================================================
 
-  var selectedDiaryLanguages = [
-    $('biblePrimaryTextSelector').value,
-    $('bibleSecondaryTextSelector').value
-  ].filter(function(code, index, arr) {
-    return (
-      code !== 'NONE' &&
-      arr.indexOf(code) === index
-    );
+var selectedDiaryLanguages = [
+  $('biblePrimaryTextSelector').value,
+  $('bibleSecondaryTextSelector').value
+].filter(function(code, index, arr) {
+  return (
+    code !== 'NONE' &&
+    arr.indexOf(code) === index
+  );
+});
+
+var fullDiaryLines = [];
+
+var seenPassageSources = {};
+
+dayQuestions.forEach(function(qq) {
+
+  var sourceCode =
+    String(
+      qq.sourceCode ||
+      qq.SOURCE_CODE ||
+      qq.subject ||
+      qq.SUBJECT ||
+      ''
+    ).trim();
+
+  if (
+    sourceCode &&
+    seenPassageSources[sourceCode]
+  ) {
+    return;
+  }
+
+  if (sourceCode) {
+    seenPassageSources[sourceCode] = true;
+  }
+
+  var diaryTranslation =
+    trData(qq);
+
+  selectedDiaryLanguages.forEach(function(code) {
+
+    var record =
+      languageRecord(
+        diaryTranslation,
+        code
+      );
+
+    if (
+      record &&
+      record.passage
+    ) {
+      fullDiaryLines.push({
+        code: code,
+        text: record.passage
+      });
+    }
+
   });
 
-  var fullDiaryLines = [];
-
-  dayQuestions.forEach(function(qq) {
-
-    var diaryTranslation =
-      trData(qq);
-
-    selectedDiaryLanguages.forEach(function(code) {
-
-      var record =
-        languageRecord(
-          diaryTranslation,
-          code
-        );
-
-      if (
-        record &&
-        record.passage
-      ) {
-        fullDiaryLines.push({
-          code: code,
-          text: record.passage
-        });
-      }
-
-    });
-
-  });
+});
 
 
   // SUBBLOCK 0604-02
