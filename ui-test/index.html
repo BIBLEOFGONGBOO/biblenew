@@ -138,51 +138,94 @@
 
 
         <!-- SUBBLOCK 1500 : LANGUAGE -->
-        <div class="gb-card-wrap">
 
-          <button
-            id="langButton"
-            class="gb-tool-button"
-            type="button"
-            aria-expanded="false"
-          >
-            LANG
-          </button>
+<div class="gb-card-wrap">
 
-          <div
-            id="langCard"
-            class="gb-card"
-            hidden
-          >
-            <div class="gb-card-title">
-              LANGUAGE
-            </div>
+  <button
+    id="langButton"
+    class="gb-tool-button"
+    type="button"
+    aria-expanded="false"
+  >
+    LANG
+  </button>
 
-            <div class="gb-card-row">
-              <span class="gb-card-label">
-                PRIMARY
-              </span>
 
-              <select class="gb-select">
-                <option>English</option>
-                <option>Korean</option>
-                <option>Japanese</option>
-              </select>
-            </div>
+  <div
+    id="langCard"
+    class="gb-card"
+    hidden
+  >
 
-            <div class="gb-card-row">
-              <span class="gb-card-label">
-                SECONDARY
-              </span>
+    <div class="gb-card-title">
+      LANGUAGE
+    </div>
 
-              <select class="gb-select">
-                <option>Korean</option>
-                <option>English</option>
-                <option>Japanese</option>
-              </select>
-            </div>
-          </div>
-        </div>
+
+    <div class="gb-card-row">
+
+      <span class="gb-card-label">
+        PRIMARY
+      </span>
+
+      <select
+        id="biblePrimaryTextSelector"
+        class="gb-select"
+        aria-label="Primary Bible language"
+      >
+
+        <option value="WEB">
+          ENG
+        </option>
+
+        <option value="KJV">
+          KJV
+        </option>
+
+        <option value="KO_WEB">
+          KOR
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div class="gb-card-row">
+
+      <span class="gb-card-label">
+        SECONDARY
+      </span>
+
+      <select
+        id="bibleSecondaryTextSelector"
+        class="gb-select"
+        aria-label="Secondary Bible language"
+      >
+
+        <option value="NONE">
+          NONE
+        </option>
+
+        <option value="WEB">
+          ENG
+        </option>
+
+        <option value="KJV">
+          KJV
+        </option>
+
+        <option value="KO_WEB">
+          KOR
+        </option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+</div>
 
 
         <!-- SUBBLOCK 2000 : PLAY -->
@@ -801,15 +844,9 @@
     aria-pressed="true"
   ></button>
 
-  <select id="biblePrimaryTextSelector">
-    <option value="ENG">ENG</option>
-  </select>
-
-  <select id="bibleSecondaryTextSelector">
-    <option value="KOR">KOR</option>
-  </select>
-
-  <div id="bibleHeaderActionRow"></div>
+  <div
+    id="bibleHeaderActionRow"
+  ></div>
 
 </div>
   
