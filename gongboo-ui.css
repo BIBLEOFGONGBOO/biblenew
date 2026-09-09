@@ -1,0 +1,1283 @@
+/* SUBBLOCK 0000 : ROOT / BASE */
+
+:root{
+  --gb-bg:#eef3f7;
+  --gb-surface:#ffffff;
+  --gb-soft:#f7f9fb;
+
+  --gb-border:#cfd7e1;
+  --gb-text:#111111;
+  --gb-muted:#5e6875;
+
+  --gb-accent:#1769d2;
+  --gb-accent-strong:#1659b8;
+  --gb-accent-soft:#e7f1ff;
+
+  --gb-stop:#e3262e;
+  --gb-stop-dark:#c81f26;
+
+  --gb-current:#f2c744;
+
+  --gb-radius:11px;
+  --gb-card-radius:14px;
+
+  --gb-button-height:40px;
+
+  --gb-shadow:
+    0 10px 28px rgba(27,45,66,.18);
+
+  --gb-content-width:960px;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  min-height:100%;
+}
+
+body{
+  background:var(--gb-bg);
+  color:var(--gb-text);
+
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Helvetica,
+    Arial,
+    sans-serif;
+}
+
+button,
+select,
+input{
+  font:inherit;
+}
+
+button{
+  -webkit-tap-highlight-color:transparent;
+}
+
+
+/* SUBBLOCK 0500 : TOP BAR */
+
+.gb-topbar{
+  position:sticky;
+  top:0;
+  z-index:3000;
+
+  background:
+    rgba(238,243,247,.96);
+
+  border-bottom:
+    1px solid var(--gb-border);
+
+  backdrop-filter:
+    blur(10px);
+}
+
+.gb-topbar-row{
+  width:min(
+    calc(100% - 16px),
+    var(--gb-content-width)
+  );
+
+  margin:0 auto;
+
+  padding:7px 0;
+}
+
+.gb-toolbar{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  gap:7px;
+}
+
+.gb-card-wrap{
+  position:relative;
+}
+
+
+/* SUBBLOCK 1000 : MAIN TOOL BUTTONS */
+
+.gb-tool-button{
+  min-width:68px;
+  height:var(--gb-button-height);
+
+  padding:0 13px;
+
+  border:
+    1px solid var(--gb-border);
+
+  border-radius:
+    var(--gb-radius);
+
+  background:
+    var(--gb-surface);
+
+  color:
+    #20252c;
+
+  font-size:12px;
+  font-weight:900;
+
+  cursor:pointer;
+
+  box-shadow:
+    0 2px 6px rgba(0,0,0,.04);
+}
+
+.gb-system-button{
+  min-width:64px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  gap:5px;
+}
+
+.gb-chevron{
+  font-size:8px;
+  color:var(--gb-muted);
+}
+
+.gb-tool-button-square{
+  min-width:40px;
+  width:40px;
+
+  padding:0;
+}
+
+.gb-tool-button:hover{
+  background:
+    var(--gb-soft);
+}
+
+.gb-tool-button.is-active,
+.gb-tool-button[aria-pressed="true"]{
+  color:
+    var(--gb-accent-strong);
+
+  border-color:
+    var(--gb-accent);
+
+  background:
+    var(--gb-accent-soft);
+
+  box-shadow:
+    0 0 0 1px rgba(23,105,210,.08);
+}
+
+
+/* SUBBLOCK 1500 : COMMON CARD */
+
+.gb-card{
+  position:absolute;
+
+  top:calc(100% + 7px);
+  right:0;
+
+  z-index:4000;
+
+  width:300px;
+
+  padding:10px;
+
+  border:
+    1px solid #d4dbe4;
+
+  border-radius:
+    var(--gb-card-radius);
+
+  background:
+    var(--gb-surface);
+
+  box-shadow:
+    var(--gb-shadow);
+}
+
+.gb-card[hidden]{
+  display:none;
+}
+
+.gb-card-title{
+  padding:
+    2px 4px 7px;
+
+  color:
+    #1c1c1c;
+
+  font-size:12px;
+  font-weight:950;
+
+  letter-spacing:.04em;
+}
+
+
+/* SUBBLOCK 2000 : SYSTEM CARD */
+
+.gb-system-card{
+  left:0;
+  right:auto;
+
+  width:285px;
+
+  padding:8px;
+}
+
+.gb-system-option{
+  width:100%;
+  min-height:38px;
+
+  display:grid;
+
+  grid-template-columns:
+    42px 1fr 16px;
+
+  align-items:center;
+
+  column-gap:16px;
+
+  padding:
+    0 9px;
+
+  border:0;
+  border-radius:8px;
+
+  background:
+    transparent;
+
+  color:
+    var(--gb-text);
+
+  text-align:left;
+
+  cursor:pointer;
+}
+
+.gb-system-option:hover,
+.gb-system-option.is-active{
+  background:
+    var(--gb-accent-soft);
+}
+
+.gb-system-code{
+  color:
+    var(--gb-accent-strong);
+
+  font-size:12px;
+  font-weight:950;
+}
+
+.gb-system-name{
+  font-size:13px;
+  font-weight:800;
+}
+
+.gb-submenu-arrow{
+  color:
+    var(--gb-muted);
+
+  font-size:18px;
+
+  text-align:right;
+}
+
+
+/* SUBBLOCK 2500 : GENERAL CARD ROW */
+
+.gb-card-row{
+  min-height:42px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:8px;
+
+  border-top:
+    1px solid #edf0f3;
+}
+
+.gb-card-label{
+  color:
+    #111111;
+
+  font-size:12px;
+  font-weight:950;
+}
+
+.gb-select{
+  height:31px;
+
+  padding:
+    0 8px;
+
+  border:
+    1px solid #c8d0da;
+
+  border-radius:8px;
+
+  background:
+    #ffffff;
+
+  color:
+    #1a1a1a;
+
+  font-weight:700;
+}
+
+
+/* SUBBLOCK 3000 : SLIDER ROW */
+
+.gb-slider-row{
+  min-height:48px;
+
+  display:grid;
+
+  grid-template-columns:
+    58px 1fr 52px;
+
+  align-items:center;
+
+  gap:10px;
+
+  border-top:
+    1px solid #edf0f3;
+}
+
+.gb-slider-label{
+  color:
+    #111111;
+
+  font-size:12px;
+  font-weight:950;
+}
+
+.gb-slider-value{
+  text-align:right;
+
+  color:
+    #111111;
+
+  font-size:12px;
+  font-weight:950;
+}
+
+.gb-range{
+  width:100%;
+
+  accent-color:
+    #1477f2;
+
+  cursor:pointer;
+}
+
+
+/* SUBBLOCK 3500 : PLAY / MIC ACTIONS */
+
+.gb-four-actions{
+  display:grid;
+
+  grid-template-columns:
+    repeat(4,1fr);
+
+  gap:6px;
+
+  margin-top:8px;
+}
+
+
+/* MIC ROW */
+
+.gb-three-actions{
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:6px;
+
+  margin-top:8px;
+}
+
+
+/* COMPACT BUTTONS */
+
+.gb-compact-toggle,
+.gb-compact-action{
+  min-width:0;
+  height:36px;
+
+  padding:
+    0 6px;
+
+  border:
+    1px solid #cfd7e1;
+
+  border-radius:8px;
+
+  background:
+    #ffffff;
+
+  color:
+    #222222;
+
+  font-size:10.5px;
+  font-weight:950;
+
+  white-space:nowrap;
+
+  cursor:pointer;
+}
+
+.gb-compact-toggle:hover,
+.gb-compact-action:hover{
+  background:
+    #f4f7fa;
+}
+
+
+/* TOGGLE ACTIVE */
+
+.gb-compact-toggle[aria-pressed="true"]{
+  color:#ffffff;
+
+  border-color:
+    var(--gb-accent);
+
+  background:
+    linear-gradient(
+      180deg,
+      #2c7fe7,
+      var(--gb-accent-strong)
+    );
+
+  box-shadow:
+    0 2px 6px rgba(23,105,210,.25);
+}
+
+
+/* START ACTIVE */
+
+#playStartButton[aria-pressed="true"],
+#micStartButton[aria-pressed="true"]{
+  color:#ffffff;
+
+  border-color:
+    #165ab7;
+
+  background:
+    linear-gradient(
+      180deg,
+      #2d72d8,
+      #164fa6
+    );
+
+  box-shadow:
+    0 2px 7px rgba(22,79,166,.28);
+}
+
+
+/* STOP ACTIVE */
+
+#playStopButton[aria-pressed="true"],
+#micStopButton[aria-pressed="true"]{
+  color:#ffffff;
+
+  border-color:
+    var(--gb-stop-dark);
+
+  background:
+    linear-gradient(
+      180deg,
+      #ef3038,
+      var(--gb-stop)
+    );
+
+  box-shadow:
+    0 2px 7px rgba(227,38,46,.28);
+}
+
+
+/* SUBBLOCK 4000 : MODE */
+
+.gb-mode-row{
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:6px;
+}
+
+.gb-mode-button{
+  height:34px;
+
+  border:
+    1px solid var(--gb-border);
+
+  border-radius:8px;
+
+  background:
+    #ffffff;
+
+  color:
+    #222222;
+
+  font-size:11px;
+  font-weight:900;
+
+  cursor:pointer;
+}
+
+.gb-mode-button.is-active{
+  color:
+    var(--gb-accent-strong);
+
+  border-color:
+    var(--gb-accent);
+
+  background:
+    var(--gb-accent-soft);
+}
+
+.gb-mode-button:disabled{
+  color:#a8adb5;
+
+  background:
+    #f0f1f3;
+
+  opacity:.65;
+
+  cursor:not-allowed;
+}
+
+.gb-card-separator{
+  height:1px;
+
+  margin:
+    8px 0;
+
+  background:
+    #e8ecf0;
+}
+
+
+/* SUBBLOCK 4500 : MORE CARD BUTTON GRID */
+
+.gb-more-grid{
+  display:grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0,1fr));
+
+  gap:6px;
+}
+
+
+.gb-more-grid-button{
+  width:100%;
+  min-width:0;
+  height:34px;
+
+  padding:0 4px;
+
+  border:
+    1px solid var(--gb-border);
+
+  border-radius:8px;
+
+  background:
+    #ffffff;
+
+  color:
+    #222222;
+
+  font-size:11px;
+  font-weight:900;
+
+  cursor:pointer;
+}
+
+
+/* STD와 같은 깨끗한 HOVER */
+
+.gb-more-grid-button:hover:not(:disabled){
+  background:
+    #f7f9fb;
+
+  border-color:
+    var(--gb-accent);
+}
+
+
+/* CHUNK ON = LRN과 같은 ACTIVE */
+
+.gb-more-grid-button[aria-pressed="true"]{
+  color:#ffffff;
+
+  border-color:
+    var(--gb-accent);
+
+  background:
+    linear-gradient(
+      180deg,
+      #2d7fe7 0%,
+      #1769d2 100%
+    );
+
+  box-shadow:
+    0 3px 8px rgba(23,105,210,.28);
+}
+
+
+/* PEOPLE / MAP / OPTION = QZ와 같은 DISABLED */
+
+.gb-more-grid-button:disabled{
+  color:#a8adb5;
+
+  background:
+    #f0f1f3;
+
+  opacity:.65;
+
+  cursor:not-allowed;
+}
+
+
+/* SUBBLOCK 5000 : LOGIN */
+
+.gb-login-button{
+  width:100%;
+  height:34px;
+
+  border:
+    1px solid #dde1e6;
+
+  border-radius:8px;
+
+  background:
+    #f0f1f3;
+
+  color:
+    #a4aab2;
+
+  font-size:12px;
+  font-weight:900;
+
+  cursor:not-allowed;
+
+  opacity:.75;
+}
+
+
+/* SUBBLOCK 5500 : CONTENT */
+
+.gb-content{
+  width:min(
+    calc(100% - 24px),
+    var(--gb-content-width)
+  );
+
+  margin:
+    16px auto 90px;
+}
+
+.gb-demo-card{
+  padding:16px;
+
+  border:
+    1px solid var(--gb-border);
+
+  border-radius:14px;
+
+  background:
+    var(--gb-surface);
+}
+
+.gb-demo-label{
+  margin-bottom:10px;
+
+  color:
+    #9198a2;
+
+  font-size:11px;
+  font-weight:900;
+
+  letter-spacing:.08em;
+}
+
+.gb-conversation-turn{
+  padding:
+    12px 14px;
+
+  border:
+    1px solid transparent;
+
+  border-radius:10px;
+
+  cursor:pointer;
+}
+
+.gb-conversation-turn +
+.gb-conversation-turn{
+  margin-top:7px;
+}
+
+.gb-conversation-turn.is-current{
+  border-color:
+    var(--gb-current);
+
+  background:
+    #fffdf6;
+}
+
+.gb-speaker{
+  margin-bottom:4px;
+
+  font-size:12px;
+  font-weight:900;
+}
+
+.gb-text{
+  font-size:16px;
+  line-height:1.5;
+}
+
+
+/* SUBBLOCK 6000 : PREV / NEXT */
+
+.gb-bottom-nav{
+  position:fixed;
+
+  left:50%;
+  bottom:0;
+
+  z-index:2500;
+
+  width:min(
+    calc(100% - 24px),
+    var(--gb-content-width)
+  );
+
+  transform:
+    translateX(-50%);
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:8px;
+
+  padding:
+    8px 0 10px;
+
+  background:
+    linear-gradient(
+      to top,
+      var(--gb-bg) 72%,
+      transparent
+    );
+}
+
+.gb-nav-button{
+  height:40px;
+
+  border:
+    1px solid var(--gb-border);
+
+  border-radius:10px;
+
+  background:
+    #ffffff;
+
+  color:
+    #20252c;
+
+  font-size:12px;
+  font-weight:900;
+
+  cursor:pointer;
+}
+
+
+/* SUBBLOCK 6500 : ACTIVE STATES / BIBLE TOOLS / TOOLTIP */
+/* ACTIVE STATE / BIBLE TOOLS / TOOLTIP */
+
+
+/* =========================================================
+   COMMON ACTIVE STATE
+   선택된 버튼은 모두 진한 파랑 + 흰 글씨
+========================================================= */
+
+.gb-tool-button.is-active,
+.gb-tool-button[aria-pressed="true"],
+.gb-compact-toggle[aria-pressed="true"],
+.gb-compact-action[aria-pressed="true"],
+.gb-chunk-button[aria-pressed="true"],
+.gb-mode-button.is-active{
+
+  color:#ffffff;
+
+  border-color:#1769d2;
+
+  background:
+    linear-gradient(
+      180deg,
+      #2d7fe7 0%,
+      #1769d2 100%
+    );
+
+  box-shadow:
+    0 3px 8px rgba(23,105,210,.28);
+}
+
+
+/* STOP은 위험 동작이므로 RED 유지 */
+
+#playStopButton[aria-pressed="true"],
+#micStopButton[aria-pressed="true"]{
+
+  color:#ffffff;
+
+  border-color:#c81f26;
+
+  background:
+    linear-gradient(
+      180deg,
+      #ef3038 0%,
+      #df2029 100%
+    );
+
+  box-shadow:
+    0 3px 8px rgba(223,32,41,.26);
+}
+
+
+/* =========================================================
+   BIBLE TOOLS
+========================================================= */
+
+.gb-bible-tools{
+
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:6px;
+}
+
+
+.gb-secondary-tool{
+
+  height:34px;
+
+  border:
+    1px solid var(--gb-border);
+
+  border-radius:8px;
+
+  background:#ffffff;
+
+  color:#222222;
+
+  font-size:11px;
+  font-weight:900;
+
+  cursor:pointer;
+}
+
+
+.gb-secondary-tool:not(:disabled):hover{
+
+  background:
+    var(--gb-soft);
+}
+
+
+.gb-secondary-tool:disabled{
+
+  color:#a8adb5;
+
+  border-color:#e0e3e7;
+
+  background:#f0f1f3;
+
+  opacity:.60;
+
+  cursor:not-allowed;
+}
+
+
+/* =========================================================
+   COMMON HOVER TOOLTIP
+========================================================= */
+
+[data-tooltip]{
+
+  position:relative;
+}
+
+
+[data-tooltip]::after{
+
+  content:
+    attr(data-tooltip);
+
+  position:absolute;
+
+  left:50%;
+  bottom:
+    calc(100% + 8px);
+
+  transform:
+    translateX(-50%);
+
+  z-index:9999;
+
+  padding:
+    5px 8px;
+
+  border-radius:6px;
+
+  background:
+    rgba(23,28,35,.94);
+
+  color:#ffffff;
+
+  font-size:10px;
+  font-weight:700;
+
+  line-height:1.2;
+
+  white-space:nowrap;
+
+  pointer-events:none;
+
+  opacity:0;
+
+  visibility:hidden;
+
+  transition:
+    opacity .14s ease,
+    visibility .14s ease;
+}
+
+
+[data-tooltip]::before{
+
+  content:"";
+
+  position:absolute;
+
+  left:50%;
+  bottom:
+    calc(100% + 3px);
+
+  transform:
+    translateX(-50%);
+
+  z-index:9999;
+
+  border-left:
+    5px solid transparent;
+
+  border-right:
+    5px solid transparent;
+
+  border-top:
+    5px solid rgba(23,28,35,.94);
+
+  pointer-events:none;
+
+  opacity:0;
+
+  visibility:hidden;
+
+  transition:
+    opacity .14s ease,
+    visibility .14s ease;
+}
+
+
+[data-tooltip]:hover::after,
+[data-tooltip]:hover::before{
+
+  opacity:1;
+
+  visibility:visible;
+}
+
+
+/* Card 안쪽 버튼 Tooltip은 아래쪽으로 표시 */
+
+.gb-card [data-tooltip]::after{
+
+  top:
+    calc(100% + 7px);
+
+  bottom:auto;
+}
+
+
+.gb-card [data-tooltip]::before{
+
+  top:
+    calc(100% + 2px);
+
+  bottom:auto;
+
+  border-top:0;
+
+  border-bottom:
+    5px solid rgba(23,28,35,.94);
+}
+
+
+/* TOUCH 장치에서는 Hover Tooltip 숨김 */
+/* SUBBLOCK 7000 : TOP TOOLBAR TOOLTIP */
+
+/* TOP TOOLBAR TOOLTIP — show below button */
+
+.gb-toolbar > [data-tooltip]::after,
+.gb-toolbar > .gb-card-wrap > [data-tooltip]::after{
+  top:calc(100% + 8px);
+  bottom:auto;
+}
+
+.gb-toolbar > [data-tooltip]::before,
+.gb-toolbar > .gb-card-wrap > [data-tooltip]::before{
+  top:calc(100% + 3px);
+  bottom:auto;
+
+  border-top:0;
+  border-bottom:
+    5px solid rgba(23,28,35,.94);
+}
+/* SUBBLOCK 7250 : TOUCH TOOLTIP */
+@media (hover:none){
+
+  [data-tooltip]::after,
+  [data-tooltip]::before{
+
+    display:none;
+  }
+}
+/* SUBBLOCK 7500 : MOBILE */
+@media (max-width:600px){
+
+  .gb-topbar-row{
+    width:100%;
+
+    padding:6px;
+  }
+
+  .gb-toolbar{
+    width:100%;
+
+    display:grid;
+
+    grid-template-columns:
+      .82fr .82fr 1fr 1fr .82fr .62fr;
+
+    gap:4px;
+  }
+
+  .gb-tool-button{
+    width:100%;
+    min-width:0;
+
+    height:40px;
+
+    padding:
+      0 4px;
+
+    font-size:11px;
+  }
+
+  .gb-tool-button-square{
+    width:100%;
+  }
+
+  .gb-card-wrap{
+    position:static;
+  }
+
+  .gb-card{
+    position:fixed;
+
+    top:53px;
+    left:7px;
+    right:7px;
+
+    width:auto;
+
+    max-width:355px;
+
+    margin:
+      0 auto;
+  }
+
+  .gb-system-card{
+    max-width:310px;
+
+    margin-left:0;
+  }
+
+  .gb-content{
+    width:
+      calc(100% - 14px);
+
+    margin-top:10px;
+  }
+
+  .gb-demo-card{
+    padding:11px;
+  }
+
+  .gb-conversation-turn{
+    padding:11px;
+  }
+
+  .gb-text{
+    font-size:15px;
+  }
+
+  .gb-bottom-nav{
+    width:
+      calc(100% - 14px);
+  }
+}
+
+
+/* SUBBLOCK 8000 : SMALL MOBILE */
+@media (max-width:340px){
+
+  .gb-toolbar{
+    grid-template-columns:
+      .78fr .78fr 1fr .95fr .78fr .58fr;
+
+    gap:3px;
+  }
+
+  .gb-tool-button{
+    padding:
+      0 2px;
+
+    font-size:10px;
+  }
+
+  .gb-four-actions{
+    gap:3px;
+  }
+
+  .gb-compact-toggle,
+  .gb-compact-action{
+    padding:
+      0 2px;
+
+    font-size:9.5px;
+  }
+
+  .gb-slider-row{
+    grid-template-columns:
+      50px 1fr 46px;
+
+    gap:6px;
+  }
+}
+
+
+
+/* SUBBLOCK 8250 : MIC CARD COMPACT SIZE */
+
+#micCard{
+  width:218px;
+  max-width:calc(100vw - 12px);
+
+  padding:5px 7px;
+
+  font-size:11px;
+}
+
+
+#micCard > .gb-card-title{
+  display:none;
+}
+
+
+#micCard .gb-setting-row{
+  min-height:30px;
+  padding-top:2px;
+  padding-bottom:2px;
+  gap:4px;
+}
+
+
+#micCard button{
+  min-height:28px;
+  height:28px;
+
+  padding:2px 4px;
+
+  font-size:10px;
+}
+
+
+#micCard input[type="range"]{
+  min-width:0;
+  height:20px;
+}
+
+
+#micCard .gb-card-divider{
+  margin-top:2px;
+  margin-bottom:2px;
+}
+
+
+
+/* SUBBLOCK 8500 : MIC SCORE / SPEECH HIGHLIGHT */
+
+.speech-correct{
+  background:#fef08a;
+  color:#111827;
+  box-shadow:
+    inset 0 -3px 0 #facc15;
+  border-radius:3px;
+  padding:1px 1px;
+}
+
+
+#micStopButton{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:6px;
+}
+
+
+.gb-mic-score{
+  font-weight:900;
+  white-space:nowrap;
+}
+/* SUBBLOCK 8275 : PLAY CARD TITLE HIDE / COMPACT */
+
+#playCard > .gb-card-title{
+  display:none;
+}
+
+#playCard{
+  padding-top:6px;
+}
