@@ -1167,17 +1167,18 @@
     class="bible-people-dialog bible-explore-dialog"
     role="dialog"
     aria-modal="true"
+    aria-labelledby="bibleExploreTitle"
   >
 
     <header class="bible-people-head">
 
       <div>
         <span class="bible-people-kicker">
-          BIBLE REFERENCE
+          BIBLE CONTEXT
         </span>
 
-        <h2>
-          Bible Atlas
+        <h2 id="bibleExploreTitle">
+          Atlas &amp; Bible Study
         </h2>
       </div>
 
@@ -1213,6 +1214,7 @@
           type="button"
           id="bibleExploreClose"
           class="bible-people-close"
+          aria-label="Close Bible Atlas"
         >
           ×
         </button>
@@ -1222,10 +1224,11 @@
     </header>
 
 
-    <div
+    <nav
       id="bibleExploreTabs"
       class="bible-explore-tabs"
-    ></div>
+      aria-label="Bible study tools"
+    ></nav>
 
 
     <div
@@ -1242,7 +1245,7 @@
 
   </div>
 
-</section>     
+</section>   
 
       
 <!-- SUBBLOCK 4500 : SCRIPT LOAD / PAGE CLOSE -->
