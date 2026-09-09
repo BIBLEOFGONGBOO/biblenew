@@ -1004,7 +1004,156 @@
 
   </div>
 </div>
-  
+
+<!-- SUBBLOCK 4300 : BIBLE PEOPLE PANEL -->
+
+<section
+  id="biblePeoplePanel"
+  class="bible-people-panel"
+  aria-label="Bible People"
+  hidden
+>
+
+  <div
+    class="bible-people-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="biblePeopleTitle"
+  >
+
+    <header class="bible-people-head">
+
+      <div>
+        <span class="bible-people-kicker">
+          BIBLE REFERENCE
+        </span>
+
+        <h2 id="biblePeopleTitle">
+          Bible People
+        </h2>
+      </div>
+
+      <div class="bible-context-head-actions">
+
+        <button
+          type="button"
+          id="biblePeopleBack"
+          class="bible-context-back"
+          disabled
+        >
+          ← Back
+        </button>
+
+        <button
+          type="button"
+          id="biblePeopleForward"
+          class="bible-context-back"
+          disabled
+        >
+          Forward →
+        </button>
+
+        <button
+          type="button"
+          id="biblePeopleAtlas"
+          class="bible-people-close bible-people-atlas"
+        >
+          🌐
+        </button>
+
+        <button
+          type="button"
+          id="biblePeopleClose"
+          class="bible-people-close"
+        >
+          ×
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <form
+      id="biblePeopleSearchForm"
+      class="bible-people-search"
+      role="search"
+    >
+
+      <label for="biblePeopleSearchInput">
+        Search by name or alias
+      </label>
+
+      <div>
+
+        <input
+          id="biblePeopleSearchInput"
+          type="search"
+          autocomplete="off"
+          placeholder="Aaron, Abraham, David..."
+          required
+        >
+
+        <button type="submit">
+          Search
+        </button>
+
+      </div>
+
+    </form>
+
+
+    <nav
+      id="biblePeopleAlphabet"
+      class="bible-sermon-alphabet"
+      aria-label="Filter Bible people alphabetically"
+    ></nav>
+
+
+    <div
+      id="biblePeopleStatus"
+      class="bible-people-status"
+      aria-live="polite"
+    >
+      Enter a Bible person’s name.
+    </div>
+
+
+    <div
+      class="bible-people-layout bible-explore-layout is-search-browser"
+    >
+
+      <aside
+        id="biblePeopleResults"
+        class="bible-people-results"
+      ></aside>
+
+      <main
+        id="biblePeopleDetail"
+        class="bible-people-detail"
+      >
+
+        <div class="bible-people-empty">
+
+          <strong>
+            Explore people across Scripture
+          </strong>
+
+          <span>
+            Search for a person to view descriptions,
+            references, and relationships.
+          </span>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+</section>
+      
 <!-- SUBBLOCK 4500 : SCRIPT LOAD / PAGE CLOSE -->
 
 <script src="./config.js"></script>
