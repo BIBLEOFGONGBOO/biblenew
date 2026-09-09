@@ -866,6 +866,144 @@
   ></div>
 
 </div>
+
+
+<div
+  id="resultModal"
+  class="modal"
+>
+  <div class="modal-content">
+
+    <h2 style="text-align:center">
+      RESULT
+    </h2>
+
+    <div class="stats">
+
+      <div class="stat-card">
+        <div>CORRECT</div>
+        <div
+          class="stat-value"
+          id="correctCount"
+        >
+          0
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div>ACCURACY</div>
+        <div
+          class="stat-value"
+          id="accuracyRate"
+        >
+          0%
+        </div>
+      </div>
+
+    </div>
+
+    <div id="resultGrid" class="result-grid"></div>
+
+    <div class="button-group">
+
+      <button
+        id="retryAllBtn"
+        class="nav-btn btn-prev"
+      >
+        RETRY
+      </button>
+
+      <button
+        id="reviewWrongBtn"
+        class="nav-btn btn-warning"
+      >
+        REVIEW
+      </button>
+
+      <button
+        id="closeModalBtn"
+        class="nav-btn btn-prev"
+      >
+        CLOSE
+      </button>
+
+    </div>
+
+    <div id="loadNextContainer"></div>
+
+  </div>
+</div>
+
+
+<div
+  id="wrongModal"
+  class="modal"
+>
+  <div
+    class="modal-content"
+    style="max-width:750px"
+  >
+
+    <h2 style="text-align:center">
+      REVIEW
+    </h2>
+
+    <div
+      id="wrongList"
+      class="wrong-list"
+    ></div>
+
+    <div class="button-group">
+
+      <button
+        id="retryWrongFromReviewBtn"
+        class="nav-btn btn-warning"
+      >
+        RETRY WRONG ONLY
+      </button>
+
+      <button
+        id="closeWrongBtn"
+        class="nav-btn btn-prev"
+      >
+        CLOSE
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+
+<div
+  id="progressModal"
+  class="modal"
+  style="display:none"
+>
+  <div class="modal-content">
+
+    <div id="progressModalBody"></div>
+
+    <div class="button-group">
+
+      <button
+        id="progressContinueBtn"
+        class="nav-btn btn-next"
+      >
+        CONTINUE
+      </button>
+
+      <button
+        id="progressCancelBtn"
+        class="nav-btn btn-quit"
+      >
+        START FRESH
+      </button>
+
+    </div>
+
+  </div>
+</div>
   
 <!-- SUBBLOCK 4500 : SCRIPT LOAD / PAGE CLOSE -->
 
