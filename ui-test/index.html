@@ -422,7 +422,7 @@
         </div>
 
 
-        <!-- SUBBLOCK 3000 : MORE / MODE -->
+       <!-- SUBBLOCK 3000 : MORE / MODE -->
 
 <div class="gb-card-wrap">
 
@@ -435,7 +435,6 @@
     ⋯
   </button>
 
-
   <div
     id="moreCard"
     class="gb-card"
@@ -446,53 +445,41 @@
       MODE
     </div>
 
-
     <div
       id="modeButtons"
       class="gb-mode-row"
     >
 
       <button
-        id="modeLearnButton"
         class="gb-mode-button mode-btn mode-learn"
         type="button"
         data-ui-mode="learn"
-        aria-pressed="false"
       >
         LRN
       </button>
 
-
       <button
-        id="modeStudyButton"
-        class="gb-mode-button mode-btn mode-study is-active"
+        class="gb-mode-button mode-btn mode-study"
         type="button"
         data-ui-mode="study"
-        aria-pressed="true"
       >
         STD
       </button>
 
-
       <button
-        id="modeExamButton"
         class="gb-mode-button mode-btn mode-exam"
         type="button"
         data-ui-mode="exam"
-        aria-pressed="false"
       >
         EXM
       </button>
 
     </div>
 
-
     <div class="gb-card-separator"></div>
-
 
     <div class="gb-more-grid">
 
-      <!-- 실제 BIBLE QUIZ TOGGLE -->
       <button
         id="bibleQuizToggle"
         class="gb-more-grid-button"
@@ -502,26 +489,32 @@
         QZ
       </button>
 
-
       <button
-        id="peopleButton"
+        id="biblePeopleToggle"
         class="gb-more-grid-button"
         type="button"
-        disabled
+        aria-expanded="false"
       >
         PEOPLE
       </button>
 
-
       <button
-        id="mapButton"
+        id="bibleExploreToggle"
         class="gb-more-grid-button"
         type="button"
-        disabled
+        aria-expanded="false"
       >
         MAP
       </button>
 
+      <button
+        id="chunkToggle"
+        class="gb-more-grid-button"
+        type="button"
+        aria-pressed="false"
+      >
+        CHUNK
+      </button>
 
       <button
         class="gb-more-grid-button"
@@ -530,16 +523,6 @@
       >
         OPTION
       </button>
-
-
-      <button
-        class="gb-more-grid-button"
-        type="button"
-        disabled
-      >
-        OPTION
-      </button>
-
 
       <button
         class="gb-more-grid-button"
@@ -551,9 +534,7 @@
 
     </div>
 
-
     <div class="gb-card-separator"></div>
-
 
     <button
       class="gb-login-button"
@@ -566,10 +547,6 @@
   </div>
 
 </div>
-
-      </div>
-    </div>
-  </header>
 
 
 
@@ -863,23 +840,10 @@
 <div hidden>
 
   <button
-    id="bibleExploreToggle"
-    type="button"
-  ></button>
-
-
-  <button
-    id="biblePeopleToggle"
-    type="button"
-  ></button>
-
-
-  <button
     id="biblePassageToggle"
     type="button"
     aria-pressed="false"
   ></button>
-
 
   <div
     id="bibleHeaderActionRow"
