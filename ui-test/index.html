@@ -454,19 +454,150 @@
 
 <!-- SUBBLOCK 3500 : CONTENT / CONVERSATION HOST -->
 
+<!-- SUBBLOCK 3500 : BIBLE CONTENT HOST -->
+
 <main class="gb-content">
+
+  <!-- ===================================================== -->
+  <!-- BIBLE HOME / NEW LESSON -->
+  <!-- ===================================================== -->
 
   <section
     id="setupSection"
     class="gb-demo-card"
   >
 
-    <div class="card-new">
-      Loading Conversation Directory...
+    <div class="card card-new">
+
+      <div
+        id="resumeQuickContainer"
+        class="resume-quick"
+        hidden
+      ></div>
+
+
+      <div class="card-icon">
+        📖
+      </div>
+
+
+      <div
+        class="card-title card-title-new"
+      >
+        NEW LESSON
+      </div>
+
+
+      <div class="card-sub">
+        Choose a book, then choose a chapter
+      </div>
+
+
+      <div
+        id="bibleChapterPicker"
+        class="bible-chapter-picker"
+        aria-label="Bible chapters"
+        aria-live="polite"
+        hidden
+      ></div>
+
+
+      <div
+        id="bibleBookPicker"
+        class="bible-book-picker"
+        aria-label="Bible books"
+      ></div>
+
+
+      <div
+        class="input-wrapper bible-legacy-chapter-select"
+        hidden
+      >
+
+        <select
+          id="setSelector"
+        >
+          <option value="1">
+            Loading sets...
+          </option>
+        </select>
+
+      </div>
+
+
+      <div
+        class="input-wrapper"
+        hidden
+      >
+
+        <input
+          type="number"
+          id="startNumber"
+          min="1"
+          placeholder="1-720"
+        >
+
+      </div>
+
+
+      <button
+        class="btn-start"
+        id="startQuizBtn"
+        hidden
+      >
+        ▶ START
+      </button>
+
+
+      <div class="card-hint">
+        Select one of the 66 books.
+      </div>
+
+    </div>
+
+
+    <div
+      class="card card-resume"
+      id="resumeCard"
+      hidden
+    >
+
+      <div class="card-icon">
+        ⏳
+      </div>
+
+      <div class="card-title card-title-resume">
+        RESUME
+      </div>
+
+      <div class="card-sub card-sub-resume">
+        Continue previous session
+      </div>
+
+      <div id="savedBadgeContainer">
+
+        <div class="no-session">
+          No saved session
+          <small>
+            Start a new lesson
+          </small>
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="bottom-hint">
+      Progress is saved automatically
     </div>
 
   </section>
 
+
+  <!-- ===================================================== -->
+  <!-- BIBLE LESSON -->
+  <!-- ===================================================== -->
 
   <section
     id="quizMain"
@@ -475,12 +606,41 @@
   >
 
     <div
+      id="reviewBanner"
+      class="review-banner"
+      style="display:none;"
+    >
+      <span>Review Mode</span>
+
+      <button
+        id="exitReviewBtn"
+        class="exit-review-btn"
+      >
+        EXIT REVIEW
+      </button>
+    </div>
+
+
+    <div
       class="progress-area"
       style="display:none;"
     >
+
+      <div class="progress-bar-container">
+
+        <div
+          class="progress-bar"
+          id="quizProgressBar"
+        ></div>
+
+      </div>
+
+
       <div
-        id="quizProgressBar"
+        class="account-identity"
+        id="accountIdentity"
       ></div>
+
     </div>
 
 
@@ -492,6 +652,49 @@
       <div
         id="questionContainer"
       ></div>
+
+
+      <div
+        id="explanationBox"
+        class="explanation"
+      >
+
+        <div
+          id="explanationText"
+        ></div>
+
+      </div>
+
+
+      <!-- 기존 MAIN 호환용 NAV -->
+      <div hidden>
+
+        <button
+          id="prevBtn"
+          type="button"
+        ></button>
+
+        <button
+          id="skipBtn"
+          type="button"
+        ></button>
+
+        <button
+          id="nextBtn"
+          type="button"
+        ></button>
+
+        <button
+          id="submitBtn"
+          type="button"
+        ></button>
+
+        <button
+          id="quitBtn"
+          type="button"
+        ></button>
+
+      </div>
 
     </div>
 
