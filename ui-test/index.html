@@ -423,137 +423,160 @@
 
 
         <!-- SUBBLOCK 3000 : MORE / MODE -->
-        <div class="gb-card-wrap">
 
-          <button
-            id="moreButton"
-            class="gb-tool-button gb-tool-button-square"
-            type="button"
-            aria-expanded="false"
-          >
-            ⋯
-          </button>
-
-          <div
-            id="moreCard"
-            class="gb-card"
-            hidden
-          >
-            <div class="gb-card-title">
-              MODE
-            </div>
-
-            <div class="gb-mode-row">
+<div class="gb-card-wrap">
 
   <button
-    id="modeLearnButton"
-    class="gb-mode-button"
+    id="moreButton"
+    class="gb-tool-button gb-tool-button-square"
     type="button"
-    data-ui-mode="learn"
+    aria-expanded="false"
   >
-    LRN
+    ⋯
   </button>
 
-  <button
-    id="modeStudyButton"
-    class="gb-mode-button is-active"
-    type="button"
-    data-ui-mode="study"
-  >
-    STD
-  </button>
 
-  <button
-    id="modeExamButton"
-    class="gb-mode-button"
-    type="button"
-    data-ui-mode="exam"
+  <div
+    id="moreCard"
+    class="gb-card"
+    hidden
   >
-    EXM
-  </button>
+
+    <div class="gb-card-title">
+      MODE
+    </div>
+
+
+    <div
+      id="modeButtons"
+      class="gb-mode-row"
+    >
+
+      <button
+        id="modeLearnButton"
+        class="gb-mode-button mode-btn mode-learn"
+        type="button"
+        data-ui-mode="learn"
+        aria-pressed="false"
+      >
+        LRN
+      </button>
+
+
+      <button
+        id="modeStudyButton"
+        class="gb-mode-button mode-btn mode-study is-active"
+        type="button"
+        data-ui-mode="study"
+        aria-pressed="true"
+      >
+        STD
+      </button>
+
+
+      <button
+        id="modeExamButton"
+        class="gb-mode-button mode-btn mode-exam"
+        type="button"
+        data-ui-mode="exam"
+        aria-pressed="false"
+      >
+        EXM
+      </button>
+
+    </div>
+
+
+    <div class="gb-card-separator"></div>
+
+
+    <div class="gb-more-grid">
+
+      <!-- 실제 BIBLE QUIZ TOGGLE -->
+      <button
+        id="bibleQuizToggle"
+        class="gb-more-grid-button"
+        type="button"
+        aria-pressed="true"
+      >
+        QZ
+      </button>
+
+
+      <button
+        id="peopleButton"
+        class="gb-more-grid-button"
+        type="button"
+        disabled
+      >
+        PEOPLE
+      </button>
+
+
+      <button
+        id="mapButton"
+        class="gb-more-grid-button"
+        type="button"
+        disabled
+      >
+        MAP
+      </button>
+
+
+      <button
+        class="gb-more-grid-button"
+        type="button"
+        disabled
+      >
+        OPTION
+      </button>
+
+
+      <button
+        class="gb-more-grid-button"
+        type="button"
+        disabled
+      >
+        OPTION
+      </button>
+
+
+      <button
+        class="gb-more-grid-button"
+        type="button"
+        disabled
+      >
+        OPTION
+      </button>
+
+    </div>
+
+
+    <div class="gb-card-separator"></div>
+
+
+    <button
+      class="gb-login-button"
+      type="button"
+      disabled
+    >
+      LOGIN
+    </button>
+
+  </div>
 
 </div>
-
-            <div class="gb-card-separator"></div>
-
-            <div class="gb-more-grid">
-
-              <button
-  id="quizToggle"
-  class="gb-more-grid-button"
-  type="button"
-  aria-pressed="true"
->
-  QZ
-</button>
-
-              <button
-                id="peopleButton"
-                class="gb-more-grid-button"
-                type="button"
-                disabled
-              >
-                PEOPLE
-              </button>
-
-              <button
-                id="mapButton"
-                class="gb-more-grid-button"
-                type="button"
-                disabled
-              >
-                MAP
-              </button>
-
-              <button
-  class="gb-more-grid-button"
-  type="button"
-  disabled
->
-  OPTION
-</button>
-
-              <button
-                class="gb-more-grid-button"
-                type="button"
-                disabled
-              >
-                OPTION
-              </button>
-
-              <button
-                class="gb-more-grid-button"
-                type="button"
-                disabled
-              >
-                OPTION
-              </button>
-
-            </div>
-
-            <div class="gb-card-separator"></div>
-
-            <button
-              class="gb-login-button"
-              type="button"
-              disabled
-            >
-              LOGIN
-            </button>
-
-          </div>
-        </div>
 
       </div>
     </div>
   </header>
 
 
-<!-- SUBBLOCK 3500 : CONTENT / CONVERSATION HOST -->
 
 <!-- SUBBLOCK 3500 : BIBLE CONTENT HOST -->
 
 <main class="gb-content">
+
 
   <!-- ===================================================== -->
   <!-- BIBLE HOME / NEW LESSON -->
@@ -578,9 +601,7 @@
       </div>
 
 
-      <div
-        class="card-title card-title-new"
-      >
+      <div class="card-title card-title-new">
         NEW LESSON
       </div>
 
@@ -611,12 +632,12 @@
         hidden
       >
 
-        <select
-          id="setSelector"
-        >
+        <select id="setSelector">
+
           <option value="1">
             Loading sets...
           </option>
+
         </select>
 
       </div>
@@ -663,21 +684,27 @@
         ⏳
       </div>
 
+
       <div class="card-title card-title-resume">
         RESUME
       </div>
+
 
       <div class="card-sub card-sub-resume">
         Continue previous session
       </div>
 
+
       <div id="savedBadgeContainer">
 
         <div class="no-session">
+
           No saved session
+
           <small>
             Start a new lesson
           </small>
+
         </div>
 
       </div>
@@ -690,6 +717,7 @@
     </div>
 
   </section>
+
 
 
   <!-- ===================================================== -->
@@ -707,7 +735,10 @@
       class="review-banner"
       style="display:none;"
     >
-      <span>Review Mode</span>
+
+      <span>
+        Review Mode
+      </span>
 
       <button
         id="exitReviewBtn"
@@ -715,6 +746,7 @@
       >
         EXIT REVIEW
       </button>
+
     </div>
 
 
@@ -746,9 +778,7 @@
       style="display:none;"
     >
 
-      <div
-        id="questionContainer"
-      ></div>
+      <div id="questionContainer"></div>
 
 
       <div
@@ -756,14 +786,13 @@
         class="explanation"
       >
 
-        <div
-          id="explanationText"
-        ></div>
+        <div id="explanationText"></div>
 
       </div>
 
 
-      <!-- 기존 MAIN 호환용 NAV -->
+      <!-- 기존 MAIN NAV 호환 -->
+
       <div hidden>
 
         <button
@@ -800,28 +829,34 @@
 </main>
 
 
+
 <!-- SUBBLOCK 4000 : PREV / NEXT -->
-  <footer class="gb-bottom-nav">
 
-    <button
-      id="prevButton"
-      class="gb-nav-button"
-      type="button"
-    >
-      ◀ PREV
-    </button>
+<footer class="gb-bottom-nav">
 
-    <button
-      id="nextButton"
-      class="gb-nav-button"
-      type="button"
-    >
-      NEXT ▶
-    </button>
+  <button
+    id="prevButton"
+    class="gb-nav-button"
+    type="button"
+  >
+    ◀ PREV
+  </button>
 
-  </footer>
+
+  <button
+    id="nextButton"
+    class="gb-nav-button"
+    type="button"
+  >
+    NEXT ▶
+  </button>
+
+</footer>
+
 
 </div>
+
+
 
 <!-- SUBBLOCK 4250 : LEGACY MAIN COMPATIBILITY -->
 
@@ -832,10 +867,12 @@
     type="button"
   ></button>
 
+
   <button
     id="biblePeopleToggle"
     type="button"
   ></button>
+
 
   <button
     id="biblePassageToggle"
@@ -843,11 +880,6 @@
     aria-pressed="false"
   ></button>
 
-  <button
-    id="bibleQuizToggle"
-    type="button"
-    aria-pressed="true"
-  ></button>
 
   <div
     id="bibleHeaderActionRow"
