@@ -1158,98 +1158,272 @@
 
 </section>
 
- <!-- SUBBLOCK 4400 : BIBLE ATLAS / MAP -->
+ <!-- SUBBLOCK 4400 : BIBLE ATLAS / JOURNEYS / TIMELINE -->
 
-<section
-  id="bibleExplorePanel"
-  class="bible-people-panel bible-explore-panel"
-  aria-label="Bible Atlas"
-  hidden
->
-
-  <div
-    class="bible-people-dialog bible-explore-dialog"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="bibleExploreTitle"
-  >
+<section id="bibleExplorePanel" class="bible-people-panel bible-explore-panel" aria-label="Bible Atlas" hidden>
+  <div class="bible-people-dialog bible-explore-dialog" role="dialog" aria-modal="true" aria-labelledby="bibleExploreTitle">
 
     <header class="bible-people-head">
-
       <div>
-        <span class="bible-people-kicker">
-          BIBLE CONTEXT
-        </span>
-
-        <h2 id="bibleExploreTitle">
-          Atlas &amp; Bible Study
-        </h2>
+        <span class="bible-people-kicker">BIBLE CONTEXT</span>
+        <h2 id="bibleExploreTitle">Atlas &amp; Bible Study</h2>
       </div>
 
       <div class="bible-context-head-actions">
-
-        <button
-          type="button"
-          id="bibleExploreBack"
-          class="bible-context-back"
-          disabled
-        >
-          ← Back
+        <button type="button" id="bibleExploreBack" class="bible-context-back" disabled>← Back</button>
+        <button type="button" id="bibleExploreForward" class="bible-context-back" disabled>Forward →</button>
+        <button type="button" id="bibleExplorePeople" class="bible-context-back bible-people-shortcut" aria-label="Open Bible People" title="Open Bible People — search people, relationships, places, events, and Scripture">
+          <span class="header-person-icon" aria-hidden="true"></span>
         </button>
+        <button type="button" id="bibleExploreClose" class="bible-people-close" aria-label="Close Bible Atlas">&times;</button>
+      </div>
+    </header>
 
-        <button
-          type="button"
-          id="bibleExploreForward"
-          class="bible-context-back"
-          disabled
-        >
-          Forward →
-        </button>
+    <nav class="bible-explore-tabs" aria-label="Bible context sections">
+      <button type="button" class="is-active" data-bible-explore-tab="places">Places</button>
+      <button type="button" data-bible-explore-tab="journeys">Journeys</button>
+      <button type="button" data-bible-explore-tab="timeline">Timeline</button>
+      <button type="button" data-bible-explore-tab="patristic">Early Church</button>
+      <button type="button" data-bible-explore-tab="knowledge">Study</button>
+      <button type="button" data-bible-explore-tab="library">Library</button>
+      <button type="button" data-bible-explore-tab="museum">Museum</button>
+    </nav>
 
-        <button
-          type="button"
-          id="bibleExplorePeople"
-          class="bible-people-close bible-people-atlas"
-          aria-label="Open Bible People"
-          title="Bible People"
-        >
-          👥
-        </button>
+    <div id="bibleExploreStatus" class="bible-people-status" aria-live="polite">
+      Loading Bible context data...
+    </div>
 
-        <button
-          type="button"
-          id="bibleExploreClose"
-          class="bible-people-close"
-          aria-label="Close Bible Atlas"
-        >
-          &times;
-        </button>
+
+    <section class="bible-explore-view is-active" data-bible-explore-view="places">
+      <div class="bible-explore-toolbar">
+        <input id="biblePlaceSearch" type="search" autocomplete="off" placeholder="Search Jerusalem, Bethlehem, Jordan...">
+      </div>
+
+      <nav id="biblePlaceAlphabet" class="bible-sermon-alphabet" aria-label="Filter places alphabetically"></nav>
+
+      <div class="bible-people-layout bible-explore-layout">
+        <aside id="biblePlaceResults" class="bible-people-results" aria-label="Place results"></aside>
+        <main id="biblePlaceDetail" class="bible-people-detail"></main>
+      </div>
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="journeys">
+      <div class="bible-explore-toolbar">
+        <input id="bibleJourneySearch" type="search" autocomplete="off" placeholder="Search a journey...">
+        <select id="bibleJourneySelector" aria-label="Select a journey" hidden></select>
+      </div>
+
+      <nav id="bibleJourneyAlphabet" class="bible-sermon-alphabet" aria-label="Filter journeys alphabetically"></nav>
+
+      <div class="bible-people-layout bible-explore-layout is-search-browser">
+        <aside id="bibleJourneyResults" class="bible-people-results" aria-label="Journey results"></aside>
+        <main id="bibleJourneyOutput" class="bible-people-detail"></main>
+      </div>
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="timeline">
+      <div class="bible-explore-toolbar">
+        <input id="bibleTimelineSearch" type="search" autocomplete="off" placeholder="Search a Bible book or timeline...">
+        <select id="bibleTimelineSelector" aria-label="Select a Bible book" hidden></select>
+        <select id="bibleTimelineEventSelector" aria-label="Select an event"></select>
+      </div>
+
+      <nav id="bibleTimelineAlphabet" class="bible-sermon-alphabet" aria-label="Filter timelines alphabetically"></nav>
+
+      <div class="bible-people-layout bible-explore-layout is-search-browser">
+        <aside id="bibleTimelineResults" class="bible-people-results" aria-label="Timeline results"></aside>
+        <main id="bibleTimelineOutput" class="bible-people-detail"></main>
+      </div>
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="patristic">
+      <div class="bible-explore-toolbar">
+        <input id="biblePatristicSearch" type="search" autocomplete="off" placeholder="Search work, author, or year...">
+      </div>
+
+      <nav id="biblePatristicAlphabet" class="bible-sermon-alphabet" aria-label="Filter Early Church works alphabetically"></nav>
+
+      <div class="bible-people-layout bible-explore-layout">
+        <aside id="biblePatristicResults" class="bible-people-results" aria-label="Early Church works"></aside>
+        <main id="biblePatristicDetail" class="bible-people-detail"></main>
+      </div>
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="knowledge">
+
+      <nav class="bible-knowledge-sections" aria-label="Bible study sections">
+        <button type="button" class="is-active" data-knowledge-section="entities">Verse Topics</button>
+        <button type="button" data-knowledge-section="words">Words</button>
+        <button type="button" data-knowledge-section="dictionary">Dictionary</button>
+        <button type="button" data-knowledge-section="topics">Topics</button>
+        <button type="button" data-knowledge-section="books">Books</button>
+      </nav>
+
+
+      <section class="bible-knowledge-view is-active" data-knowledge-view="entities">
+        <div class="bible-explore-toolbar">
+          <input id="bibleKnowledgeEntitySearch" type="search" autocomplete="off" placeholder="Search key terms, plants, animals, objects...">
+        </div>
+
+        <nav id="bibleEntitiesAlphabet" class="bible-sermon-alphabet" aria-label="Filter verse topics alphabetically"></nav>
+
+        <div class="bible-people-layout bible-explore-layout">
+          <aside id="bibleKnowledgeEntityResults" class="bible-people-results" aria-label="Verse topic results"></aside>
+          <main id="bibleKnowledgeEntityDetail" class="bible-people-detail"></main>
+        </div>
+      </section>
+
+
+      <section class="bible-knowledge-view" data-knowledge-view="words">
+        <div class="bible-explore-toolbar">
+          <input id="bibleWordSearch" type="search" autocomplete="off" placeholder="Search an English Bible word...">
+        </div>
+
+        <nav id="bibleWordAlphabet" class="bible-sermon-alphabet" aria-label="Filter words alphabetically"></nav>
+
+        <div class="bible-people-layout bible-explore-layout">
+          <aside id="bibleWordResults" class="bible-people-results" aria-label="Word results"></aside>
+          <main id="bibleWordDetail" class="bible-people-detail"></main>
+        </div>
+      </section>
+
+
+      <section class="bible-knowledge-view" data-knowledge-view="dictionary">
+        <div class="bible-explore-toolbar">
+          <input id="bibleDictionarySearch" type="search" autocomplete="off" placeholder="Search the Bible dictionary...">
+        </div>
+
+        <nav id="bibleDictionaryAlphabet" class="bible-sermon-alphabet" aria-label="Filter dictionary entries alphabetically"></nav>
+
+        <div class="bible-people-layout bible-explore-layout">
+          <aside id="bibleDictionaryResults" class="bible-people-results" aria-label="Dictionary results"></aside>
+          <main id="bibleDictionaryDetail" class="bible-people-detail"></main>
+        </div>
+      </section>
+
+
+      <section class="bible-knowledge-view" data-knowledge-view="topics">
+        <div class="bible-explore-toolbar">
+          <input id="bibleTopicSearch" type="search" autocomplete="off" placeholder="Search a Bible topic...">
+        </div>
+
+        <nav id="bibleTopicAlphabet" class="bible-sermon-alphabet" aria-label="Filter topics alphabetically"></nav>
+
+        <div class="bible-people-layout bible-explore-layout">
+          <aside id="bibleTopicResults" class="bible-people-results" aria-label="Topic results"></aside>
+          <main id="bibleTopicDetail" class="bible-people-detail"></main>
+        </div>
+      </section>
+
+
+      <section class="bible-knowledge-view" data-knowledge-view="books">
+        <div class="bible-explore-toolbar">
+          <input id="bibleBookSearch" type="search" autocomplete="off" placeholder="Search a Bible book...">
+        </div>
+
+        <nav id="bibleBookAlphabet" class="bible-sermon-alphabet" aria-label="Filter Bible books alphabetically"></nav>
+
+        <div class="bible-people-layout bible-explore-layout">
+          <aside id="bibleBookResults" class="bible-people-results" aria-label="Bible book results"></aside>
+          <main id="bibleBookDetail" class="bible-people-detail"></main>
+        </div>
+      </section>
+
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="library">
+
+      <nav class="bible-knowledge-sections" aria-label="Bible library sections">
+        <button type="button" class="is-active" data-library-section="verse">Commentary</button>
+        <button type="button" data-library-section="church-father-quotes">Church Fathers</button>
+        <button type="button" data-library-section="reference">Dictionaries</button>
+        <button type="button" data-library-section="sermon">Sermons</button>
+        <button type="button" data-library-section="hymn">Hymns</button>
+        <button type="button" data-library-section="historical-work">Historical Works</button>
+      </nav>
+
+      <div class="bible-explore-toolbar">
+        <input id="bibleLibrarySearch" type="search" autocomplete="off" placeholder="Search titles, preachers, Scripture, language, or date...">
+
+        <select id="bibleSermonSearchBy" aria-label="Search sermons by" hidden>
+          <option value="title">Title</option>
+          <option value="author">Author</option>
+        </select>
+
+        <select id="bibleSermonSource" aria-label="Filter sermons by collection" hidden>
+          <option value="">All collections</option>
+        </select>
+      </div>
+
+      <nav id="bibleSermonAlphabet" class="bible-sermon-alphabet" aria-label="Filter sermons alphabetically" hidden></nav>
+      <nav id="bibleLibraryAlphabet" class="bible-sermon-alphabet" aria-label="Filter library sources alphabetically"></nav>
+
+      <div class="bible-people-layout bible-explore-layout">
+        <aside id="bibleLibraryResults" class="bible-people-results" aria-label="Library sources"></aside>
+        <main id="bibleLibraryDetail" class="bible-people-detail"></main>
+      </div>
+
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="museum">
+
+      <div class="bible-explore-toolbar bible-museum-toolbar">
+
+        <input id="bibleMuseumSearch" type="search" autocomplete="off" placeholder="Search verified Met images…">
+
+        <select id="bibleMuseumEra" aria-label="Filter museum by Bible era">
+          <option value="">All eras</option>
+          <option>Patriarchal era</option>
+          <option>Exodus and Judges</option>
+          <option>United and divided monarchy</option>
+          <option>Exile and Persian return</option>
+          <option>Hellenistic era</option>
+          <option>New Testament Roman era</option>
+        </select>
+
+        <select id="bibleMuseumRegion" aria-label="Filter museum by region">
+          <option value="">All regions</option>
+          <option>Egypt</option>
+          <option>Levant and Canaan</option>
+          <option>Mesopotamia</option>
+          <option>Persia</option>
+          <option>Greek world</option>
+          <option>Roman world</option>
+        </select>
+
+        <select id="bibleMuseumTopic" aria-label="Filter museum by topic">
+          <option value="">All topics</option>
+          <option>Clothing and textiles</option>
+          <option>Homes and daily life</option>
+          <option>Food and agriculture</option>
+          <option>Cities and architecture</option>
+          <option>Military and politics</option>
+          <option>Religion and ritual</option>
+          <option>Economy and work</option>
+          <option>Writing and language</option>
+          <option>Environment and animals</option>
+        </select>
 
       </div>
 
-    </header>
+      <nav id="bibleMuseumLetters" class="bible-museum-letters" aria-label="Browse museum titles by first letter"></nav>
 
+      <div id="bibleMuseumPager" class="bible-sermon-scroll-note" aria-live="polite"></div>
 
-    <div
-      id="bibleExploreTabs"
-      class="bible-explore-tabs"
-    ></div>
+      <div class="bible-people-layout bible-explore-layout">
+        <aside id="bibleMuseumResults" class="bible-people-results" aria-label="Met Museum artwork results"></aside>
+        <main id="bibleMuseumDetail" class="bible-people-detail"></main>
+      </div>
 
-
-    <div
-      id="bibleExploreStatus"
-      class="bible-people-status"
-      aria-live="polite"
-    ></div>
-
-
-    <div
-      id="bibleExploreContent"
-      class="bible-explore-content"
-    ></div>
+    </section>
 
   </div>
-
 </section>
       
 <!-- SUBBLOCK 4500 : SCRIPT LOAD / PAGE CLOSE -->
