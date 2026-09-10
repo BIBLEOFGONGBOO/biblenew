@@ -7153,7 +7153,7 @@ function installBibleMicButton() {
   startBtn.onclick =
     function() {
 
-      turnBibleMicOn();
+      turnAnneMicOn();
 
       startBtn.setAttribute(
         'aria-pressed',
@@ -7174,7 +7174,7 @@ function installBibleMicButton() {
     stopBtn.onclick =
       function() {
 
-        turnBibleMicOff();
+        turnAnneMicOff();
 
         startBtn.setAttribute(
           'aria-pressed',
