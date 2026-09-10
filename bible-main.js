@@ -7104,7 +7104,15 @@ function turnAnneMicOff() {
 }
 
 
+// SUBBLOCK 1113-05
+// ============================================================
+// MIC 전역 상태
+// ============================================================
 
+var _bibleMicInstalled = false;
+var _bibleMicMoving = false;
+var _bibleMicRestartTimer = null;
+var _bibleMicRecognizeTimer = null;
 
 // SUBBLOCK 1114
 // ============================================================
