@@ -416,73 +416,90 @@ if(playStopButton){
 
   /* SUBBLOCK 2500 : MIC START / STOP */
 
-  var micStartButton =
-    document.getElementById(
-      'micStartButton'
-    );
+var micStartButton =
+  document.getElementById(
+    'micStartButton'
+  );
 
-  var micStopButton =
-    document.getElementById(
-      'micStopButton'
-    );
+var micStopButton =
+  document.getElementById(
+    'micStopButton'
+  );
 
 
-  function setMicState(
-    running
-  ){
-
-    if(micStartButton){
-
-      micStartButton.setAttribute(
-        'aria-pressed',
-        running
-          ? 'true'
-          : 'false'
-      );
-    }
-
-    if(micStopButton){
-
-      micStopButton.setAttribute(
-        'aria-pressed',
-        running
-          ? 'false'
-          : 'true'
-      );
-    }
-  }
-
+function setMicState(
+  running
+){
 
   if(micStartButton){
 
-    micStartButton.addEventListener(
-
-      'click',
-
-      function(){
-
-        setMicState(
-          true
-        );
-      }
+    micStartButton.setAttribute(
+      'aria-pressed',
+      running
+        ? 'true'
+        : 'false'
     );
   }
 
 
   if(micStopButton){
 
-    micStopButton.addEventListener(
-
-      'click',
-
-      function(){
-
-        setMicState(
-          false
-        );
-      }
+    micStopButton.setAttribute(
+      'aria-pressed',
+      running
+        ? 'false'
+        : 'true'
     );
   }
+}
+
+
+if(micStartButton){
+
+  micStartButton.addEventListener(
+    'click',
+    function(){
+
+      setMicState(
+        true
+      );
+
+
+      if(
+        typeof turnBibleMicOn ===
+        'function'
+      ){
+
+        turnBibleMicOn();
+      }
+
+    }
+  );
+}
+
+
+if(micStopButton){
+
+  micStopButton.addEventListener(
+    'click',
+    function(){
+
+      if(
+        typeof turnBibleMicOff ===
+        'function'
+      ){
+
+        turnBibleMicOff();
+      }
+
+
+      setMicState(
+        false
+      );
+
+    }
+  );
+}
 
 
 /* SUBBLOCK 3000 : SPEED */
