@@ -7106,68 +7106,97 @@ function turnAnneMicOff() {
 
 // SUBBLOCK 1114
 // ============================================================
-// MIC 버튼 설치
-//
-// licenseSpeech가 버튼을 나중에 생성하므로
-// 버튼이 나타날 때 자동으로 바인딩
+// MIC 버튼 바인딩
+// 새 템플릿 MIC START / STOP 연결
 // ============================================================
 
-function installAnneMicButton() {
+function installBibleMicButton() {
 
-  var btn =
+  var startBtn =
     document.getElementById(
-      'anneMicButton'
+      'micStartButton'
+    );
+
+  var stopBtn =
+    document.getElementById(
+      'micStopButton'
     );
 
 
-  if (!btn) {
+  if (!startBtn) {
     return false;
   }
 
 
   if (
-    btn.dataset.micBound ===
+    startBtn.dataset.bibleMicBound ===
     '1'
   ) {
-
     return true;
   }
 
 
-  btn.dataset.micBound =
+  startBtn.dataset.bibleMicBound =
     '1';
 
 
-  btn.setAttribute(
-    'aria-pressed',
-    'false'
-  );
-
-
-  btn.onclick =
+  startBtn.onclick =
     function() {
 
-      if (
-        ANNE_STATE.micMode
-      ) {
+      turnBibleMicOn();
 
-        turnAnneMicOff();
+      startBtn.setAttribute(
+        'aria-pressed',
+        'true'
+      );
 
-      } else {
-
-        turnAnneMicOn();
-
+      if (stopBtn) {
+        stopBtn.setAttribute(
+          'aria-pressed',
+          'false'
+        );
       }
-
     };
 
 
-  _anneMicInstalled =
+  if (stopBtn) {
+
+    stopBtn.onclick =
+      function() {
+
+        turnBibleMicOff();
+
+        startBtn.setAttribute(
+          'aria-pressed',
+          'false'
+        );
+
+        stopBtn.setAttribute(
+          'aria-pressed',
+          'true'
+        );
+
+        setTimeout(
+          function() {
+
+            stopBtn.setAttribute(
+              'aria-pressed',
+              'false'
+            );
+
+          },
+          250
+        );
+      };
+  }
+
+
+  _bibleMicInstalled =
     true;
 
 
   console.log(
-    '[MIC] ✅ 마이크 버튼 설치 완료'
+    '[BIBLE MIC] ✅ TEMPLATE 연결 완료'
   );
 
 
