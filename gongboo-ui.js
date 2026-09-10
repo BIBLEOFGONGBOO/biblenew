@@ -464,15 +464,6 @@ if(micStartButton){
         true
       );
 
-
-      if(
-        typeof turnBibleMicOn ===
-        'function'
-      ){
-
-        turnBibleMicOn();
-      }
-
     }
   );
 }
@@ -483,16 +474,6 @@ if(micStopButton){
   micStopButton.addEventListener(
     'click',
     function(){
-
-      if(
-        typeof turnBibleMicOff ===
-        'function'
-      ){
-
-        turnBibleMicOff();
-      }
-
-
       setMicState(
         false
       );
@@ -1553,6 +1534,10 @@ window.addEventListener(
 
           bridge.id =
             'anneMicPanel';
+
+
+          bridge.dataset.templateBridge =
+            '1';
 
 
           bridge.style.cssText = `

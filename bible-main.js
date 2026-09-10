@@ -5454,6 +5454,11 @@ function getAnneMicLanguage() {
       ? selector.value
       : 'ENG';
 
+  code =
+    String(code || 'MODERN')
+      .trim()
+      .toUpperCase();
+
   if (code === 'KOR') {
     return {
       code: 'KOR',
@@ -5469,7 +5474,10 @@ function getAnneMicLanguage() {
   }
 
   return {
-    code: 'ENG',
+    code:
+      code === 'KJV'
+        ? 'KJV'
+        : 'MODERN',
     recognition: 'en-US'
   };
 }
@@ -5605,6 +5613,203 @@ function getCurrentMicSentence() {
     passageMode: false
   };
 }
+
+
+// SUBBLOCK 1103-2
+// ============================================================
+// BIBLE MANUAL MIC SYNC
+// 문장 클릭 → 노란 테두리 이동
+// MIC ON이면 선택한 문장부터 Recognition 재시작
+// CONVERSATION의 검증된 수동 동기화 방식을 BIBLE DOM에 적용
+// ============================================================
+
+document.addEventListener(
+  'click',
+  function(event) {
+
+    var textEl =
+      event.target.closest(
+        '.anne-full-diary .language-line, ' +
+        '.anne-passage .language-line'
+      );
+
+
+    if (!textEl) {
+      return;
+    }
+
+
+    var langInfo =
+      getAnneMicLanguage();
+
+
+    if (
+      textEl.getAttribute(
+        'data-language'
+      ) !== langInfo.code
+    ) {
+      return;
+    }
+
+
+    var lines =
+      Array.from(
+        document.querySelectorAll(
+          '.anne-full-diary ' +
+          '.language-line[data-language="' +
+          langInfo.code +
+          '"]'
+        )
+      ).filter(
+        function(el) {
+
+          var rect =
+            el.getBoundingClientRect();
+
+          return (
+            rect.width > 0 &&
+            rect.height > 0
+          );
+        }
+      );
+
+
+    if (!lines.length) {
+
+      lines =
+        Array.from(
+          document.querySelectorAll(
+            '.anne-passage ' +
+            '.language-line[data-language="' +
+            langInfo.code +
+            '"]'
+          )
+        ).filter(
+          function(el) {
+
+            var rect =
+              el.getBoundingClientRect();
+
+            return (
+              rect.width > 0 &&
+              rect.height > 0
+            );
+          }
+        );
+    }
+
+
+    var index =
+      lines.indexOf(
+        textEl
+      );
+
+
+    if (index < 0) {
+      return;
+    }
+
+
+    _anneMicPassageIndex =
+      index;
+
+
+    lines.forEach(
+      function(el, i) {
+
+        if (i === index) {
+
+          el.style.setProperty(
+            'outline',
+            '3px solid #facc15',
+            'important'
+          );
+
+          el.style.setProperty(
+            'outline-offset',
+            '2px',
+            'important'
+          );
+
+          el.style.setProperty(
+            'background',
+            '#fffdf2',
+            'important'
+          );
+
+        } else {
+
+          el.style.removeProperty(
+            'outline'
+          );
+
+          el.style.removeProperty(
+            'outline-offset'
+          );
+
+          el.style.removeProperty(
+            'background'
+          );
+        }
+      }
+    );
+
+
+    console.log(
+      '[BIBLE MIC MANUAL SYNC] →',
+      index
+    );
+
+
+    if (
+      !ANNE_STATE.micMode
+    ) {
+      return;
+    }
+
+
+    _anneMicLastTranscript =
+      '';
+
+
+    if (
+      _anneMicRecognizeTimer
+    ) {
+
+      clearTimeout(
+        _anneMicRecognizeTimer
+      );
+
+      _anneMicRecognizeTimer =
+        null;
+    }
+
+
+    _anneMicMoving =
+      true;
+
+
+    stopAnneRecognition();
+
+
+    setTimeout(
+      function() {
+
+        _anneMicMoving =
+          false;
+
+
+        if (
+          ANNE_STATE.micMode
+        ) {
+
+          startAnneRecognition();
+        }
+      },
+      180
+    );
+  }
+);
 
 
 // SUBBLOCK 1104
@@ -6768,10 +6973,23 @@ function startAnneRecognition() {
       );
 
 
-      showAnneMicScore(
-        score,
-        passed
-      );
+      if (
+        typeof window.showAnneMicScore ===
+        'function'
+      ) {
+
+        window.showAnneMicScore(
+          score,
+          passed
+        );
+
+      } else {
+
+        showAnneMicScore(
+          score,
+          passed
+        );
+      }
 
 
       highlightAnneMicWords(
@@ -6985,7 +7203,18 @@ function turnAnneMicOn() {
 
   ANNE_STATE.micMode =
     true;
-  _anneMicPassageIndex = 0;
+
+
+  if (
+    !Number.isInteger(
+      _anneMicPassageIndex
+    ) ||
+    _anneMicPassageIndex < 0
+  ) {
+
+    _anneMicPassageIndex =
+      0;
+  }
 
 
   btn.classList.add(
@@ -7008,14 +7237,33 @@ function turnAnneMicOn() {
 
 
   var panel =
-    ensureAnneMicPanel();
+    typeof window.ensureAnneMicPanel ===
+      'function'
+      ? window.ensureAnneMicPanel()
+      : ensureAnneMicPanel();
 
 
-  positionAnneMicPanel();
+  if (
+    typeof window.positionAnneMicPanel ===
+    'function'
+  ) {
+
+    window.positionAnneMicPanel();
+
+  } else {
+
+    positionAnneMicPanel();
+  }
 
 
-  panel.style.display =
-    'block';
+  if (panel) {
+
+    panel.style.display =
+      panel.dataset.templateBridge ===
+        '1'
+        ? 'none'
+        : 'block';
+  }
 
 
   if (
@@ -7106,107 +7354,78 @@ function turnAnneMicOff() {
 
 // SUBBLOCK 1113-05
 // ============================================================
-// MIC 전역 상태
+// BIBLE MODULE → TEMPLATE MIC BRIDGE
 // ============================================================
 
-var _bibleMicInstalled = false;
-var _bibleMicMoving = false;
-var _bibleMicRestartTimer = null;
-var _bibleMicRecognizeTimer = null;
+window.turnAnneMicOn =
+  turnAnneMicOn;
+
+window.turnAnneMicOff =
+  turnAnneMicOff;
+
+window.finalizeAnneMicRecognition =
+  finalizeAnneMicRecognition;
 
 // SUBBLOCK 1114
 // ============================================================
-// MIC 버튼 바인딩
-// 새 템플릿 MIC START / STOP 연결
+// 기존 MIC 버튼 설치
+// Template START / STOP은 gongboo-ui.js Bridge가 담당
 // ============================================================
 
-function installBibleMicButton() {
+function installAnneMicButton() {
 
-  var startBtn =
+  var btn =
     document.getElementById(
-      'micStartButton'
-    );
-
-  var stopBtn =
-    document.getElementById(
-      'micStopButton'
+      'anneMicButton'
     );
 
 
-  if (!startBtn) {
+  if (!btn) {
     return false;
   }
 
 
   if (
-    startBtn.dataset.bibleMicBound ===
+    btn.dataset.micBound ===
     '1'
   ) {
+
     return true;
   }
 
 
-  startBtn.dataset.bibleMicBound =
+  btn.dataset.micBound =
     '1';
 
 
-  startBtn.onclick =
+  btn.setAttribute(
+    'aria-pressed',
+    'false'
+  );
+
+
+  btn.onclick =
     function() {
 
-      turnAnneMicOn();
+      if (
+        ANNE_STATE.micMode
+      ) {
 
-      startBtn.setAttribute(
-        'aria-pressed',
-        'true'
-      );
+        turnAnneMicOff();
 
-      if (stopBtn) {
-        stopBtn.setAttribute(
-          'aria-pressed',
-          'false'
-        );
+      } else {
+
+        turnAnneMicOn();
       }
     };
 
 
-  if (stopBtn) {
-
-    stopBtn.onclick =
-      function() {
-
-        turnAnneMicOff();
-
-        startBtn.setAttribute(
-          'aria-pressed',
-          'false'
-        );
-
-        stopBtn.setAttribute(
-          'aria-pressed',
-          'true'
-        );
-
-        setTimeout(
-          function() {
-
-            stopBtn.setAttribute(
-              'aria-pressed',
-              'false'
-            );
-
-          },
-          250
-        );
-      };
-  }
-
-
-  _bibleMicInstalled =
+  _anneMicInstalled =
     true;
 
 
   console.log(
-    '[BIBLE MIC] ✅ TEMPLATE 연결 완료'
+    '[BIBLE MIC] ✅ 기존 버튼 연결 완료'
   );
 
 
@@ -7219,10 +7438,10 @@ function installBibleMicButton() {
 // MIC 버튼 생성 감시
 // ============================================================
 
-(function watchBibleMicButton() {
+(function watchAnneMicButton() {
 
   if (
-    installBibleMicButton()
+    installAnneMicButton()
   ) {
     return;
   }
@@ -7233,7 +7452,7 @@ function installBibleMicButton() {
       function() {
 
         if (
-          installBibleMicButton()
+          installAnneMicButton()
         ) {
 
           observer.disconnect();
@@ -7257,7 +7476,7 @@ function installBibleMicButton() {
     function() {
 
       if (
-        _bibleMicInstalled
+        _anneMicInstalled
       ) {
 
         observer.disconnect();
