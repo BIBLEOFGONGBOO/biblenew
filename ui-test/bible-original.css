@@ -1134,6 +1134,7 @@ html:not(.admin-user) .admin-preview-panel {
   .bilingual-block{display:flex;flex-direction:column;gap:10px}
   .language-line-en{color:#172033}
   .language-line-ko{color:#27364d;padding-top:10px;margin-top:2px;border-top:1px dashed #cfd7e3;font-family:'Malgun Gothic','Noto Sans KR',sans-serif}
+  .bible-mic-target{outline:3px solid #facc15;outline-offset:4px;border-radius:4px;background:#fef9c3;cursor:pointer}
   .question-text.bilingual-block{margin-top:18px}
   .question-text .language-line-en,.question-text .language-line-ko{font-size:17px;line-height:1.75;font-weight:600}
   .passage-language-card{background:#f8f9fa;padding:16px;border-radius:10px;margin:14px 0;border:1px solid #dee2e6}

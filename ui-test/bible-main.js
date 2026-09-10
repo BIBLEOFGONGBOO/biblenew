@@ -5466,30 +5466,105 @@ function getAnneMicLanguage() {
       'biblePrimaryTextSelector'
     );
 
-  var code =
+  var code = String(
     selector
       ? selector.value
-      : 'ENG';
+      : 'WEB'
+  ).toUpperCase();
 
-  if (code === 'KOR') {
+  if (
+    code === 'KOR' ||
+    code === 'KO' ||
+    code === 'KO_WEB'
+  ) {
     return {
       code: 'KOR',
       recognition: 'ko-KR'
     };
   }
 
-  if (code === 'JPN') {
+  if (code === 'KJV') {
     return {
-      code: 'JPN',
-      recognition: 'ja-JP'
+      code: 'KJV',
+      recognition: 'en-US'
     };
   }
 
   return {
-    code: 'ENG',
+    code: 'MODERN',
     recognition: 'en-US'
   };
 }
+
+var _bibleMicSelectedSentence = null;
+
+function isBibleMicSentenceVisible(element) {
+
+  if (!element || !element.isConnected) {
+    return false;
+  }
+
+  var rect = element.getBoundingClientRect();
+
+  return rect.width > 0 && rect.height > 0;
+}
+
+function setBibleMicSelectedSentence(element) {
+
+  if (
+    _bibleMicSelectedSentence &&
+    _bibleMicSelectedSentence !== element
+  ) {
+    _bibleMicSelectedSentence.classList.remove(
+      'bible-mic-target'
+    );
+  }
+
+  _bibleMicSelectedSentence = element || null;
+
+  if (_bibleMicSelectedSentence) {
+    _bibleMicSelectedSentence.classList.add(
+      'bible-mic-target'
+    );
+  }
+}
+
+function installBibleMicSentenceSelection() {
+
+  document.addEventListener(
+    'click',
+    function(event) {
+
+      if (!ANNE_STATE || !ANNE_STATE.micMode) {
+        return;
+      }
+
+      var element = event.target.closest(
+        '.anne-passage .language-line[data-language], ' +
+        '.anne-full-diary .language-line[data-language]'
+      );
+
+      if (!element) {
+        return;
+      }
+
+      var language = getAnneMicLanguage();
+
+      if (element.dataset.language !== language.code) {
+        return;
+      }
+
+      setBibleMicSelectedSentence(element);
+      _anneMicPassageIndex = 0;
+
+      // Restart recognition immediately so the selected sentence is the
+      // active target, while MIC itself stays on.
+      startAnneRecognition();
+    }
+  );
+}
+
+installBibleMicSentenceSelection();
 
 
 // SUBBLOCK 1103
@@ -5533,6 +5608,30 @@ function getCurrentMicSentence() {
 
 
   if (diaryLines.length) {
+
+    if (
+      _bibleMicSelectedSentence &&
+      diaryLines.indexOf(_bibleMicSelectedSentence) >= 0
+    ) {
+
+      var selectedDiaryIndex = diaryLines.indexOf(
+        _bibleMicSelectedSentence
+      );
+
+      _anneMicPassageIndex = selectedDiaryIndex;
+
+      return {
+        element: _bibleMicSelectedSentence,
+        text: String(
+          _bibleMicSelectedSentence.textContent || ''
+        ).trim(),
+        code: langInfo.code,
+        recognition: langInfo.recognition,
+        passageMode: true,
+        passageIndex: selectedDiaryIndex,
+        passageCount: diaryLines.length
+      };
+    }
 
     if (
       _anneMicPassageIndex < 0 ||
@@ -5589,6 +5688,15 @@ function getCurrentMicSentence() {
     document.querySelector(
       selector
     );
+
+  if (
+    _bibleMicSelectedSentence &&
+    _bibleMicSelectedSentence.dataset.language ===
+      langInfo.code &&
+    isBibleMicSentenceVisible(_bibleMicSelectedSentence)
+  ) {
+    sentenceEl = _bibleMicSelectedSentence;
+  }
 
 
   if (!sentenceEl) {
@@ -6517,13 +6625,22 @@ function stopAnneRecognition() {
 // Recognition 생성 및 시작
 // ============================================================
 
+function bibleMicAlert(message) {
+
+  alert(
+    String(message || '').indexOf('Chrome') === 0
+      ? 'Microphone recognition is available in Chrome or Edge.'
+      : 'Please allow microphone access in your browser.'
+  );
+}
+
 function startAnneRecognition() {
 
   if (
     !SpeechRecognition
   ) {
 
-    alert(
+    bibleMicAlert(
       'Chrome 또는 Edge 브라우저에서 마이크 기능을 사용해 주세요.'
     );
 
@@ -6687,7 +6804,7 @@ function startAnneRecognition() {
         'not-allowed'
       ) {
 
-        alert(
+        bibleMicAlert(
           '브라우저에서 마이크 사용 권한을 허용해 주세요.'
         );
 
@@ -6984,11 +7101,6 @@ function turnAnneMicOn() {
     );
 
 
-  if (!btn) {
-    return;
-  }
-
-
   // 컴퓨터 TTS 중지
   if (
     typeof stopSpeech ===
@@ -7015,34 +7127,27 @@ function turnAnneMicOn() {
   _anneMicPassageIndex = 0;
 
 
-  btn.classList.add(
-    'active'
-  );
+  // The old anneMicButton is optional compatibility markup. The visible
+  // Template v2 MIC button must be able to start recognition without it.
+  if (btn) {
+    btn.classList.add(
+      'active'
+    );
 
+    btn.setAttribute(
+      'aria-pressed',
+      'true'
+    );
 
-  btn.setAttribute(
-    'aria-pressed',
-    'true'
-  );
+    btn.style.filter =
+      'brightness(0.75)';
 
+    btn.style.fontWeight =
+      '700';
+  }
 
-  btn.style.filter =
-    'brightness(0.75)';
-
-
-  btn.style.fontWeight =
-    '700';
-
-
-  var panel =
-    ensureAnneMicPanel();
-
-
-  positionAnneMicPanel();
-
-
-  panel.style.display =
-    'block';
+  // The Template v2 MIC menu and RECOGNIZE action replace the retired
+  // floating PASS panel, so never create or show that panel here.
 
 
   if (
