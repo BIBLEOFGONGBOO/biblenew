@@ -11408,6 +11408,38 @@ window.openBiblePerson =
     );
   };
 
+function openBiblePersonFromUrl_() {
+  var personName = new URLSearchParams(
+    window.location.search
+  ).get('person');
+
+  if (!personName) {
+    return;
+  }
+
+  personName = personName.trim();
+
+  if (!personName) {
+    return;
+  }
+
+  biblePeopleOpen_();
+
+  var input = document.getElementById(
+    'biblePeopleSearchInput'
+  );
+
+  if (input) {
+    input.value = personName;
+  }
+
+  biblePeopleRunSearch_(
+    personName,
+    false
+  );
+}
+
+
 
 // SUBBLOCK 1580
 // ============================================================
@@ -11684,10 +11716,12 @@ setTimeout(
 
 
     initBiblePeopleExplorer();
-
+    openBiblePersonFromUrl_();
   },
   200
 );
+
+
 
 // SUBBLOCK 1590
 // ============================================================
