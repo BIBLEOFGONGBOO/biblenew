@@ -7103,6 +7103,17 @@ function turnAnneMicOff() {
   }
 }
 
+// SUBBLOCK 1113-05
+// ============================================================
+// BIBLE MIC GLOBAL BRIDGE
+// ============================================================
+
+window.turnBibleMicOn =
+  turnBibleMicOn;
+
+window.turnBibleMicOff =
+  turnBibleMicOff;
+
 
 // SUBBLOCK 1114
 // ============================================================
