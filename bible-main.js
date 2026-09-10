@@ -7209,10 +7209,10 @@ function installBibleMicButton() {
 // MIC 버튼 생성 감시
 // ============================================================
 
-(function watchAnneMicButton() {
+(function watchBibleMicButton() {
 
   if (
-    installAnneMicButton()
+    installBibleMicButton()
   ) {
     return;
   }
@@ -7223,7 +7223,7 @@ function installBibleMicButton() {
       function() {
 
         if (
-          installAnneMicButton()
+          installBibleMicButton()
         ) {
 
           observer.disconnect();
@@ -7247,7 +7247,7 @@ function installBibleMicButton() {
     function() {
 
       if (
-        _anneMicInstalled
+        _bibleMicInstalled
       ) {
 
         observer.disconnect();
