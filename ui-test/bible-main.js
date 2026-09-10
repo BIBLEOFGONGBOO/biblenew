@@ -3162,6 +3162,10 @@ function syncAnneToggleButtons() {
       psgOn ? '700' : '',
       'important'
     );
+
+    p.style.removeProperty(
+      'filter'
+    );
   }
 
   if (q) {
@@ -5357,6 +5361,19 @@ document.addEventListener(
   }
 );
 
+// Template v2 bridge for this ES-module product runtime.  The shared UI reads
+// only this contract; Bible keeps its current data, highlighting, and MIC flow.
+window.GongbooTemplateAdapter = {
+  startPlay: speakWithDyslexiaSupport,
+  stopPlay: stopSpeech,
+  startMic: turnAnneMicOn,
+  stopMic: turnAnneMicOff,
+  finalizeMic: finalizeAnneMicRecognition
+};
+
+window.finalizeAnneMicRecognition =
+  finalizeAnneMicRecognition;
+
 // SUBBLOCK 1004
 // ============================================================
 // Bible Navigation
@@ -6985,6 +7002,16 @@ function turnAnneMicOn() {
 
   ANNE_STATE.micMode =
     true;
+
+  if (
+    typeof window.gongbooSetMicActive ===
+    'function'
+  ) {
+
+    window.gongbooSetMicActive(
+      true
+    );
+  }
   _anneMicPassageIndex = 0;
 
 
@@ -7041,6 +7068,16 @@ function turnAnneMicOff() {
 
   ANNE_STATE.micMode =
     false;
+
+  if (
+    typeof window.gongbooSetMicActive ===
+    'function'
+  ) {
+
+    window.gongbooSetMicActive(
+      false
+    );
+  }
 
 
   _anneMicMoving =
@@ -7843,6 +7880,16 @@ function stopSpeech() {
       window.speechSynthesis.cancel();
     } catch (e) {}
   }
+
+  if (
+    typeof window.gongbooSetPlayActive ===
+    'function'
+  ) {
+
+    window.gongbooSetPlayActive(
+      false
+    );
+  }
   document
     .querySelectorAll(
       '.hl-word-span'
@@ -7883,6 +7930,16 @@ function speakWithDyslexiaSupport() {
       '[TTS] 화면에 읽을 문장이 없음'
     );
     return;
+  }
+
+  if (
+    typeof window.gongbooSetPlayActive ===
+    'function'
+  ) {
+
+    window.gongbooSetPlayActive(
+      true
+    );
   }
   var runId =
     ++_speechRunId;

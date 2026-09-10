@@ -92,6 +92,23 @@ button{
   padding:7px 0;
 }
 
+/* Deliberately non-sticky: it introduces the site, then yields space to study. */
+.gb-brand-strip{
+  width:min(
+    calc(100% - 24px),
+    var(--gb-content-width)
+  );
+
+  margin:10px auto 0;
+
+  color:#556273;
+
+  font-size:18px;
+  font-weight:850;
+  letter-spacing:.09em;
+  text-align:center;
+}
+
 .gb-toolbar{
   display:flex;
   align-items:center;
@@ -102,6 +119,34 @@ button{
 
 .gb-card-wrap{
   position:relative;
+}
+
+.gb-split-control{
+  display:grid;
+  grid-template-columns:minmax(58px,1fr) 28px;
+}
+
+.gb-split-primary{
+  min-width:0;
+  border-radius:var(--gb-radius) 0 0 var(--gb-radius);
+  border-right:0;
+  padding:0 9px;
+}
+
+.gb-split-menu{
+  min-width:28px;
+  width:28px;
+  padding:0;
+  border-radius:0 var(--gb-radius) var(--gb-radius) 0;
+  color:var(--gb-muted);
+  font-size:8px;
+}
+
+#playButton[aria-pressed="true"],
+#micButton[aria-pressed="true"]{
+  color:#ffffff;
+  border-color:var(--gb-stop-dark);
+  background:linear-gradient(180deg,#ef3038,var(--gb-stop));
 }
 
 
@@ -176,6 +221,46 @@ button{
     0 0 0 1px rgba(23,105,210,.08);
 }
 
+/* Split action overrides must follow the common button rule. */
+.gb-split-control .gb-tool-button.gb-split-primary{
+  min-width:58px;
+  width:auto;
+  padding:0 8px;
+  border-radius:var(--gb-radius) 0 0 var(--gb-radius);
+  border-right:0;
+}
+
+.gb-split-control .gb-tool-button.gb-split-menu{
+  min-width:28px;
+  width:28px;
+  padding:0;
+  border-radius:0 var(--gb-radius) var(--gb-radius) 0;
+  color:var(--gb-muted);
+  font-size:8px;
+}
+
+.gb-split-control #playButton.gb-split-primary[aria-pressed="true"],
+.gb-split-control #micButton.gb-split-primary[aria-pressed="true"]{
+  color:#ffffff;
+  border-color:var(--gb-stop-dark);
+  background:linear-gradient(180deg,#ef3038,var(--gb-stop));
+}
+
+
+/* Frequent manual scoring sits directly below the active MIC control. */
+.gb-mic-recognize-quick{
+  position:absolute;
+  top:calc(100% + 6px);
+  left:0;
+  width:100%;
+  min-width:0;
+  z-index:2001;
+}
+
+/* Keep the settings card below the quick action when both are open. */
+#micControlWrap.is-mic-active #micCard{
+  top:calc(100% + 52px);
+}
 
 /* SUBBLOCK 1500 : COMMON CARD */
 
@@ -395,6 +480,43 @@ button{
   margin-top:8px;
 }
 
+.gb-psg-card{
+  width:180px;
+}
+
+.gb-card-toggle{
+  width:100%;
+  min-height:40px;
+  border:1px solid var(--gb-border);
+  border-radius:8px;
+  background:#ffffff;
+  color:#222222;
+  font-size:12px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.gb-card-toggle[aria-pressed="true"]{
+  color:var(--gb-accent-strong);
+  border-color:var(--gb-accent);
+  background:var(--gb-accent-soft);
+}
+
+.gb-two-actions,
+.gb-one-action{
+  display:grid;
+  gap:6px;
+  margin-top:8px;
+}
+
+.gb-two-actions{
+  grid-template-columns:repeat(2,1fr);
+}
+
+.gb-one-action{
+  grid-template-columns:1fr;
+}
+
 
 /* MIC ROW */
 
@@ -489,8 +611,7 @@ button{
 
 /* STOP ACTIVE */
 
-#playStopButton[aria-pressed="true"],
-#micStopButton[aria-pressed="true"]{
+#playStopButton[aria-pressed="true"]{
   color:#ffffff;
 
   border-color:
@@ -612,11 +733,17 @@ button{
 /* STD와 같은 깨끗한 HOVER */
 
 .gb-more-grid-button:hover:not(:disabled){
-  background:
-    #f7f9fb;
+  background:#eef6ff;
+  border-color:var(--gb-accent);
+  transform:translateY(-1px);
+  box-shadow:0 3px 8px rgba(23,105,210,.16);
+}
 
-  border-color:
-    var(--gb-accent);
+.gb-mode-button:hover:not(:disabled){
+  background:#eef6ff;
+  border-color:var(--gb-accent);
+  transform:translateY(-1px);
+  box-shadow:0 3px 8px rgba(23,105,210,.16);
 }
 
 
@@ -842,11 +969,17 @@ button{
     0 3px 8px rgba(23,105,210,.28);
 }
 
+/* PSG has one visual contract: the same clear blue as the other selected tools. */
+#biblePassageToggle,
+#biblePassageToggle.active,
+#biblePassageToggle[aria-pressed="true"]{
+  filter:none !important;
+}
+
 
 /* STOP은 위험 동작이므로 RED 유지 */
 
-#playStopButton[aria-pressed="true"],
-#micStopButton[aria-pressed="true"]{
+#playStopButton[aria-pressed="true"]{
 
   color:#ffffff;
 
@@ -1089,7 +1222,7 @@ button{
     display:grid;
 
     grid-template-columns:
-      .82fr .82fr 1fr 1fr .82fr .62fr;
+      .9fr .82fr 1.18fr 1.05fr 1fr .52fr;
 
     gap:4px;
   }
@@ -1104,6 +1237,32 @@ button{
       0 4px;
 
     font-size:11px;
+  }
+
+  .gb-split-wrap,
+  .gb-split-control{
+    width:100%;
+  }
+
+  .gb-split-control{
+    grid-template-columns:minmax(0,1fr) 24px;
+  }
+
+  .gb-split-primary,
+  .gb-split-menu{
+    min-width:0;
+  }
+
+  .gb-split-control .gb-tool-button.gb-split-primary{
+    min-width:0;
+    width:auto;
+    padding:0 3px;
+  }
+
+  .gb-split-control .gb-tool-button.gb-split-menu{
+    min-width:24px;
+    width:24px;
+    padding:0;
   }
 
   .gb-tool-button-square{
@@ -1166,7 +1325,7 @@ button{
 
   .gb-toolbar{
     grid-template-columns:
-      .78fr .78fr 1fr .95fr .78fr .58fr;
+      .88fr .78fr 1.18fr 1.02fr .96fr .5fr;
 
     gap:3px;
   }
@@ -1280,4 +1439,128 @@ button{
 
 #playCard{
   padding-top:6px;
+}
+
+
+/* =========================================================
+   SUBBLOCK 9900 : ANNE HOME
+   ========================================================= */
+
+#setupSection{
+  width:100%;
+  display:flex;
+  justify-content:center;
+  padding:24px 16px 90px;
+  box-sizing:border-box;
+}
+
+#setupSection .cards-container{
+  width:100%;
+  display:flex;
+  justify-content:center;
+}
+
+#setupSection .card-new{
+  width:min(100%, 760px);
+  min-height:520px;
+
+  margin:0 auto;
+  padding:52px 44px 60px;
+
+  box-sizing:border-box;
+
+  background:#fff;
+  border-radius:22px;
+
+  box-shadow:
+    0 8px 28px rgba(15,23,42,.08);
+
+  text-align:center;
+}
+
+#setupSection .card-icon{
+  margin:0 0 8px;
+
+  font-size:34px;
+  line-height:1;
+}
+
+#setupSection .card-title-new{
+  margin:0 0 10px;
+
+  font-size:24px;
+  line-height:1.25;
+  font-weight:800;
+
+  color:#263b55;
+}
+
+#licenseSetArea{
+  width:100%;
+  max-width:390px;
+
+  margin:0 auto;
+
+  text-align:left;
+}
+
+#licenseSetArea > div{
+  width:100% !important;
+}
+
+#licenseSetArea .date-item{
+  min-height:32px;
+
+  padding:6px 8px !important;
+
+  box-sizing:border-box;
+
+  font-size:15px !important;
+  line-height:20px;
+
+  color:#2c3e50 !important;
+}
+
+#licenseSetArea .date-item:hover{
+  background:#f5f9ff !important;
+}
+
+#setupSection .bottom-hint{
+  display:none;
+}
+
+
+/* MOBILE */
+
+@media (max-width:640px){
+
+  #setupSection{
+    padding:18px 10px 80px;
+  }
+
+  #setupSection .card-new{
+    width:100%;
+    min-height:500px;
+
+    padding:34px 18px 46px;
+
+    border-radius:18px;
+  }
+
+  #setupSection .card-icon{
+    font-size:30px;
+  }
+
+  #setupSection .card-title-new{
+    font-size:21px;
+  }
+
+  #licenseSetArea{
+    max-width:100%;
+  }
+
+  #licenseSetArea .date-item{
+    font-size:14px !important;
+  }
+
 }

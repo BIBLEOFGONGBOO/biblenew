@@ -5,8 +5,9 @@
   var cardPairs = [
     ['systemButton','systemCard'],
     ['langButton','langCard'],
-    ['playButton','playCard'],
-    ['micButton','micCard'],
+    ['playMenuButton','playCard'],
+    ['micMenuButton','micCard'],
+    ['psgMenuButton','psgCard'],
     ['moreButton','moreCard']
   ];
 
@@ -18,17 +19,29 @@
     systemButton:
       'Select learning system',
 
-    psgButton:
+    biblePassageToggle:
       'Show or hide the full scenario',
+
+    psgMenuButton:
+      'Passage and quiz settings',
+
+    bibleQuizToggle:
+      'Show or hide the quiz',
 
     langButton:
       'Language settings',
 
     playButton:
-      'Playback and voice settings',
+      'Start or stop highlighted playback',
+
+    playMenuButton:
+      'Playback settings',
 
     micButton:
-      'Microphone and pronunciation settings',
+      'Start or stop microphone recognition',
+
+    micMenuButton:
+      'Microphone settings',
 
     moreButton:
       'More learning tools',
@@ -52,7 +65,7 @@
       'Start microphone recognition',
 
     micStopButton:
-      'Stop recognition and score',
+      'Recognize spoken audio and score',
 
     chunkToggle:
       'Show or hide learning chunks',
@@ -349,6 +362,27 @@ function setPlayState(
   isPlaying =
     !!playing;
 
+  var playButton =
+    document.getElementById('playButton');
+
+  var playButtonLabel =
+    document.getElementById('playButtonLabel');
+
+  if(playButton){
+    playButton.setAttribute(
+      'aria-pressed',
+      String(isPlaying)
+    );
+  }
+
+  window.gongbooCloseCards =
+    closeCards;
+
+  if(playButtonLabel){
+    playButtonLabel.textContent =
+      isPlaying ? '■ STOP' : '▶ PLAY';
+  }
+
 
   if(playStartButton){
 
@@ -366,6 +400,80 @@ function setPlayState(
       String(!isPlaying)
     );
   }
+}
+
+window.gongbooSetPlayActive =
+  setPlayState;
+
+function isPlayActive(){
+
+  var button =
+    document.getElementById(
+      'playButton'
+    );
+
+  var browserIsSpeaking =
+    'speechSynthesis' in window &&
+    (
+      window.speechSynthesis.speaking ||
+      window.speechSynthesis.pending
+    );
+
+  return (
+    isPlaying ||
+    browserIsSpeaking ||
+    !!(
+      button &&
+      button.getAttribute(
+        'aria-pressed'
+      ) === 'true'
+    )
+  );
+}
+
+function toggleTemplatePlay(){
+
+  var adapter =
+    window.GongbooTemplateAdapter || {};
+
+  if(isPlayActive()){
+
+    if(typeof adapter.stopPlay === 'function'){
+      adapter.stopPlay();
+    }else if(typeof stopSpeech === 'function'){
+      stopSpeech();
+    }
+
+    setPlayState(false);
+    return;
+  }
+
+  setPlayState(true);
+
+  if(typeof adapter.startPlay === 'function'){
+    adapter.startPlay();
+  }else if(typeof speakWithDyslexiaSupport === 'function'){
+    speakWithDyslexiaSupport();
+  }else{
+    setPlayState(false);
+  }
+}
+
+window.gongbooTogglePlay =
+  toggleTemplatePlay;
+
+var playButton =
+  document.getElementById('playButton');
+
+if(playButton){
+  playButton.addEventListener(
+    'click',
+    function(event){
+      event.stopPropagation();
+
+      toggleTemplatePlay();
+    }
+  );
 }
 
 
@@ -431,6 +539,45 @@ if(playStopButton){
     running
   ){
 
+    var micButton =
+      document.getElementById('micButton');
+
+    var micButtonLabel =
+      document.getElementById('micButtonLabel');
+
+    if(micButton){
+      micButton.setAttribute(
+        'aria-pressed',
+        String(!!running)
+      );
+    }
+
+    if(micButtonLabel){
+      micButtonLabel.textContent =
+        running ? '■ STOP' : 'MIC';
+    }
+
+    var quickRecognize =
+      document.getElementById(
+        'micRecognizeQuickButton'
+      );
+
+    var micWrap =
+      document.getElementById(
+        'micControlWrap'
+      );
+
+    if(quickRecognize){
+      quickRecognize.hidden = !running;
+    }
+
+    if(micWrap){
+      micWrap.classList.toggle(
+        'is-mic-active',
+        !!running
+      );
+    }
+
     if(micStartButton){
 
       micStartButton.setAttribute(
@@ -450,6 +597,66 @@ if(playStopButton){
           : 'true'
       );
     }
+  }
+
+  window.gongbooSetMicActive =
+    setMicState;
+
+  var isMicRunning =
+    false;
+
+  var originalSetMicState =
+    setMicState;
+
+  setMicState = function(running){
+    isMicRunning = !!running;
+    originalSetMicState(isMicRunning);
+  };
+
+  window.gongbooSetMicActive =
+    setMicState;
+
+  var micButton =
+    document.getElementById('micButton');
+
+  if(micButton){
+    micButton.addEventListener(
+      'click',
+      function(event){
+        event.stopPropagation();
+
+        if(typeof window.gongbooCloseCards === 'function'){
+          window.gongbooCloseCards();
+        }
+
+        var running =
+          micButton.getAttribute(
+            'aria-pressed'
+          ) === 'true';
+
+        var adapter =
+          window.GongbooTemplateAdapter || {};
+
+        if(running){
+          if(typeof adapter.stopMic === 'function'){
+            adapter.stopMic();
+          }else if(typeof turnAnneMicOff === 'function'){
+            turnAnneMicOff();
+          }
+          setMicState(false);
+          return;
+        }
+
+        if(typeof adapter.startMic === 'function'){
+          adapter.startMic();
+          return;
+        }
+
+        if(typeof turnAnneMicOn === 'function'){
+          turnAnneMicOn();
+        }
+      }
+    );
   }
 
 
@@ -1128,6 +1335,11 @@ var templateMicAuto =
     'micAutoToggle'
   );
 
+var templateMicRecognize =
+  document.getElementById(
+    'micRecognizeQuickButton'
+  );
+
 var templatePass =
   document.getElementById(
     'passRange'
@@ -1297,6 +1509,42 @@ if(templateMicAuto){
 
 
 // ============================================================
+// RECOGNIZE
+// Finalize the current utterance without turning MIC off.
+// ============================================================
+
+if(templateMicRecognize){
+
+  templateMicRecognize.addEventListener(
+    'click',
+    function(){
+
+      if(
+        typeof window.finalizeAnneMicRecognition ===
+        'function'
+      ){
+
+        window.finalizeAnneMicRecognition(
+          true
+        );
+      }
+
+      templateMicRecognize.setAttribute(
+        'aria-pressed',
+        'true'
+      );
+
+      setTimeout(function(){
+        templateMicRecognize.setAttribute(
+          'aria-pressed',
+          'false'
+        );
+      }, 180);
+    }
+  );
+}
+
+// ============================================================
 // START
 // ============================================================
 
@@ -1373,121 +1621,6 @@ if(templateMicStop){
     }
   );
 }
-
-// SUBBLOCK 8250 : MIC CARD POSITION / SIZE
-// PLAY 버튼 위치를 덮는 현재 위치 유지
-// 카드 가로/세로 약 20% 추가 축소
-
-(function(){
-
-  var micButton =
-    document.getElementById(
-      'micButton'
-    );
-
-  var playButton =
-    document.getElementById(
-      'playButton'
-    );
-
-  var micCard =
-    document.getElementById(
-      'micCard'
-    );
-
-
-  if(
-    !micButton ||
-    !playButton ||
-    !micCard
-  ){
-    return;
-  }
-
-
-  function positionMicCard(){
-
-    if(
-      micCard.hidden
-    ){
-      return;
-    }
-
-
-    var playRect =
-      playButton.getBoundingClientRect();
-
-
-    var cardWidth =
-      micCard.offsetWidth;
-
-
-    var left =
-      playRect.right -
-      cardWidth;
-
-
-    var top =
-      playRect.top;
-
-
-    left =
-      Math.max(
-        6,
-        left
-      );
-
-
-    micCard.style.position =
-      'fixed';
-
-
-    micCard.style.left =
-      Math.round(
-        left
-      ) + 'px';
-
-
-    micCard.style.top =
-      Math.round(
-        top
-      ) + 'px';
-
-
-    micCard.style.right =
-      'auto';
-
-
-    micCard.style.zIndex =
-      '5000';
-  }
-
-
-  micButton.addEventListener(
-    'click',
-    function(){
-
-      window.setTimeout(
-        positionMicCard,
-        0
-      );
-    }
-  );
-
-
-  window.addEventListener(
-    'resize',
-    positionMicCard
-  );
-
-
-  window.addEventListener(
-    'scroll',
-    positionMicCard,
-    true
-  );
-
-})();
 
 // SUBBLOCK 8500 : MIC LEGACY BRIDGE / SCORE / HIGHLIGHT
 
@@ -1624,7 +1757,7 @@ window.addEventListener(
         if(stopButton){
 
           stopButton.innerHTML =
-            '<span>■ STOP</span>' +
+            '<span>■ RECOGNIZE</span>' +
             '<span class="gb-mic-score">' +
             score +
             '%</span>';

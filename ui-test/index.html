@@ -18,7 +18,7 @@
 
   <link
     rel="stylesheet"
-    href="./gongboo-ui.css"
+    href="./gongboo-ui.css?v=template2-12"
   />
 
   <link
@@ -103,17 +103,6 @@
   </div>
 
 </div>
-
-
-        <!-- SUBBLOCK 1000 : PSG -->
-        <button
-          id="psgButton"
-          class="gb-tool-button"
-          type="button"
-          aria-pressed="false"
-        >
-          PSG
-        </button>
 
 
         <!-- SUBBLOCK 1500 : LANGUAGE -->
@@ -208,16 +197,27 @@
 
 
         <!-- SUBBLOCK 2000 : PLAY -->
-        <div class="gb-card-wrap">
+        <div class="gb-card-wrap gb-split-wrap">
 
-          <button
-            id="playButton"
-            class="gb-tool-button"
-            type="button"
-            aria-expanded="false"
-          >
-            PLAY
-          </button>
+          <div class="gb-split-control">
+            <button
+              id="playButton"
+              class="gb-tool-button gb-split-primary"
+              type="button"
+              aria-pressed="false"
+            >
+              <span id="playButtonLabel">▶ PLAY</span>
+            </button>
+            <button
+              id="playMenuButton"
+              class="gb-tool-button gb-split-menu"
+              type="button"
+              aria-expanded="false"
+              aria-controls="playCard"
+            >
+              <span aria-hidden="true">▼</span>
+            </button>
+          </div>
 
           <div
             id="playCard"
@@ -253,7 +253,7 @@
 
             </div>
 
-            <div class="gb-four-actions">
+            <div class="gb-two-actions">
 
               <button
                 id="repeatToggle"
@@ -278,6 +278,7 @@
                 class="gb-compact-action"
                 type="button"
                 aria-pressed="false"
+                hidden
               >
                 ▶ START
               </button>
@@ -287,6 +288,7 @@
                 class="gb-compact-action"
                 type="button"
                 aria-pressed="false"
+                hidden
               >
                 ■ STOP
               </button>
@@ -297,16 +299,30 @@
 
 
         <!-- SUBBLOCK 2500 : MIC -->
-        <div class="gb-card-wrap">
+        <div
+          id="micControlWrap"
+          class="gb-card-wrap gb-split-wrap"
+        >
 
-          <button
-            id="micButton"
-            class="gb-tool-button"
-            type="button"
-            aria-expanded="false"
-          >
-            MIC
-          </button>
+          <div class="gb-split-control">
+            <button
+              id="micButton"
+              class="gb-tool-button gb-split-primary"
+              type="button"
+              aria-pressed="false"
+            >
+              <span id="micButtonLabel">MIC</span>
+            </button>
+            <button
+              id="micMenuButton"
+              class="gb-tool-button gb-split-menu"
+              type="button"
+              aria-expanded="false"
+              aria-controls="micCard"
+            >
+              <span aria-hidden="true">▼</span>
+            </button>
+          </div>
 
           <div
             id="micCard"
@@ -367,7 +383,7 @@
 
             </div>
 
-            <div class="gb-three-actions">
+            <div class="gb-one-action">
 
               <button
                 id="micAutoToggle"
@@ -383,6 +399,7 @@
                 class="gb-compact-action"
                 type="button"
                 aria-pressed="false"
+                hidden
               >
                 ▶ START
               </button>
@@ -392,11 +409,57 @@
                 class="gb-compact-action"
                 type="button"
                 aria-pressed="false"
+                hidden
               >
                 ■ STOP
               </button>
 
             </div>
+          </div>
+
+          <button
+            id="micRecognizeQuickButton"
+            class="gb-tool-button gb-mic-recognize-quick"
+            type="button"
+            hidden
+          >
+            RECOGNIZE
+          </button>
+        </div>
+
+
+        <!-- SUBBLOCK 2700 : PSG / QUIZ -->
+        <div class="gb-card-wrap gb-split-wrap">
+          <div class="gb-split-control">
+            <button
+              id="biblePassageToggle"
+              class="gb-tool-button gb-split-primary"
+              type="button"
+              aria-pressed="false"
+            >
+              PSG
+            </button>
+            <button
+              id="psgMenuButton"
+              class="gb-tool-button gb-split-menu"
+              type="button"
+              aria-expanded="false"
+              aria-controls="psgCard"
+            >
+              <span aria-hidden="true">▼</span>
+            </button>
+          </div>
+
+          <div id="psgCard" class="gb-card gb-psg-card" hidden>
+            <div class="gb-card-title">PASSAGE</div>
+            <button
+              id="bibleQuizToggle"
+              class="gb-card-toggle"
+              type="button"
+              aria-pressed="true"
+            >
+              QUIZ
+            </button>
           </div>
         </div>
 
@@ -460,15 +523,6 @@
     <div class="gb-more-grid">
 
       <button
-        id="bibleQuizToggle"
-        class="gb-more-grid-button"
-        type="button"
-        aria-pressed="true"
-      >
-        QZ
-      </button>
-
-      <button
         id="biblePeopleToggle"
         class="gb-more-grid-button"
         type="button"
@@ -530,6 +584,10 @@
       </div>
     </div>
   </header>
+
+  <div class="gb-brand-strip" aria-label="Site identity">
+    GONGBOO.ORG : EASY LEARNING
+  </div>
 
 
 
@@ -1411,7 +1469,7 @@
 <script src="./supabase-config.js"></script>
 <script src="./supabase-provider.js"></script>
 
-<script src="./gongboo-ui.js"></script>
+<script src="./gongboo-ui.js?v=template2-12"></script>
 
 <script
   type="module"
@@ -1420,7 +1478,7 @@
 
 <script
   type="module"
-  src="./bible-main.js"
+  src="./bible-main.js?v=template2-12"
 ></script>
 
 </body>
