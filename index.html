@@ -1,0 +1,1485 @@
+<!-- SUBBLOCK 0000 : DOCUMENT / HEAD -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>
+    GONGBOO BIBLE
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="./gongboo-ui.css?v=template2-12"
+  />
+
+  <link
+    rel="stylesheet"
+    href="./bible-original.css"
+  />
+
+</head>
+
+
+<body>
+
+<div class="gb-app">
+
+  <header class="gb-topbar">
+
+    <div class="gb-topbar-row">
+
+      <div class="gb-toolbar">
+
+
+       <!-- SUBBLOCK 0500 : SYSTEM -->
+
+<div class="gb-card-wrap">
+
+  <button
+    id="systemButton"
+    class="gb-tool-button gb-system-button"
+    type="button"
+    aria-expanded="false"
+  >
+    BIB
+    <span class="gb-chevron">▼</span>
+  </button>
+
+  <div
+    id="systemCard"
+    class="gb-card gb-system-card"
+    hidden
+  >
+
+    <div class="gb-card-title">
+      SYSTEM
+    </div>
+
+    <button
+      class="gb-system-option"
+      type="button"
+      onclick="window.location.href='https://bibleofgongboo.github.io/conversation/'"
+    >
+      <span class="gb-system-code">CON</span>
+      <span class="gb-system-name">CONVERSATION</span>
+    </button>
+
+    <button
+      class="gb-system-option is-active"
+      type="button"
+      aria-current="page"
+    >
+      <span class="gb-system-code">BIB</span>
+      <span class="gb-system-name">BIBLE</span>
+    </button>
+
+    <button
+      class="gb-system-option"
+      type="button"
+      onclick="window.location.href='https://bibleofgongboo.github.io/anne/'"
+    >
+      <span class="gb-system-code">EAS</span>
+      <span class="gb-system-name">EASY LEARNING</span>
+    </button>
+
+    <button
+      class="gb-system-option"
+      type="button"
+      onclick="window.location.href='https://biblegongboo.github.io/license/app/'"
+    >
+      <span class="gb-system-code">LIC</span>
+      <span class="gb-system-name">LICENSE</span>
+    </button>
+
+  </div>
+
+</div>
+
+
+        <!-- SUBBLOCK 1500 : LANGUAGE -->
+
+<div class="gb-card-wrap">
+
+  <button
+    id="langButton"
+    class="gb-tool-button"
+    type="button"
+    aria-expanded="false"
+  >
+    LANG
+  </button>
+
+
+  <div
+    id="langCard"
+    class="gb-card"
+    hidden
+  >
+
+    <div class="gb-card-title">
+      LANGUAGE
+    </div>
+
+
+    <div class="gb-card-row">
+
+      <span class="gb-card-label">
+        PRIMARY
+      </span>
+
+      <select
+        id="biblePrimaryTextSelector"
+        class="gb-select"
+        aria-label="Primary Bible language"
+      >
+
+        <option value="WEB">
+          ENG
+        </option>
+
+        <option value="KJV">
+          KJV
+        </option>
+
+        <option value="KO_WEB">
+          KOR
+        </option>
+
+      </select>
+
+    </div>
+
+
+    <div class="gb-card-row">
+
+      <span class="gb-card-label">
+        SECONDARY
+      </span>
+
+      <select
+        id="bibleSecondaryTextSelector"
+        class="gb-select"
+        aria-label="Secondary Bible language"
+      >
+
+        <option value="NONE">
+          NONE
+        </option>
+
+        <option value="WEB">
+          ENG
+        </option>
+
+        <option value="KJV">
+          KJV
+        </option>
+
+        <option value="KO_WEB">
+          KOR
+        </option>
+
+      </select>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+        <!-- SUBBLOCK 2000 : PLAY -->
+        <div class="gb-card-wrap gb-split-wrap">
+
+          <div class="gb-split-control">
+            <button
+              id="playButton"
+              class="gb-tool-button gb-split-primary"
+              type="button"
+              aria-pressed="false"
+            >
+              <span id="playButtonLabel">▶ PLAY</span>
+            </button>
+            <button
+              id="playMenuButton"
+              class="gb-tool-button gb-split-menu"
+              type="button"
+              aria-expanded="false"
+              aria-controls="playCard"
+            >
+              <span aria-hidden="true">▼</span>
+            </button>
+          </div>
+
+          <div
+            id="playCard"
+            class="gb-card"
+            hidden
+          >
+            <div class="gb-card-title">
+              PLAY
+            </div>
+
+            <div class="gb-slider-row">
+
+              <span class="gb-slider-label">
+                SPEED
+              </span>
+
+              <input
+                id="speedRange"
+                class="gb-range"
+                type="range"
+                min="0.25"
+                max="2"
+                step="0.05"
+                value="1"
+              />
+
+              <span
+                id="speedValue"
+                class="gb-slider-value"
+              >
+                1.00×
+              </span>
+
+            </div>
+
+            <div class="gb-two-actions">
+
+              <button
+                id="repeatToggle"
+                class="gb-compact-toggle"
+                type="button"
+                aria-pressed="false"
+              >
+                REPEAT
+              </button>
+
+              <button
+                id="playAutoToggle"
+                class="gb-compact-toggle"
+                type="button"
+                aria-pressed="false"
+              >
+                AUTO
+              </button>
+
+              <button
+                id="playStartButton"
+                class="gb-compact-action"
+                type="button"
+                aria-pressed="false"
+                hidden
+              >
+                ▶ START
+              </button>
+
+              <button
+                id="playStopButton"
+                class="gb-compact-action"
+                type="button"
+                aria-pressed="false"
+                hidden
+              >
+                ■ STOP
+              </button>
+
+            </div>
+          </div>
+        </div>
+
+
+        <!-- SUBBLOCK 2500 : MIC -->
+        <div
+          id="micControlWrap"
+          class="gb-card-wrap gb-split-wrap"
+        >
+
+          <div class="gb-split-control">
+            <button
+              id="micButton"
+              class="gb-tool-button gb-split-primary"
+              type="button"
+              aria-pressed="false"
+            >
+              <span id="micButtonLabel">MIC</span>
+            </button>
+            <button
+              id="micMenuButton"
+              class="gb-tool-button gb-split-menu"
+              type="button"
+              aria-expanded="false"
+              aria-controls="micCard"
+            >
+              <span aria-hidden="true">▼</span>
+            </button>
+          </div>
+
+          <div
+            id="micCard"
+            class="gb-card"
+            hidden
+          >
+            <div class="gb-card-title">
+              MIC
+            </div>
+
+            <div class="gb-slider-row">
+
+              <span class="gb-slider-label">
+                PASS
+              </span>
+
+              <input
+                id="passRange"
+                class="gb-range"
+                type="range"
+                min="50"
+                max="100"
+                step="1"
+                value="70"
+              />
+
+              <span
+                id="passValue"
+                class="gb-slider-value"
+              >
+                70%
+              </span>
+
+            </div>
+
+            <div class="gb-slider-row">
+
+              <span class="gb-slider-label">
+                DELAY
+              </span>
+
+              <input
+                id="delayRange"
+                class="gb-range"
+                type="range"
+                min="0"
+                max="5"
+                step="0.1"
+                value="2"
+              />
+
+              <span
+                id="delayValue"
+                class="gb-slider-value"
+              >
+                2.0s
+              </span>
+
+            </div>
+
+            <div class="gb-one-action">
+
+              <button
+                id="micAutoToggle"
+                class="gb-compact-toggle"
+                type="button"
+                aria-pressed="false"
+              >
+                AUTO
+              </button>
+
+              <button
+                id="micStartButton"
+                class="gb-compact-action"
+                type="button"
+                aria-pressed="false"
+                hidden
+              >
+                ▶ START
+              </button>
+
+              <button
+                id="micStopButton"
+                class="gb-compact-action"
+                type="button"
+                aria-pressed="false"
+                hidden
+              >
+                ■ STOP
+              </button>
+
+            </div>
+          </div>
+
+          <button
+            id="micRecognizeQuickButton"
+            class="gb-tool-button gb-mic-recognize-quick"
+            type="button"
+            hidden
+          >
+            RECOGNIZE
+          </button>
+        </div>
+
+
+        <!-- SUBBLOCK 2700 : PSG / QUIZ -->
+        <div class="gb-card-wrap gb-split-wrap">
+          <div class="gb-split-control">
+            <button
+              id="biblePassageToggle"
+              class="gb-tool-button gb-split-primary"
+              type="button"
+              aria-pressed="false"
+            >
+              PSG
+            </button>
+            <button
+              id="psgMenuButton"
+              class="gb-tool-button gb-split-menu"
+              type="button"
+              aria-expanded="false"
+              aria-controls="psgCard"
+            >
+              <span aria-hidden="true">▼</span>
+            </button>
+          </div>
+
+          <div id="psgCard" class="gb-card gb-psg-card" hidden>
+            <div class="gb-card-title">PASSAGE</div>
+            <button
+              id="bibleQuizToggle"
+              class="gb-card-toggle"
+              type="button"
+              aria-pressed="true"
+            >
+              QUIZ
+            </button>
+          </div>
+        </div>
+
+
+      <!-- SUBBLOCK 3000 : MORE / MODE -->
+
+<div class="gb-card-wrap">
+
+  <button
+    id="moreButton"
+    class="gb-tool-button gb-tool-button-square"
+    type="button"
+    aria-expanded="false"
+  >
+    ⋯
+  </button>
+
+  <div
+    id="moreCard"
+    class="gb-card"
+    hidden
+  >
+
+    <div class="gb-card-title">
+      MODE
+    </div>
+
+    <div
+      id="modeButtons"
+      class="gb-mode-row"
+    >
+
+      <button
+        class="gb-mode-button mode-btn mode-learn"
+        type="button"
+        data-ui-mode="learn"
+      >
+        LRN
+      </button>
+
+      <button
+        class="gb-mode-button mode-btn mode-study"
+        type="button"
+        data-ui-mode="study"
+      >
+        STD
+      </button>
+
+      <button
+        class="gb-mode-button mode-btn mode-exam"
+        type="button"
+        data-ui-mode="exam"
+      >
+        EXM
+      </button>
+
+    </div>
+
+    <div class="gb-card-separator"></div>
+
+    <div class="gb-more-grid">
+
+      <button
+        id="biblePeopleToggle"
+        class="gb-more-grid-button"
+        type="button"
+        aria-expanded="false"
+      >
+        PEOPLE
+      </button>
+
+      <button
+        id="bibleExploreToggle"
+        class="gb-more-grid-button"
+        type="button"
+        aria-expanded="false"
+      >
+        MAP
+      </button>
+
+      <button
+        id="bibleGuideToggle"
+        class="gb-more-grid-button"
+        type="button"
+        aria-pressed="false"
+      >
+        CHUNK
+      </button>
+
+      <button
+        class="gb-more-grid-button"
+        type="button"
+        disabled
+      >
+        OPTION
+      </button>
+
+      <button
+        class="gb-more-grid-button"
+        type="button"
+        disabled
+      >
+        OPTION
+      </button>
+
+    </div>
+
+    <div class="gb-card-separator"></div>
+
+    <button
+      class="gb-login-button"
+      type="button"
+      disabled
+    >
+      LOGIN
+    </button>
+
+  </div>
+
+</div>
+
+      </div>
+    </div>
+  </header>
+
+  <div class="gb-brand-strip" aria-label="Site identity">
+    GONGBOO.ORG : EASY LEARNING
+  </div>
+
+
+
+<!-- SUBBLOCK 3500 : BIBLE CONTENT HOST -->
+
+<main class="gb-content">
+
+
+  <!-- ===================================================== -->
+  <!-- BIBLE HOME / NEW LESSON -->
+  <!-- ===================================================== -->
+
+  <section
+    id="setupSection"
+    class="gb-demo-card"
+  >
+
+    <div class="card card-new">
+
+      <div
+        id="resumeQuickContainer"
+        class="resume-quick"
+        hidden
+      ></div>
+
+
+      <div class="card-icon">
+        📖
+      </div>
+
+
+      <div class="card-title card-title-new">
+        NEW LESSON
+      </div>
+
+
+      <div class="card-sub">
+        Choose a book, then choose a chapter
+      </div>
+
+
+      <div
+        id="bibleChapterPicker"
+        class="bible-chapter-picker"
+        aria-label="Bible chapters"
+        aria-live="polite"
+        hidden
+      ></div>
+
+
+      <div
+        id="bibleBookPicker"
+        class="bible-book-picker"
+        aria-label="Bible books"
+      ></div>
+
+
+      <div
+        class="input-wrapper bible-legacy-chapter-select"
+        hidden
+      >
+
+        <select id="setSelector">
+
+          <option value="1">
+            Loading sets...
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div
+        class="input-wrapper"
+        hidden
+      >
+
+        <input
+          type="number"
+          id="startNumber"
+          min="1"
+          placeholder="1-720"
+        >
+
+      </div>
+
+
+      <button
+        class="btn-start"
+        id="startQuizBtn"
+        hidden
+      >
+        ▶ START
+      </button>
+
+
+      <div class="card-hint">
+        Select one of the 66 books.
+      </div>
+
+    </div>
+
+
+    <div
+      class="card card-resume"
+      id="resumeCard"
+      hidden
+    >
+
+      <div class="card-icon">
+        ⏳
+      </div>
+
+
+      <div class="card-title card-title-resume">
+        RESUME
+      </div>
+
+
+      <div class="card-sub card-sub-resume">
+        Continue previous session
+      </div>
+
+
+      <div id="savedBadgeContainer">
+
+        <div class="no-session">
+
+          No saved session
+
+          <small>
+            Start a new lesson
+          </small>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <div class="bottom-hint">
+      Progress is saved automatically
+    </div>
+
+  </section>
+
+
+
+  <!-- ===================================================== -->
+  <!-- BIBLE LESSON -->
+  <!-- ===================================================== -->
+
+  <section
+    id="quizMain"
+    class="gb-demo-card"
+    style="display:none;"
+  >
+
+    <div
+      id="reviewBanner"
+      class="review-banner"
+      style="display:none;"
+    >
+
+      <span>
+        Review Mode
+      </span>
+
+      <button
+        id="exitReviewBtn"
+        class="exit-review-btn"
+      >
+        EXIT REVIEW
+      </button>
+
+    </div>
+
+
+    <div
+      class="progress-area"
+      style="display:none;"
+    >
+
+      <div class="progress-bar-container">
+
+        <div
+          class="progress-bar"
+          id="quizProgressBar"
+        ></div>
+
+      </div>
+
+
+      <div
+        class="account-identity"
+        id="accountIdentity"
+      ></div>
+
+    </div>
+
+
+    <div
+      id="quizContent"
+      style="display:none;"
+    >
+
+      <div id="questionContainer"></div>
+
+
+      <div
+        id="explanationBox"
+        class="explanation"
+      >
+
+        <div id="explanationText"></div>
+
+      </div>
+
+
+      <!-- 기존 MAIN NAV 호환 -->
+
+      <div hidden>
+
+        <button
+          id="prevBtn"
+          type="button"
+        ></button>
+
+        <button
+          id="skipBtn"
+          type="button"
+        ></button>
+
+        <button
+          id="nextBtn"
+          type="button"
+        ></button>
+
+        <button
+          id="submitBtn"
+          type="button"
+        ></button>
+
+        <button
+          id="quitBtn"
+          type="button"
+        ></button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+
+<!-- SUBBLOCK 4000 : PREV / NEXT -->
+
+<footer class="gb-bottom-nav">
+
+  <button
+    id="prevButton"
+    class="gb-nav-button"
+    type="button"
+  >
+    ◀ PREV
+  </button>
+
+
+  <button
+    id="nextButton"
+    class="gb-nav-button"
+    type="button"
+  >
+    NEXT ▶
+  </button>
+
+</footer>
+
+
+</div>
+
+
+
+<!-- SUBBLOCK 4250 : LEGACY MAIN COMPATIBILITY -->
+
+<div hidden>
+
+  <button
+    id="biblePassageToggle"
+    type="button"
+    aria-pressed="false"
+  ></button>
+
+  <button
+    id="bibleLogoutToggle"
+    type="button"
+  ></button>
+
+  <button
+    id="timerToggle"
+    type="button"
+    aria-expanded="false"
+  ></button>
+
+  <section
+    id="timerPanel"
+    hidden
+  ></section>
+
+  <div
+    id="bibleHeaderActionRow"
+  ></div>
+
+</div>
+
+
+<div
+  id="resultModal"
+  class="modal"
+>
+  <div class="modal-content">
+
+    <h2 style="text-align:center">
+      RESULT
+    </h2>
+
+    <div class="stats">
+
+      <div class="stat-card">
+        <div>CORRECT</div>
+        <div
+          class="stat-value"
+          id="correctCount"
+        >
+          0
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div>ACCURACY</div>
+        <div
+          class="stat-value"
+          id="accuracyRate"
+        >
+          0%
+        </div>
+      </div>
+
+    </div>
+
+    <div id="resultGrid" class="result-grid"></div>
+
+    <div class="button-group">
+
+      <button
+        id="retryAllBtn"
+        class="nav-btn btn-prev"
+      >
+        RETRY
+      </button>
+
+      <button
+        id="reviewWrongBtn"
+        class="nav-btn btn-warning"
+      >
+        REVIEW
+      </button>
+
+      <button
+        id="closeModalBtn"
+        class="nav-btn btn-prev"
+      >
+        CLOSE
+      </button>
+
+    </div>
+
+    <div id="loadNextContainer"></div>
+
+  </div>
+</div>
+
+
+<div
+  id="wrongModal"
+  class="modal"
+>
+  <div
+    class="modal-content"
+    style="max-width:750px"
+  >
+
+    <h2 style="text-align:center">
+      REVIEW
+    </h2>
+
+    <div
+      id="wrongList"
+      class="wrong-list"
+    ></div>
+
+    <div class="button-group">
+
+      <button
+        id="retryWrongFromReviewBtn"
+        class="nav-btn btn-warning"
+      >
+        RETRY WRONG ONLY
+      </button>
+
+      <button
+        id="closeWrongBtn"
+        class="nav-btn btn-prev"
+      >
+        CLOSE
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+
+<div
+  id="progressModal"
+  class="modal"
+  style="display:none"
+>
+  <div class="modal-content">
+
+    <div id="progressModalBody"></div>
+
+    <div class="button-group">
+
+      <button
+        id="progressContinueBtn"
+        class="nav-btn btn-next"
+      >
+        CONTINUE
+      </button>
+
+      <button
+        id="progressCancelBtn"
+        class="nav-btn btn-quit"
+      >
+        START FRESH
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
+<!-- SUBBLOCK 4300 : BIBLE PEOPLE PANEL -->
+
+<section
+  id="biblePeoplePanel"
+  class="bible-people-panel"
+  aria-label="Bible People"
+  hidden
+>
+
+  <div
+    class="bible-people-dialog"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="biblePeopleTitle"
+  >
+
+    <header class="bible-people-head">
+
+      <div>
+        <span class="bible-people-kicker">
+          BIBLE REFERENCE
+        </span>
+
+        <h2 id="biblePeopleTitle">
+          Bible People
+        </h2>
+      </div>
+
+      <div class="bible-context-head-actions">
+
+        <button
+          type="button"
+          id="biblePeopleBack"
+          class="bible-context-back"
+          disabled
+        >
+          ← Back
+        </button>
+
+        <button
+          type="button"
+          id="biblePeopleForward"
+          class="bible-context-back"
+          disabled
+        >
+          Forward →
+        </button>
+
+        <button
+          type="button"
+          id="biblePeopleAtlas"
+          class="bible-people-close bible-people-atlas"
+        >
+          🌐
+        </button>
+
+        <button
+          type="button"
+          id="biblePeopleClose"
+          class="bible-people-close"
+        >
+          ×
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <form
+      id="biblePeopleSearchForm"
+      class="bible-people-search"
+      role="search"
+    >
+
+      <label for="biblePeopleSearchInput">
+        Search by name or alias
+      </label>
+
+      <div>
+
+        <input
+          id="biblePeopleSearchInput"
+          type="search"
+          autocomplete="off"
+          placeholder="Aaron, Abraham, David..."
+          required
+        >
+
+        <button type="submit">
+          Search
+        </button>
+
+      </div>
+
+    </form>
+
+
+    <nav
+      id="biblePeopleAlphabet"
+      class="bible-sermon-alphabet"
+      aria-label="Filter Bible people alphabetically"
+    ></nav>
+
+
+    <div
+      id="biblePeopleStatus"
+      class="bible-people-status"
+      aria-live="polite"
+    >
+      Enter a Bible person’s name.
+    </div>
+
+
+    <div
+      class="bible-people-layout bible-explore-layout is-search-browser"
+    >
+
+      <aside
+        id="biblePeopleResults"
+        class="bible-people-results"
+      ></aside>
+
+      <main
+        id="biblePeopleDetail"
+        class="bible-people-detail"
+      >
+
+        <div class="bible-people-empty">
+
+          <strong>
+            Explore people across Scripture
+          </strong>
+
+          <span>
+            Search for a person to view descriptions,
+            references, and relationships.
+          </span>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+
+</section>
+
+ <!-- SUBBLOCK 4400 : BIBLE ATLAS / JOURNEYS / TIMELINE -->
+
+<section id="bibleExplorePanel" class="bible-people-panel bible-explore-panel" aria-label="Bible Atlas" hidden>
+  <div class="bible-people-dialog bible-explore-dialog" role="dialog" aria-modal="true" aria-labelledby="bibleExploreTitle">
+
+    <header class="bible-people-head">
+      <div>
+        <span class="bible-people-kicker">BIBLE CONTEXT</span>
+        <h2 id="bibleExploreTitle">Atlas &amp; Bible Study</h2>
+      </div>
+
+      <div class="bible-context-head-actions">
+        <button type="button" id="bibleExploreBack" class="bible-context-back" disabled>← Back</button>
+        <button type="button" id="bibleExploreForward" class="bible-context-back" disabled>Forward →</button>
+        <button type="button" id="bibleExplorePeople" class="bible-context-back bible-people-shortcut" aria-label="Open Bible People" title="Open Bible People — search people, relationships, places, events, and Scripture">
+          <span class="header-person-icon" aria-hidden="true"></span>
+        </button>
+        <button type="button" id="bibleExploreClose" class="bible-people-close" aria-label="Close Bible Atlas">&times;</button>
+      </div>
+    </header>
+
+    <nav class="bible-explore-tabs" aria-label="Bible context sections">
+      <button type="button" class="is-active" data-bible-explore-tab="places">Places</button>
+      <button type="button" data-bible-explore-tab="journeys">Journeys</button>
+      <button type="button" data-bible-explore-tab="timeline">Timeline</button>
+      <button type="button" data-bible-explore-tab="patristic">Early Church</button>
+      <button type="button" data-bible-explore-tab="knowledge">Study</button>
+      <button type="button" data-bible-explore-tab="library">Library</button>
+      <button type="button" data-bible-explore-tab="museum">Museum</button>
+    </nav>
+
+    <div id="bibleExploreStatus" class="bible-people-status" aria-live="polite">
+      Loading Bible context data...
+    </div>
+
+
+    <section class="bible-explore-view is-active" data-bible-explore-view="places">
+      <div class="bible-explore-toolbar">
+        <input id="biblePlaceSearch" type="search" autocomplete="off" placeholder="Search Jerusalem, Bethlehem, Jordan...">
+      </div>
+
+      <nav id="biblePlaceAlphabet" class="bible-sermon-alphabet" aria-label="Filter places alphabetically"></nav>
+
+      <div class="bible-people-layout bible-explore-layout">
+        <aside id="biblePlaceResults" class="bible-people-results" aria-label="Place results"></aside>
+        <main id="biblePlaceDetail" class="bible-people-detail"></main>
+      </div>
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="journeys">
+      <div class="bible-explore-toolbar">
+        <input id="bibleJourneySearch" type="search" autocomplete="off" placeholder="Search a journey...">
+        <select id="bibleJourneySelector" aria-label="Select a journey" hidden></select>
+      </div>
+
+      <nav id="bibleJourneyAlphabet" class="bible-sermon-alphabet" aria-label="Filter journeys alphabetically"></nav>
+
+      <div class="bible-people-layout bible-explore-layout is-search-browser">
+        <aside id="bibleJourneyResults" class="bible-people-results" aria-label="Journey results"></aside>
+        <main id="bibleJourneyOutput" class="bible-people-detail"></main>
+      </div>
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="timeline">
+      <div class="bible-explore-toolbar">
+        <input id="bibleTimelineSearch" type="search" autocomplete="off" placeholder="Search a Bible book or timeline...">
+        <select id="bibleTimelineSelector" aria-label="Select a Bible book" hidden></select>
+        <select id="bibleTimelineEventSelector" aria-label="Select an event"></select>
+      </div>
+
+      <nav id="bibleTimelineAlphabet" class="bible-sermon-alphabet" aria-label="Filter timelines alphabetically"></nav>
+
+      <div class="bible-people-layout bible-explore-layout is-search-browser">
+        <aside id="bibleTimelineResults" class="bible-people-results" aria-label="Timeline results"></aside>
+        <main id="bibleTimelineOutput" class="bible-people-detail"></main>
+      </div>
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="patristic">
+      <div class="bible-explore-toolbar">
+        <input id="biblePatristicSearch" type="search" autocomplete="off" placeholder="Search work, author, or year...">
+      </div>
+
+      <nav id="biblePatristicAlphabet" class="bible-sermon-alphabet" aria-label="Filter Early Church works alphabetically"></nav>
+
+      <div class="bible-people-layout bible-explore-layout">
+        <aside id="biblePatristicResults" class="bible-people-results" aria-label="Early Church works"></aside>
+        <main id="biblePatristicDetail" class="bible-people-detail"></main>
+      </div>
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="knowledge">
+
+      <nav class="bible-knowledge-sections" aria-label="Bible study sections">
+        <button type="button" class="is-active" data-knowledge-section="entities">Verse Topics</button>
+        <button type="button" data-knowledge-section="words">Words</button>
+        <button type="button" data-knowledge-section="dictionary">Dictionary</button>
+        <button type="button" data-knowledge-section="topics">Topics</button>
+        <button type="button" data-knowledge-section="books">Books</button>
+      </nav>
+
+
+      <section class="bible-knowledge-view is-active" data-knowledge-view="entities">
+        <div class="bible-explore-toolbar">
+          <input id="bibleKnowledgeEntitySearch" type="search" autocomplete="off" placeholder="Search key terms, plants, animals, objects...">
+        </div>
+
+        <nav id="bibleEntitiesAlphabet" class="bible-sermon-alphabet" aria-label="Filter verse topics alphabetically"></nav>
+
+        <div class="bible-people-layout bible-explore-layout">
+          <aside id="bibleKnowledgeEntityResults" class="bible-people-results" aria-label="Verse topic results"></aside>
+          <main id="bibleKnowledgeEntityDetail" class="bible-people-detail"></main>
+        </div>
+      </section>
+
+
+      <section class="bible-knowledge-view" data-knowledge-view="words">
+        <div class="bible-explore-toolbar">
+          <input id="bibleWordSearch" type="search" autocomplete="off" placeholder="Search an English Bible word...">
+        </div>
+
+        <nav id="bibleWordAlphabet" class="bible-sermon-alphabet" aria-label="Filter words alphabetically"></nav>
+
+        <div class="bible-people-layout bible-explore-layout">
+          <aside id="bibleWordResults" class="bible-people-results" aria-label="Word results"></aside>
+          <main id="bibleWordDetail" class="bible-people-detail"></main>
+        </div>
+      </section>
+
+
+      <section class="bible-knowledge-view" data-knowledge-view="dictionary">
+        <div class="bible-explore-toolbar">
+          <input id="bibleDictionarySearch" type="search" autocomplete="off" placeholder="Search the Bible dictionary...">
+        </div>
+
+        <nav id="bibleDictionaryAlphabet" class="bible-sermon-alphabet" aria-label="Filter dictionary entries alphabetically"></nav>
+
+        <div class="bible-people-layout bible-explore-layout">
+          <aside id="bibleDictionaryResults" class="bible-people-results" aria-label="Dictionary results"></aside>
+          <main id="bibleDictionaryDetail" class="bible-people-detail"></main>
+        </div>
+      </section>
+
+
+      <section class="bible-knowledge-view" data-knowledge-view="topics">
+        <div class="bible-explore-toolbar">
+          <input id="bibleTopicSearch" type="search" autocomplete="off" placeholder="Search a Bible topic...">
+        </div>
+
+        <nav id="bibleTopicAlphabet" class="bible-sermon-alphabet" aria-label="Filter topics alphabetically"></nav>
+
+        <div class="bible-people-layout bible-explore-layout">
+          <aside id="bibleTopicResults" class="bible-people-results" aria-label="Topic results"></aside>
+          <main id="bibleTopicDetail" class="bible-people-detail"></main>
+        </div>
+      </section>
+
+
+      <section class="bible-knowledge-view" data-knowledge-view="books">
+        <div class="bible-explore-toolbar">
+          <input id="bibleBookSearch" type="search" autocomplete="off" placeholder="Search a Bible book...">
+        </div>
+
+        <nav id="bibleBookAlphabet" class="bible-sermon-alphabet" aria-label="Filter Bible books alphabetically"></nav>
+
+        <div class="bible-people-layout bible-explore-layout">
+          <aside id="bibleBookResults" class="bible-people-results" aria-label="Bible book results"></aside>
+          <main id="bibleBookDetail" class="bible-people-detail"></main>
+        </div>
+      </section>
+
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="library">
+
+      <nav class="bible-knowledge-sections" aria-label="Bible library sections">
+        <button type="button" class="is-active" data-library-section="verse">Commentary</button>
+        <button type="button" data-library-section="church-father-quotes">Church Fathers</button>
+        <button type="button" data-library-section="reference">Dictionaries</button>
+        <button type="button" data-library-section="sermon">Sermons</button>
+        <button type="button" data-library-section="hymn">Hymns</button>
+        <button type="button" data-library-section="historical-work">Historical Works</button>
+      </nav>
+
+      <div class="bible-explore-toolbar">
+        <input id="bibleLibrarySearch" type="search" autocomplete="off" placeholder="Search titles, preachers, Scripture, language, or date...">
+
+        <select id="bibleSermonSearchBy" aria-label="Search sermons by" hidden>
+          <option value="title">Title</option>
+          <option value="author">Author</option>
+        </select>
+
+        <select id="bibleSermonSource" aria-label="Filter sermons by collection" hidden>
+          <option value="">All collections</option>
+        </select>
+      </div>
+
+      <nav id="bibleSermonAlphabet" class="bible-sermon-alphabet" aria-label="Filter sermons alphabetically" hidden></nav>
+      <nav id="bibleLibraryAlphabet" class="bible-sermon-alphabet" aria-label="Filter library sources alphabetically"></nav>
+
+      <div class="bible-people-layout bible-explore-layout">
+        <aside id="bibleLibraryResults" class="bible-people-results" aria-label="Library sources"></aside>
+        <main id="bibleLibraryDetail" class="bible-people-detail"></main>
+      </div>
+
+    </section>
+
+
+    <section class="bible-explore-view" data-bible-explore-view="museum">
+
+      <div class="bible-explore-toolbar bible-museum-toolbar">
+
+        <input id="bibleMuseumSearch" type="search" autocomplete="off" placeholder="Search verified Met images…">
+
+        <select id="bibleMuseumEra" aria-label="Filter museum by Bible era">
+          <option value="">All eras</option>
+          <option>Patriarchal era</option>
+          <option>Exodus and Judges</option>
+          <option>United and divided monarchy</option>
+          <option>Exile and Persian return</option>
+          <option>Hellenistic era</option>
+          <option>New Testament Roman era</option>
+        </select>
+
+        <select id="bibleMuseumRegion" aria-label="Filter museum by region">
+          <option value="">All regions</option>
+          <option>Egypt</option>
+          <option>Levant and Canaan</option>
+          <option>Mesopotamia</option>
+          <option>Persia</option>
+          <option>Greek world</option>
+          <option>Roman world</option>
+        </select>
+
+        <select id="bibleMuseumTopic" aria-label="Filter museum by topic">
+          <option value="">All topics</option>
+          <option>Clothing and textiles</option>
+          <option>Homes and daily life</option>
+          <option>Food and agriculture</option>
+          <option>Cities and architecture</option>
+          <option>Military and politics</option>
+          <option>Religion and ritual</option>
+          <option>Economy and work</option>
+          <option>Writing and language</option>
+          <option>Environment and animals</option>
+        </select>
+
+      </div>
+
+      <nav id="bibleMuseumLetters" class="bible-museum-letters" aria-label="Browse museum titles by first letter"></nav>
+
+      <div id="bibleMuseumPager" class="bible-sermon-scroll-note" aria-live="polite"></div>
+
+      <div class="bible-people-layout bible-explore-layout">
+        <aside id="bibleMuseumResults" class="bible-people-results" aria-label="Met Museum artwork results"></aside>
+        <main id="bibleMuseumDetail" class="bible-people-detail"></main>
+      </div>
+
+    </section>
+
+  </div>
+</section>
+      
+<!-- SUBBLOCK 4500 : SCRIPT LOAD / PAGE CLOSE -->
+
+<script src="./config.js"></script>
+<script src="./supabase-config.js"></script>
+<script src="./supabase-provider.js"></script>
+
+<script src="./gongboo-ui.js?v=template2-12"></script>
+
+<script
+  type="module"
+  src="./bible-explorer.js"
+></script>
+
+<script
+  type="module"
+  src="./bible-main.js?v=template2-12"
+></script>
+
+</body>
+</html>
