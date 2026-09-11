@@ -11409,9 +11409,22 @@ window.openBiblePerson =
   };
 
 function openBiblePersonFromUrl_() {
-  var personName = new URLSearchParams(
+  var searchParams = new URLSearchParams(
     window.location.search
-  ).get('person');
+  );
+
+  var personId = searchParams.get('personId');
+
+  if (personId) {
+    personId = personId.trim();
+
+    if (personId) {
+      window.openBiblePerson(personId);
+      return;
+    }
+  }
+
+  var personName = searchParams.get('person');
 
   if (!personName) {
     return;
