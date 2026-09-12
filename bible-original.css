@@ -1478,6 +1478,12 @@ html:not(.admin-user) .admin-preview-panel {
   .bible-people-status{min-height:22px;padding:0 26px 12px;color:#64748b;font-size:13px}.bible-people-status.is-error{color:#b91c1c}
   .bible-people-layout{display:grid;grid-template-columns:172px minmax(0,1fr);gap:16px;padding:0 26px 26px}
   .bible-people-results,.bible-people-detail{border:1px solid #dbe3ee;border-radius:15px;background:#fff;min-height:500px;overflow:auto}
+  .bible-people-panel.is-direct-person .bible-people-search,
+  .bible-people-panel.is-direct-person #biblePeopleAlphabet,
+  .bible-people-panel.is-direct-person #biblePeopleStatus,
+  .bible-people-panel.is-direct-person #biblePeopleResults{display:none!important}
+  .bible-people-panel.is-direct-person .bible-people-layout{grid-template-columns:minmax(0,1fr);padding-top:20px}
+  .bible-people-panel.is-direct-person .bible-people-detail{width:100%;min-height:calc(100vh - 150px)}
   .bible-person-result{display:block;width:100%;border:0;border-bottom:1px solid #e2e8f0;background:#fff;padding:14px;text-align:left;cursor:pointer}
   .bible-person-result:hover,.bible-person-result.is-active{background:#eff6ff}.bible-person-result strong,.bible-person-result span{display:block}
   .bible-person-result strong{font-size:15px;color:#172033}.bible-person-result span{margin-top:3px;font-size:12px;color:#64748b}
@@ -1673,6 +1679,7 @@ html:not(.admin-user) .admin-preview-panel {
   .bible-legacy-chapter-select{display:none!important}
   @media(max-width:600px){.setup-area{margin:8px;padding:18px 10px}.card{padding:20px 10px}.bible-book-button{font-size:14px}.bible-chapter-picker{padding:3px 2px 9px}.bible-chapter-button{min-width:36px;height:38px}.card-resume{padding:18px 12px}}
   @media(max-width:760px){.bible-people-panel{padding:0}.bible-people-dialog{min-height:100vh;border-radius:0}.bible-people-layout{grid-template-columns:1fr}.bible-people-results{min-height:0;max-height:210px}.bible-people-detail{min-height:430px}.bible-person-title{display:block}.bible-person-id{display:inline-block;margin-top:10px}.bible-explore-tabs,.bible-knowledge-sections{padding-left:14px;padding-right:14px}.bible-explore-toolbar{padding-left:14px;padding-right:14px}.bible-explore-output{margin-left:14px;margin-right:14px}.bible-source-images{grid-template-columns:1fr}}
+  @media(max-width:760px){.bible-people-panel.is-direct-person .bible-people-layout{padding:14px}.bible-people-panel.is-direct-person .bible-people-detail{height:calc(100vh - 90px);min-height:0}}
   .bible-explore-layout.is-search-browser{grid-template-columns:minmax(220px,28%) minmax(0,1fr);height:min(68vh,720px);min-height:520px;align-items:stretch}
   .bible-explore-layout.is-search-browser>.bible-people-results,.bible-explore-layout.is-search-browser>.bible-people-detail{min-height:0;height:100%;overflow-y:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
   @media(max-width:760px){.bible-explore-layout.is-search-browser{display:grid;grid-template-columns:1fr;height:auto}.bible-explore-layout.is-search-browser>.bible-people-results{height:42vh;max-height:none}.bible-explore-layout.is-search-browser>.bible-people-detail{height:55vh;min-height:0}}

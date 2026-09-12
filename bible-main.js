@@ -11381,11 +11381,38 @@ function biblePeopleSearchSubmit_(
 // Public Person Opener
 // ============================================================
 
+function biblePeopleSetDirectDetailMode_(
+  enabled
+) {
+
+  var panel =
+    document.getElementById(
+      'biblePeoplePanel'
+    );
+
+  if (!panel) {
+    return;
+  }
+
+  panel.classList.toggle(
+    'is-direct-person',
+    !!enabled
+  );
+}
+
+
 window.openBiblePerson =
   function(
     personId,
     navigationOptions
   ) {
+
+    biblePeopleSetDirectDetailMode_(
+      !!(
+        navigationOptions &&
+        navigationOptions.directUrl
+      )
+    );
 
     biblePeopleOpen_();
 
@@ -11407,6 +11434,57 @@ window.openBiblePerson =
       personId
     );
   };
+
+function openBiblePersonFromUrl_() {
+  var searchParams = new URLSearchParams(
+    window.location.search
+  );
+
+  var personId = searchParams.get('personId');
+
+  if (personId) {
+    personId = personId.trim();
+
+    if (personId) {
+      window.openBiblePerson(
+        personId,
+        {
+          skipHistory: true,
+          directUrl: true
+        }
+      );
+      return;
+    }
+  }
+
+  var personName = searchParams.get('person');
+
+  if (!personName) {
+    return;
+  }
+
+  personName = personName.trim();
+
+  if (!personName) {
+    return;
+  }
+
+  biblePeopleOpen_();
+
+  var input = document.getElementById(
+    'biblePeopleSearchInput'
+  );
+
+  if (input) {
+    input.value = personName;
+  }
+
+  biblePeopleRunSearch_(
+    personName,
+    false
+  );
+}
+
 
 
 // SUBBLOCK 1580
@@ -11684,10 +11762,12 @@ setTimeout(
 
 
     initBiblePeopleExplorer();
-
+    openBiblePersonFromUrl_();
   },
   200
 );
+
+
 
 // SUBBLOCK 1590
 // ============================================================
