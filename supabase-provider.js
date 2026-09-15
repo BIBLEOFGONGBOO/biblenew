@@ -243,10 +243,10 @@
 
   // ============================================================
   // NEW:
-  // bible_question_translations 의 KO 읽기
+  // bible_question_translations 의 KO / JA 읽기
   // ============================================================
 
-  async function loadKoTranslations_(
+  async function loadQuestionTranslations_(
     rows,
     signal
   ) {
@@ -300,12 +300,12 @@
         'chunk_4',
         'chunk_5'
       ].join(',') +
-      '&lang=eq.KO' +
+      '&lang=in.(KO,JA)' +
       '&record_id=in.(' +
       idList +
       ')' +
       '&limit=' +
-      ids.length;
+      (ids.length * 2);
 
     var rowsKo =
       await rest_(
@@ -326,14 +326,23 @@
             ''
           ).trim();
 
-        if (id) {
-          map[id] = row;
+        var language =
+          String(row && row.lang || '')
+            .trim()
+            .toUpperCase();
+
+        if (id && (language === 'KO' || language === 'JA')) {
+          if (!map[id]) {
+            map[id] = {};
+          }
+
+          map[id][language] = row;
         }
       }
     );
 
     console.log(
-      '[BIBLE KO] Translation loaded:',
+      '[BIBLE I18N] Translation loaded:',
       Object.keys(map).length +
         ' / ' +
         ids.length
@@ -344,115 +353,91 @@
 
   // ============================================================
   // NEW:
-  // 기존 문제 데이터 위에 새 KO 번역 덮어쓰기
+  // 기존 문제 데이터 위에 새 번역 덮어쓰기
   // ============================================================
 
-  function applyKoTranslation_(
+  function applyQuestionTranslation_(
     row,
-    ko
+    translation,
+    language
   ) {
-    if (!row || !ko) {
+    if (!row || !translation) {
       return row;
     }
 
+    var suffix =
+      String(language || '')
+        .trim()
+        .toUpperCase();
+
+    if (suffix !== 'KO' && suffix !== 'JA') {
+      return row;
+    }
+
+    var lower = suffix.toLowerCase();
     var next =
       Object.assign({}, row);
 
-    next.Q_KO =
-      ko.question ||
-      next.Q_KO ||
-      next.q_ko ||
+    next['Q_' + suffix] =
+      translation.question ||
+      next['Q_' + suffix] ||
+      next['q_' + lower] ||
       '';
 
-    next.P_KO =
-      ko.passage ||
-      next.P_KO ||
-      next.passage_ko ||
+    next['P_' + suffix] =
+      translation.passage ||
+      next['P_' + suffix] ||
+      next['passage_' + lower] ||
       '';
 
-    next['1_KO'] =
-      ko.option_1 ||
-      next['1_KO'] ||
-      next.option_1_ko ||
+    next['1_' + suffix] =
+      translation.option_1 ||
+      next['1_' + suffix] ||
+      next['option_1_' + lower] ||
       '';
 
-    next['2_KO'] =
-      ko.option_2 ||
-      next['2_KO'] ||
-      next.option_2_ko ||
+    next['2_' + suffix] =
+      translation.option_2 ||
+      next['2_' + suffix] ||
+      next['option_2_' + lower] ||
       '';
 
-    next['3_KO'] =
-      ko.option_3 ||
-      next['3_KO'] ||
-      next.option_3_ko ||
+    next['3_' + suffix] =
+      translation.option_3 ||
+      next['3_' + suffix] ||
+      next['option_3_' + lower] ||
       '';
 
-    next['4_KO'] =
-      ko.option_4 ||
-      next['4_KO'] ||
-      next.option_4_ko ||
+    next['4_' + suffix] =
+      translation.option_4 ||
+      next['4_' + suffix] ||
+      next['option_4_' + lower] ||
       '';
 
-    next.E_KO =
-      ko.explanation ||
-      next.E_KO ||
-      next.explanation_ko ||
+    next['E_' + suffix] =
+      translation.explanation ||
+      next['E_' + suffix] ||
+      next['explanation_' + lower] ||
       '';
 
-    // lower-case도 같이 맞춰 둔다.
-    next.q_ko = next.Q_KO;
-    next.passage_ko = next.P_KO;
+    next['q_' + lower] = next['Q_' + suffix];
+    next['passage_' + lower] = next['P_' + suffix];
+    next['option_1_' + lower] = next['1_' + suffix];
+    next['option_2_' + lower] = next['2_' + suffix];
+    next['option_3_' + lower] = next['3_' + suffix];
+    next['option_4_' + lower] = next['4_' + suffix];
+    next['explanation_' + lower] = next['E_' + suffix];
 
-    next.option_1_ko =
-      next['1_KO'];
-
-    next.option_2_ko =
-      next['2_KO'];
-
-    next.option_3_ko =
-      next['3_KO'];
-
-    next.option_4_ko =
-      next['4_KO'];
-
-    next.explanation_ko =
-      next.E_KO;
-
-    // CHUNK도 같이 실어 둔다.
-    next.CHUNK_1_KO =
-      ko.chunk_1 || '';
-
-    next.CHUNK_2_KO =
-      ko.chunk_2 || '';
-
-    next.CHUNK_3_KO =
-      ko.chunk_3 || '';
-
-    next.CHUNK_4_KO =
-      ko.chunk_4 || '';
-
-    next.CHUNK_5_KO =
-      ko.chunk_5 || '';
-
-    next.chunk_1_ko =
-      next.CHUNK_1_KO;
-
-    next.chunk_2_ko =
-      next.CHUNK_2_KO;
-
-    next.chunk_3_ko =
-      next.CHUNK_3_KO;
-
-    next.chunk_4_ko =
-      next.CHUNK_4_KO;
-
-    next.chunk_5_ko =
-      next.CHUNK_5_KO;
+    for (var chunkIndex = 1; chunkIndex <= 5; chunkIndex++) {
+      next['CHUNK_' + chunkIndex + '_' + suffix] =
+        translation['chunk_' + chunkIndex] || '';
+      next['chunk_' + chunkIndex + '_' + lower] =
+        next['CHUNK_' + chunkIndex + '_' + suffix];
+    }
 
     next.RECORD_ID =
       getQuestionRecordId_(row) ||
-      ko.record_id ||
+      translation.record_id ||
       '';
 
     next.record_id =
@@ -463,10 +448,10 @@
 
   // ============================================================
   // NEW:
-  // bible-content 응답에 KO 번역 합치기
+  // bible-content 응답에 KO / JA 번역 합치기
   // ============================================================
 
-  async function overlayKoTranslations_(
+  async function overlayQuestionTranslations_(
     result,
     signal
   ) {
@@ -533,15 +518,15 @@
     }
 
     try {
-      var koMap =
-        await loadKoTranslations_(
+      var translationMap =
+        await loadQuestionTranslations_(
           rows,
           signal
         );
 
       if (
-        !koMap ||
-        !Object.keys(koMap).length
+        !translationMap ||
+        !Object.keys(translationMap).length
       ) {
         return result;
       }
@@ -554,12 +539,22 @@
 
             if (
               recordId &&
-              koMap[recordId]
+              translationMap[recordId]
             ) {
-              return applyKoTranslation_(
-                row,
-                koMap[recordId]
-              );
+              var translations = translationMap[recordId];
+              var next = row;
+
+              ['KO', 'JA'].forEach(function(language) {
+                if (translations[language]) {
+                  next = applyQuestionTranslation_(
+                    next,
+                    translations[language],
+                    language
+                  );
+                }
+              });
+
+              return next;
             }
 
             return row;
@@ -573,8 +568,8 @@
       }
 
       console.log(
-        '[BIBLE KO] New translations applied:',
-        Object.keys(koMap).length
+        '[BIBLE I18N] New translations applied:',
+        Object.keys(translationMap).length
       );
 
       return response_(
@@ -585,7 +580,7 @@
     } catch (error) {
       // 새 번역 테이블 문제가 있어도 기존 앱은 계속 작동
       console.warn(
-        '[BIBLE KO] Translation overlay failed. Legacy KO is used.',
+        '[BIBLE I18N] Translation overlay failed. Legacy data is used.',
         error
       );
 
@@ -1382,8 +1377,8 @@
         signal
       );
 
-    // 그 위에 새 KO translation을 덮는다.
-    return overlayKoTranslations_(
+    // 그 위에 새 KO / JA translation을 덮는다.
+    return overlayQuestionTranslations_(
       questionResponse,
       signal
     );

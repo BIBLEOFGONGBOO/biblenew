@@ -4,7 +4,6 @@
 
   var cardPairs = [
     ['systemButton','systemCard'],
-    ['langButton','langCard'],
     ['playMenuButton','playCard'],
     ['micMenuButton','micCard'],
     ['psgMenuButton','psgCard'],
@@ -28,9 +27,6 @@
     bibleQuizToggle:
       'Show or hide the quiz',
 
-    langButton:
-      'Language settings',
-
     playButton:
       'Start or stop highlighted playback',
 
@@ -44,7 +40,7 @@
       'Microphone settings',
 
     moreButton:
-      'More learning tools',
+      'Settings',
 
     repeatToggle:
       'Repeat playback',
@@ -380,7 +376,7 @@ function setPlayState(
 
   if(playButtonLabel){
     playButtonLabel.textContent =
-      isPlaying ? '■ STOP' : '▶ PLAY';
+      isPlaying ? '■' : '▶';
   }
 
 
@@ -554,7 +550,7 @@ if(playStopButton){
 
     if(micButtonLabel){
       micButtonLabel.textContent =
-        running ? '■ STOP' : 'MIC';
+        running ? '■' : '🎤';
     }
 
     var quickRecognize =

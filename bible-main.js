@@ -919,6 +919,11 @@ function convertBibleRowsToAnne_(
           )
         );
 
+      var qJa =
+        cleanBibleText_(
+          readBibleValue_(row, map, 'Q_JA')
+        );
+
 
       var pEn =
         cleanBibleText_(
@@ -937,6 +942,11 @@ function convertBibleRowsToAnne_(
             map,
             'P_KO'
           )
+        );
+
+      var pJa =
+        cleanBibleText_(
+          readBibleValue_(row, map, 'P_JA')
         );
 
 
@@ -991,12 +1001,20 @@ function convertBibleRowsToAnne_(
           )
         );
 
+      var eJa =
+        cleanBibleText_(
+          readBibleValue_(row, map, 'E_JA')
+        );
+
 
       var enOptions =
         {};
 
 
       var koOptions =
+        {};
+
+      var jaOptions =
         {};
 
 
@@ -1028,6 +1046,18 @@ function convertBibleRowsToAnne_(
               map,
               choiceIndex +
               '_KO'
+            )
+          );
+
+        jaOptions[
+          choiceIndex
+        ] =
+          cleanBibleText_(
+            readBibleValue_(
+              row,
+              map,
+              choiceIndex +
+              '_JA'
             )
           );
       }
@@ -1146,6 +1176,27 @@ function convertBibleRowsToAnne_(
         });
       }
 
+      // Japanese
+      if (
+        qJa ||
+        pJa ||
+        jaOptions[1] ||
+        jaOptions[2] ||
+        jaOptions[3] ||
+        jaOptions[4]
+      ) {
+        translations.push({
+          language_code: 'ja',
+          passage: pJa,
+          question_text: qJa,
+          option_1: jaOptions[1],
+          option_2: jaOptions[2],
+          option_3: jaOptions[3],
+          option_4: jaOptions[4],
+          explanation: eJa
+        });
+      }
+
 
       questions.push({
 
@@ -1197,7 +1248,10 @@ function convertBibleRowsToAnne_(
 
           KO_WEB:
             pKoWeb ||
-            pKo
+            pKo,
+
+          JPN:
+            pJa
         },
 
         license_question_translations:
@@ -1272,6 +1326,10 @@ function languageRecord(
     return translations.ko;
   }
 
+  if (code === 'JPN' || code === 'JA') {
+    return translations.ja;
+  }
+
 
   return translations.en;
 }
@@ -1312,6 +1370,13 @@ function biblePassageText_(
     return (
       translations.ko &&
       translations.ko.passage
+    ) || '';
+  }
+
+  if (code === 'JPN' || code === 'JA') {
+    return (
+      translations.ja &&
+      translations.ja.passage
     ) || '';
   }
 
@@ -1411,6 +1476,8 @@ function linesData(
             upper === 'KO_WEB'
           )
             ? 'KOR'
+            : upper === 'JPN' || upper === 'JA'
+              ? 'JPN'
             : 'ENG';
 
 
@@ -1437,6 +1504,8 @@ function linesData(
             upper === 'KO_WEB'
           )
             ? 'KOR'
+            : upper === 'JPN' || upper === 'JA'
+              ? 'JPN'
             : upper === 'KJV'
               ? 'KJV'
               : 'MODERN',
@@ -1471,6 +1540,8 @@ function htmlLinesData(
         item.code ===
           'KOR'
           ? 'ko'
+          : item.code === 'JPN'
+            ? 'ja'
           : 'en';
 
 
@@ -4965,6 +5036,7 @@ function installLanguages() {
       <option value="KJV">KJV</option>
       <option value="MODERN">MODERN</option>
       <option value="KOR">KOR</option>
+      <option value="JPN">JPN</option>
       <option value="NONE">NONE</option>
     `;
 
@@ -5487,6 +5559,13 @@ function getAnneMicLanguage() {
     return {
       code: 'KJV',
       recognition: 'en-US'
+    };
+  }
+
+  if (code === 'JPN' || code === 'JA') {
+    return {
+      code: 'JPN',
+      recognition: 'ja-JP'
     };
   }
 
