@@ -11457,13 +11457,12 @@ function biblePeopleSearchSubmit_(
 
 // SUBBLOCK 1575
 // ============================================================
-// Public Person Opener
+// Public Person / Scripture Reference Opener
 // ============================================================
 
 function biblePeopleSetDirectDetailMode_(
   enabled
 ) {
-
   var panel =
     document.getElementById(
       'biblePeoplePanel'
@@ -11514,10 +11513,26 @@ window.openBiblePerson =
     );
   };
 
+
 function openBiblePersonFromUrl_() {
   var searchParams = new URLSearchParams(
     window.location.search
   );
+
+  var sourceCode =
+    String(
+      searchParams.get('sourceCode') || ''
+    ).trim();
+
+  if (sourceCode) {
+    window.setTimeout(function() {
+      openBibleScriptureReference_(
+        sourceCode
+      );
+    }, 0);
+
+    return;
+  }
 
   var personId = searchParams.get('personId');
 
@@ -11532,6 +11547,7 @@ function openBiblePersonFromUrl_() {
           directUrl: true
         }
       );
+
       return;
     }
   }
