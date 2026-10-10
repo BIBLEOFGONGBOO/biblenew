@@ -307,73 +307,20 @@ button{
 }
 
 
-/* SUBBLOCK 2000 : SYSTEM CARD */
+/* SUBBLOCK 2000 : HOME ICON STYLE */
 
-.gb-system-card{
-  left:0;
-  right:auto;
-
-  width:285px;
-
-  padding:8px;
+.gb-home-button{
+  color:var(--gb-accent-strong);
 }
 
-.gb-system-option{
-  width:100%;
-  min-height:38px;
-
-  display:grid;
-
-  grid-template-columns:
-    42px 1fr 16px;
-
-  align-items:center;
-
-  column-gap:16px;
-
-  padding:
-    0 9px;
-
-  border:0;
-  border-radius:8px;
-
-  background:
-    transparent;
-
-  color:
-    var(--gb-text);
-
-  text-align:left;
-
-  cursor:pointer;
-}
-
-.gb-system-option:hover,
-.gb-system-option.is-active{
-  background:
-    var(--gb-accent-soft);
-}
-
-.gb-system-code{
-  color:
-    var(--gb-accent-strong);
-
-  font-size:12px;
-  font-weight:950;
-}
-
-.gb-system-name{
-  font-size:13px;
-  font-weight:800;
-}
-
-.gb-submenu-arrow{
-  color:
-    var(--gb-muted);
-
-  font-size:18px;
-
-  text-align:right;
+.gb-home-button svg{
+  width:21px;
+  height:21px;
+  fill:none !important;
+  stroke:currentColor !important;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  stroke-width:1.8;
 }
 
 

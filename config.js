@@ -1,4 +1,5 @@
 window.BIBLE_NEW_CONFIG = Object.freeze({
+  homeUrl: 'https://gongboo-home.pages.dev/',
   supabaseUrl: 'https://yxudhflyxuztvzaiunva.supabase.co',
   publishableKey: 'sb_publishable_9Kg6bvsSqZzOGMavBG3_1w_WO6WGbGB',
   table: 'bible_question_translations',
