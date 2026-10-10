@@ -960,6 +960,7 @@
   }
 
 /* ===== 복사 방지: 일반 회원만 적용 / admin은 복사 허용 ===== */
+/*
 html:not(.admin-user) body * {
   -webkit-user-select: none !important;
   user-select: none !important;
@@ -967,6 +968,7 @@ html:not(.admin-user) body * {
 html:not(.admin-user) body ::selection {
   background: transparent !important;
 }
+*/
 
 /* 관리자 계정: 텍스트 선택·복사 허용 */
 html.admin-user body,

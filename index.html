@@ -3,6 +3,67 @@
 <!DOCTYPE html>
 <html lang="en">
 
+
+<!-- =====================================================
+     SUBBLOCK 0005 : DIRECT BIBLE REFERENCE LOADING
+     ===================================================== -->
+
+<style>
+  #bibleReferenceLoadingOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: none;
+    place-items: center;
+    background: #f6f8fc;
+    color: #172033;
+    font-family: system-ui, sans-serif;
+  }
+
+  html.is-bible-reference-loading
+  #bibleReferenceLoadingOverlay {
+    display: grid;
+  }
+
+  .bible-reference-loading-box {
+    text-align: center;
+    padding: 24px;
+  }
+
+  .bible-reference-loading-spinner {
+    width: 30px;
+    height: 30px;
+    margin: 0 auto 14px;
+    border: 3px solid #cbd5e1;
+    border-top-color: #075ea8;
+    border-radius: 50%;
+    animation:
+      bible-reference-loading-spin
+      0.75s linear infinite;
+  }
+
+  @keyframes bible-reference-loading-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>
+
+<script>
+  (function() {
+    var parameters =
+      new URLSearchParams(
+        window.location.search
+      );
+
+    if (parameters.get('sourceCode')) {
+      document.documentElement.classList.add(
+        'is-bible-reference-loading'
+      );
+    }
+  })();
+</script>
+
 <head>
 
   <meta charset="UTF-8" />
@@ -30,6 +91,24 @@
 
 
 <body>
+
+<!-- =====================================================
+     SUBBLOCK 0006 : DIRECT BIBLE REFERENCE OVERLAY
+     ===================================================== -->
+
+<div
+  id="bibleReferenceLoadingOverlay"
+  role="status"
+  aria-live="polite"
+>
+  <div class="bible-reference-loading-box">
+    <div
+      class="bible-reference-loading-spinner"
+    ></div>
+
+    <strong>Loading Bible reference…</strong>
+  </div>
+</div>
 
 <div class="gb-app">
 

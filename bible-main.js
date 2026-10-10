@@ -4141,26 +4141,83 @@ function attachBibleEnglishEntityLinks_(q) {
   });
 }
   
-  // SUBBLOCK 0604-03
+    // SUBBLOCK 0604-03
   // ==========================================================
   // 화면 생성
   // ==========================================================
+
+  var headerSourceCode =
+    String(
+      q.sourceCode ||
+      q.SOURCE_CODE ||
+      q.subject ||
+      q.SUBJECT ||
+      q.date ||
+      ''
+    ).trim();
+
+  /* 앞에 붙은 문제 번호 등 제거: 36NT-... → NT-... */
+  var testamentMatch =
+    headerSourceCode.match(
+      /(?:OT|NT)-.+/
+    );
+
+  if (testamentMatch) {
+    headerSourceCode =
+      testamentMatch[0];
+  }
+
+  var headerParts =
+    headerSourceCode.split('-');
+
+  var headerReference =
+    headerSourceCode;
+
+  if (headerParts.length >= 4) {
+    var headerVerse =
+      parseInt(
+        headerParts.pop(),
+        10
+      );
+
+    var headerChapter =
+      parseInt(
+        headerParts.pop(),
+        10
+      );
+
+    headerReference =
+      headerParts.join('-') +
+      '-' +
+      (
+        isNaN(headerChapter)
+          ? ''
+          : headerChapter
+      ) +
+      ':' +
+      (
+        isNaN(headerVerse)
+          ? ''
+          : headerVerse
+      );
+  }
 
   $('questionContainer').innerHTML = `
     <div class="question-card">
 
       <div class="q-num">
-        Question ${dayIndex + 1} / ${dayQuestions.length}
+  Question ${dayIndex + 1} / ${dayQuestions.length}
 
-        <span style="
-          float:right;
-          font-weight:400;
-          font-size:13px;
-          color:#888;
-        ">
-          📅 ${currentDate}
-        </span>
-      </div>
+  <span style="
+    margin-left:1em;
+    font-weight:700;
+    font-size:13px;
+    color:#fff;
+    white-space:nowrap;
+  ">
+    &emsp;${headerReference}
+  </span>
+</div>
 
       <div
         class="anne-full-diary"
@@ -4217,36 +4274,36 @@ function attachBibleEnglishEntityLinks_(q) {
           [1,2,3,4,5].map(function(n) {
 
             var lang =
-  String(
-    $('biblePrimaryTextSelector')?.value ||
-    'WEB'
-  ).toUpperCase();
+              String(
+                $('biblePrimaryTextSelector')?.value ||
+                'WEB'
+              ).toUpperCase();
 
-var chunkText =
-  q.raw?.[
-    'CHUNK_' + n + '_EN'
-  ] ||
-  '';
+            var chunkText =
+              q.raw?.[
+                'CHUNK_' + n + '_EN'
+              ] ||
+              '';
 
-var chunkKo =
-  q.raw?.[
-    'CHUNK_' + n + '_KO'
-  ] ||
-  q.raw?.[
-    'chunk_' + n + '_ko'
-  ] ||
-  '';
+            var chunkKo =
+              q.raw?.[
+                'CHUNK_' + n + '_KO'
+              ] ||
+              q.raw?.[
+                'chunk_' + n + '_ko'
+              ] ||
+              '';
 
             return chunkText
-  ? '<div style="padding:6px 0; font-size:15px; line-height:1.8; color:#2d2d2d; border-bottom:1px solid #f0ebe5;">' +
-      '• <strong>' + chunkText + '</strong>' +
-      (chunkKo
-        ? '<span style="margin-left:10px; color:#666;">' +
-          chunkKo +
-          '</span>'
-        : '') +
-    '</div>'
-  : '';
+              ? '<div style="padding:6px 0; font-size:15px; line-height:1.8; color:#2d2d2d; border-bottom:1px solid #f0ebe5;">' +
+                  '• <strong>' + chunkText + '</strong>' +
+                  (chunkKo
+                    ? '<span style="margin-left:10px; color:#666;">' +
+                      chunkKo +
+                      '</span>'
+                    : '') +
+                  '</div>'
+              : '';
 
           }).join('')
         }
@@ -4311,6 +4368,7 @@ var chunkKo =
 
     </div>
   `;
+
   attachBiblePlacesButton_(q);
   attachBibleEnglishEntityLinks_(q);
 
@@ -11514,25 +11572,53 @@ window.openBiblePerson =
   };
 
 
+function hideBibleReferenceLoading_() {
+  document.documentElement.classList.remove(
+    'is-bible-reference-loading'
+  );
+}
+
+async function openBibleScriptureReferenceWithLoading_(
+  sourceCode
+) {
+  try {
+    return await openBibleScriptureReference_(
+      sourceCode
+    );
+  } finally {
+    window.requestAnimationFrame(function() {
+      window.requestAnimationFrame(function() {
+        hideBibleReferenceLoading_();
+      });
+    });
+  }
+}
+
 function openBiblePersonFromUrl_() {
   var searchParams = new URLSearchParams(
     window.location.search
   );
 
-  var sourceCode =
-    String(
-      searchParams.get('sourceCode') || ''
-    ).trim();
+  var sourceCode = String(
+    searchParams.get('sourceCode') || ''
+  ).trim();
 
   if (sourceCode) {
     window.setTimeout(function() {
-      openBibleScriptureReference_(
+      openBibleScriptureReferenceWithLoading_(
         sourceCode
-      );
+      ).catch(function(error) {
+        console.error(
+          '[BIBLE REF] URL open failed:',
+          error
+        );
+      });
     }, 0);
 
     return;
   }
+
+  hideBibleReferenceLoading_();
 
   var personId = searchParams.get('personId');
 
@@ -11579,7 +11665,6 @@ function openBiblePersonFromUrl_() {
     false
   );
 }
-
 
 
 // SUBBLOCK 1580
