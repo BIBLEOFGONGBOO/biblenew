@@ -12253,3 +12253,820 @@ document.addEventListener(
     );
   }
 );
+
+
+
+/* ==========================================================================
+   BLOCK 10000: BIBLE WORD DICTIONARY
+   ========================================================================== */
+
+(function() {
+  'use strict';
+
+  var bibleDictionaryColumns = {
+    EN: {
+      column: 'Base_English',
+      label: 'English'
+    },
+    KO: {
+      column: 'Korean',
+      label: 'Korean'
+    },
+    JA: {
+      column: 'Japanese',
+      label: 'Japanese'
+    }
+  };
+
+  var bibleDictionarySelectedWord = '';
+  var bibleDictionaryLongPressTimer = null;
+  var bibleDictionarySuppressClickUntil = 0;
+  var bibleDictionaryLongPressStartX = 0;
+  var bibleDictionaryLongPressStartY = 0;
+
+  function getBibleDictionaryConfig() {
+    return window.BIBLE_NEW_CONFIG &&
+      window.BIBLE_NEW_CONFIG.dictionary
+      ? window.BIBLE_NEW_CONFIG.dictionary
+      : null;
+  }
+
+  function getBibleDictionaryCode(value) {
+    var code = String(value || '')
+      .trim()
+      .toUpperCase();
+
+    if (
+      code === 'WEB' ||
+      code === 'KJV' ||
+      code === 'MODERN' ||
+      code === 'ENG' ||
+      code === 'EN'
+    ) {
+      return 'EN';
+    }
+
+    if (
+      code === 'KO_WEB' ||
+      code === 'KOR' ||
+      code === 'KO'
+    ) {
+      return 'KO';
+    }
+
+    if (
+      code === 'JPN' ||
+      code === 'JA'
+    ) {
+      return 'JA';
+    }
+
+    return '';
+  }
+
+  function getBibleDictionaryLanguage(code) {
+    return bibleDictionaryColumns[code] || null;
+  }
+
+  function getBibleDictionarySelectedCode(
+    elementId,
+    fallbackCode
+  ) {
+    var select = document.getElementById(elementId);
+
+    var value = select
+      ? select.value
+      : '';
+
+    var code = getBibleDictionaryCode(value);
+
+    return code || fallbackCode || '';
+  }
+
+  function getBibleDictionaryPair(sourceCode) {
+    var primaryCode =
+      getBibleDictionarySelectedCode(
+        'biblePrimaryTextSelector',
+        'EN'
+      );
+
+    var secondaryCode =
+      getBibleDictionarySelectedCode(
+        'bibleSecondaryTextSelector',
+        ''
+      );
+
+    var targetCode =
+      sourceCode === secondaryCode
+        ? primaryCode
+        : secondaryCode;
+
+    return {
+      sourceCode: sourceCode,
+      targetCode: targetCode,
+      sourceLanguage:
+        getBibleDictionaryLanguage(sourceCode),
+      targetLanguage:
+        getBibleDictionaryLanguage(targetCode)
+    };
+  }
+
+  function normalizeBibleDictionaryWord(value) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(
+        /^[\s\p{P}\p{S}]+|[\s\p{P}\p{S}]+$/gu,
+        ''
+      )
+      .slice(0, 100);
+  }
+
+  function getBibleDictionaryPopup() {
+    var popup = document.getElementById(
+      'bibleDictionaryPopup'
+    );
+
+    if (popup) {
+      return popup;
+    }
+
+    popup = document.createElement('aside');
+
+    popup.id = 'bibleDictionaryPopup';
+    popup.className = 'bible-dictionary-popup';
+    popup.hidden = true;
+
+    popup.innerHTML = [
+      '<button class="bible-dictionary-close"',
+      ' type="button" aria-label="Close dictionary">×</button>',
+      '<div class="bible-dictionary-word-title"></div>',
+      '<div class="bible-dictionary-base"></div>',
+      '<div class="bible-dictionary-translation"></div>',
+      '<div class="bible-dictionary-definition"></div>',
+      '<div class="bible-dictionary-status"></div>'
+    ].join('');
+
+    popup.querySelector(
+      '.bible-dictionary-close'
+    ).onclick = function() {
+      popup.hidden = true;
+    };
+
+    document.body.appendChild(popup);
+
+    return popup;
+  }
+
+  function showBibleDictionaryPopup(data) {
+    var popup = getBibleDictionaryPopup();
+
+    popup.querySelector(
+      '.bible-dictionary-word-title'
+    ).textContent = data.word || '';
+
+    popup.querySelector(
+      '.bible-dictionary-base'
+    ).textContent = data.base
+      ? 'Base: ' + data.base
+      : '';
+
+    popup.querySelector(
+      '.bible-dictionary-translation'
+    ).textContent = data.translation &&
+      data.language
+      ? data.language + ': ' + data.translation
+      : '';
+
+    popup.querySelector(
+      '.bible-dictionary-definition'
+    ).textContent = String(
+      data.definition || ''
+    ).replace(/\s*\|\s*/g, '\n• ');
+
+    popup.querySelector(
+      '.bible-dictionary-status'
+    ).textContent = data.status || '';
+
+    popup.hidden = false;
+  }
+
+  async function fetchBibleDictionaryEntry(
+    word,
+    sourceLanguage,
+    targetLanguage
+  ) {
+    var config = getBibleDictionaryConfig();
+
+    if (
+      !config ||
+      !word ||
+      !sourceLanguage ||
+      !targetLanguage
+    ) {
+      return null;
+    }
+
+    var fields = [
+      'Search_Word',
+      'Base_English',
+      'Word_Forms',
+      'English_Definition',
+      sourceLanguage.column,
+      targetLanguage.column
+    ]
+      .filter(function(value, index, values) {
+        return values.indexOf(value) === index;
+      })
+      .join(',');
+
+    var params = new URLSearchParams();
+
+    params.set('select', fields);
+    params.set('limit', '1');
+
+    if (
+      sourceLanguage.column === 'Base_English'
+    ) {
+      params.set(
+        'or',
+        '(Search_Word.ilike.' +
+          word +
+          ',Base_English.ilike.' +
+          word +
+          ')'
+      );
+    } else {
+      params.set(
+        sourceLanguage.column,
+        'ilike.' + word
+      );
+    }
+
+    var headers = {
+      apikey: config.publishableKey,
+      Authorization:
+        'Bearer ' + config.publishableKey
+    };
+
+    var response = await fetch(
+      config.url +
+        '/rest/v1/' +
+        config.table +
+        '?' +
+        params.toString(),
+      {
+        headers: headers
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        'Dictionary lookup failed: ' +
+          response.status
+      );
+    }
+
+    var rows = await response.json();
+
+    if (rows.length) {
+      return rows[0];
+    }
+
+    if (
+      sourceLanguage.column !== 'Base_English'
+    ) {
+      return null;
+    }
+
+    params.delete('or');
+
+    params.set(
+      'Word_Forms',
+      'ilike.*' + word + '*'
+    );
+
+    response = await fetch(
+      config.url +
+        '/rest/v1/' +
+        config.table +
+        '?' +
+        params.toString(),
+      {
+        headers: headers
+      }
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    rows = await response.json();
+
+    return rows.length
+      ? rows[0]
+      : null;
+  }
+
+  async function requestBibleAzureTranslation(
+    word,
+    sourceLanguage,
+    targetLanguage
+  ) {
+    var config = getBibleDictionaryConfig();
+
+    if (
+      !config ||
+      !sourceLanguage ||
+      !targetLanguage
+    ) {
+      return null;
+    }
+
+    var response = await fetch(
+      config.url +
+        '/functions/v1/' +
+        config.azureFunctionName,
+      {
+        method: 'POST',
+
+        headers: {
+          apikey: config.publishableKey,
+          Authorization:
+            'Bearer ' + config.publishableKey,
+          'Content-Type': 'application/json'
+        },
+
+        body: JSON.stringify({
+          word: word,
+          sourceLanguage: sourceLanguage.label,
+          targetLanguage: targetLanguage.label
+        })
+      }
+    );
+
+    var result = await response.json();
+
+    if (!response.ok || !result.success) {
+      throw new Error(
+        result.error ||
+          'Azure translation failed.'
+      );
+    }
+
+    return result;
+  }
+
+  async function openBibleDictionary(
+    originalWord,
+    sourceCode
+  ) {
+    var word = normalizeBibleDictionaryWord(
+      originalWord
+    );
+
+    var pair = getBibleDictionaryPair(
+      sourceCode
+    );
+
+    if (!word) {
+      return;
+    }
+
+    if (
+      !pair.sourceLanguage ||
+      !pair.targetLanguage
+    ) {
+      showBibleDictionaryPopup({
+        word: originalWord,
+        status:
+          'Select two languages first.'
+      });
+
+      return;
+    }
+
+    showBibleDictionaryPopup({
+      word: originalWord,
+      status: 'Searching Dictionary...'
+    });
+
+    try {
+      var entry = await fetchBibleDictionaryEntry(
+        word,
+        pair.sourceLanguage,
+        pair.targetLanguage
+      );
+
+      var translation = entry
+        ? String(
+            entry[
+              pair.targetLanguage.column
+            ] || ''
+          ).trim()
+        : '';
+
+      if (translation) {
+        showBibleDictionaryPopup({
+          word: originalWord,
+          base:
+            pair.sourceCode === 'EN'
+              ? ''
+              : entry.Base_English || '',
+          definition:
+            entry.English_Definition || '',
+          language:
+            pair.sourceLanguage.label +
+            ' → ' +
+            pair.targetLanguage.label,
+          translation: translation,
+          status: 'Dictionary'
+        });
+
+        return;
+      }
+
+      showBibleDictionaryPopup({
+        word: originalWord,
+        base: entry
+          ? entry.Base_English || ''
+          : '',
+        status: 'Checking Azure translation...'
+      });
+
+      var azure =
+        await requestBibleAzureTranslation(
+          word,
+          pair.sourceLanguage,
+          pair.targetLanguage
+        );
+
+      showBibleDictionaryPopup({
+        word: originalWord,
+        language:
+          pair.sourceLanguage.label +
+          ' → ' +
+          pair.targetLanguage.label,
+        translation:
+          azure.translation || '',
+        status:
+          azure.source === 'dictionary'
+            ? 'Dictionary'
+            : 'Azure saved to Dictionary'
+      });
+    } catch (error) {
+      console.error(
+        '[BIBLE] Dictionary lookup failed:',
+        error
+      );
+
+      showBibleDictionaryPopup({
+        word: originalWord,
+        status:
+          'Translation is temporarily unavailable.'
+      });
+    }
+  }
+
+  function clearBibleDictionarySelection() {
+    document
+      .querySelectorAll(
+        '.bible-dictionary-word.is-dictionary-selected'
+      )
+      .forEach(function(element) {
+        element.classList.remove(
+          'is-dictionary-selected'
+        );
+      });
+  }
+
+  function tokenizeBibleDictionaryLine(line) {
+    if (
+      !line ||
+      line.querySelector(
+        '.bible-dictionary-word, ' +
+          '.hl-word-span, ' +
+          '.speech-correct'
+      )
+    ) {
+      return;
+    }
+
+    var sourceCode =
+      getBibleDictionaryCode(
+        line.dataset.language
+      );
+
+    var text = String(line.textContent || '');
+
+    if (!sourceCode || !text.trim()) {
+      return;
+    }
+
+    var segments = [];
+
+    try {
+      var locale = sourceCode === 'KO'
+        ? 'ko'
+        : sourceCode === 'JA'
+          ? 'ja'
+          : 'en';
+
+      var segmenter = new Intl.Segmenter(
+        locale,
+        {
+          granularity: 'word'
+        }
+      );
+
+      segments = Array.from(
+        segmenter.segment(text)
+      );
+    } catch (error) {
+      segments = text
+        .split(
+          /(\s+|[^\p{L}\p{N}'-]+)/u
+        )
+        .map(function(segment) {
+          return {
+            segment: segment,
+            isWordLike:
+              /[\p{L}\p{N}]/u.test(segment)
+          };
+        });
+    }
+
+    var fragment =
+      document.createDocumentFragment();
+
+    segments.forEach(function(item) {
+      var segment = item.segment || '';
+
+      if (!segment) {
+        return;
+      }
+
+      if (
+        item.isWordLike &&
+        normalizeBibleDictionaryWord(segment)
+      ) {
+        var word = document.createElement('span');
+
+        word.className =
+          'bible-dictionary-word';
+
+        word.dataset.dictionaryLanguage =
+          sourceCode;
+
+        word.textContent = segment;
+
+        fragment.appendChild(word);
+        return;
+      }
+
+      fragment.appendChild(
+        document.createTextNode(segment)
+      );
+    });
+
+    line.replaceChildren(fragment);
+  }
+
+  function tokenizeBibleDictionaryWords() {
+    document
+      .querySelectorAll(
+        '.anne-passage ' +
+          '.language-line[data-language], ' +
+          '.anne-full-diary ' +
+          '.language-line[data-language]'
+      )
+      .forEach(function(line) {
+        tokenizeBibleDictionaryLine(line);
+      });
+  }
+
+  function clearBibleDictionaryLongPress() {
+    window.clearTimeout(
+      bibleDictionaryLongPressTimer
+    );
+
+    bibleDictionaryLongPressTimer = null;
+  }
+
+  function getBibleDictionaryWordAtPoint(event) {
+    var target = event.target;
+
+    return target && target.closest
+      ? target.closest(
+          '.bible-dictionary-word'
+        )
+      : null;
+  }
+
+  function installBibleDictionary() {
+    tokenizeBibleDictionaryWords();
+
+    var questionContainer =
+      document.getElementById(
+        'questionContainer'
+      );
+
+    if (questionContainer) {
+      new MutationObserver(function() {
+        window.setTimeout(
+          tokenizeBibleDictionaryWords,
+          0
+        );
+      }).observe(questionContainer, {
+        childList: true,
+        subtree: true
+      });
+    }
+
+    document.addEventListener(
+      'pointerdown',
+      function(event) {
+        if (
+          event.pointerType !== 'touch' ||
+          (window.ANNE_STATE &&
+            window.ANNE_STATE.micMode)
+        ) {
+          return;
+        }
+
+        var element =
+          getBibleDictionaryWordAtPoint(event);
+
+        if (!element) {
+          return;
+        }
+
+        clearBibleDictionaryLongPress();
+
+        bibleDictionaryLongPressStartX =
+          event.clientX;
+
+        bibleDictionaryLongPressStartY =
+          event.clientY;
+
+        bibleDictionaryLongPressTimer =
+          window.setTimeout(function() {
+            bibleDictionarySuppressClickUntil =
+              Date.now() + 800;
+
+            clearBibleDictionarySelection();
+
+            element.classList.add(
+              'is-dictionary-selected'
+            );
+
+            bibleDictionarySelectedWord =
+              element.dataset.dictionaryLanguage +
+              '|' +
+              element.textContent;
+
+            openBibleDictionary(
+              element.textContent,
+              element.dataset.dictionaryLanguage
+            );
+
+            clearBibleDictionaryLongPress();
+          }, 450);
+      }
+    );
+
+    document.addEventListener(
+      'pointermove',
+      function(event) {
+        if (!bibleDictionaryLongPressTimer) {
+          return;
+        }
+
+        if (
+          Math.abs(
+            event.clientX -
+              bibleDictionaryLongPressStartX
+          ) > 12 ||
+          Math.abs(
+            event.clientY -
+              bibleDictionaryLongPressStartY
+          ) > 12
+        ) {
+          clearBibleDictionaryLongPress();
+        }
+      }
+    );
+
+    [
+      'pointerup',
+      'pointercancel'
+    ].forEach(function(eventName) {
+      document.addEventListener(
+        eventName,
+        clearBibleDictionaryLongPress
+      );
+    });
+
+    document.addEventListener(
+      'click',
+      function(event) {
+        if (
+          window.ANNE_STATE &&
+          window.ANNE_STATE.micMode
+        ) {
+          return;
+        }
+
+        var element =
+          getBibleDictionaryWordAtPoint(event);
+
+        if (!element) {
+          return;
+        }
+
+        if (
+          Date.now() <
+          bibleDictionarySuppressClickUntil
+        ) {
+          event.preventDefault();
+          return;
+        }
+
+        event.preventDefault();
+
+        var word =
+          normalizeBibleDictionaryWord(
+            element.textContent
+          );
+
+        var sourceCode =
+          element.dataset.dictionaryLanguage;
+
+        var selectionKey =
+          sourceCode + '|' + word;
+
+        if (!word) {
+          return;
+        }
+
+        if (
+          bibleDictionarySelectedWord ===
+          selectionKey
+        ) {
+          openBibleDictionary(
+            word,
+            sourceCode
+          );
+
+          return;
+        }
+
+        clearBibleDictionarySelection();
+
+        element.classList.add(
+          'is-dictionary-selected'
+        );
+
+        bibleDictionarySelectedWord =
+          selectionKey;
+      }
+    );
+
+    document.addEventListener(
+      'click',
+      function(event) {
+        var popup = document.getElementById(
+          'bibleDictionaryPopup'
+        );
+
+        if (
+          !popup ||
+          popup.hidden ||
+          (
+            event.target &&
+            event.target.closest &&
+            event.target.closest(
+              '#bibleDictionaryPopup'
+            )
+          )
+        ) {
+          return;
+        }
+
+        popup.hidden = true;
+      }
+    );
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      installBibleDictionary,
+      { once: true }
+    );
+  } else {
+    installBibleDictionary();
+  }
+})();
+
+/* END BLOCK 10000 */

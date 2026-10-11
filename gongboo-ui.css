@@ -1511,3 +1511,121 @@ button{
   }
 
 }
+
+
+
+/* ==========================================================================
+   BLOCK 8810: BIBLE WORD DICTIONARY UI
+   ========================================================================== */
+
+.bible-dictionary-word{
+  display:inline-block;
+  cursor:pointer !important;
+  user-select:none;
+  -webkit-user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  border-radius:3px;
+  transition:
+    background .15s ease,
+    color .15s ease,
+    box-shadow .15s ease;
+}
+
+.bible-dictionary-word:hover{
+  background:#eaf5ff;
+  color:#075ea8;
+}
+
+.bible-dictionary-word:active{
+  background:#bfdbfe;
+  color:#1d4ed8;
+}
+
+.bible-dictionary-word.is-dictionary-selected{
+  background:#dbeafe;
+  color:#1d4ed8;
+  box-shadow:
+    inset 0 -2px 0 #2563eb;
+}
+
+.bible-dictionary-popup{
+  position:fixed;
+  right:12px;
+  bottom:12px;
+  left:12px;
+  z-index:10001;
+  width:auto;
+  max-width:620px;
+  margin:0 auto;
+  padding:16px;
+  border:1px solid #cbd5e1;
+  border-radius:16px;
+  background:#ffffff;
+  box-shadow:0 14px 38px rgba(15,23,42,.28);
+  color:#172033;
+}
+
+.bible-dictionary-popup[hidden]{
+  display:none;
+}
+
+.bible-dictionary-close{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:32px;
+  height:32px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#475569;
+  font-size:22px;
+  cursor:pointer;
+}
+
+.bible-dictionary-word-title{
+  margin:0 42px 10px 0;
+  color:#075ea8;
+  font-size:22px;
+  font-weight:900;
+}
+
+.bible-dictionary-base,
+.bible-dictionary-translation,
+.bible-dictionary-definition,
+.bible-dictionary-status{
+  margin-top:8px;
+  line-height:1.5;
+}
+
+.bible-dictionary-translation{
+  color:#b45309;
+  font-weight:800;
+}
+
+.bible-dictionary-definition{
+  color:#334155;
+  white-space:pre-line;
+}
+
+.bible-dictionary-status{
+  color:#64748b;
+  font-size:13px;
+}
+
+@media (max-width:767px){
+
+  .bible-dictionary-word{
+    min-height:1.4em;
+  }
+
+  .bible-dictionary-popup{
+    right:8px;
+    bottom:8px;
+    left:8px;
+    padding:14px;
+  }
+}
+
+/* END BLOCK 8810 */
