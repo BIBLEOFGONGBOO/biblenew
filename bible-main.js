@@ -3519,7 +3519,7 @@ async function openBibleHymnsForSource_(sourceCode) {
     var pericopes = await bibleHymnsRest_(
       'bible_pericopes',
       new URLSearchParams({
-        select: 'pericope_id,title_en,start_chapter,start_verse,end_chapter,end_verse',
+        select: 'pericope_id,title_en,reference,start_chapter,start_verse,end_chapter,end_verse',
         book_name: 'eq.' + bookName
       }).toString()
     );
@@ -3560,13 +3560,14 @@ async function openBibleHymnsForSource_(sourceCode) {
       })
       .slice(0, 3);
 
-    var heading = matchingPericopes[0].title_en || sourceCode;
+    var pericope = matchingPericopes[0];
+    var heading = pericope.title_en || sourceCode;
+    var reference = pericope.reference || sourceCode;
     var content = recommendations.length
       ? '<div class="bible-hymns-list">' + recommendations.map(function(match) {
           var hymn = match.hymn_player_manifest;
-          var state = match.review_status === 'approved' ? 'Reviewed' : 'Draft';
           return '<article class="bible-hymn-card">' +
-            '<div class="bible-hymn-card-top"><span>Hymn ' + bibleHymnsEscapeHtml_(match.hymn_number) + '</span><span class="bible-hymn-state">' + state + '</span></div>' +
+            '<div class="bible-hymn-card-top"><span>Hymn ' + bibleHymnsEscapeHtml_(match.hymn_number) + '</span></div>' +
             '<strong>' + bibleHymnsEscapeHtml_(hymn.title) + '</strong>' +
             '<p>' + bibleHymnsEscapeHtml_(match.match_reason) + '</p>' +
             '<a class="bible-hymn-play" href="' + bibleHymnsEscapeHtml_(bibleHymnsPlayerUrl_(hymn.player_url)) + '" target="_blank" rel="noopener">Open score and play</a>' +
@@ -3575,7 +3576,7 @@ async function openBibleHymnsForSource_(sourceCode) {
       : '<p class="bible-hymns-empty">No playable hymn recommendation has been published for this passage yet.</p>';
 
     bibleHymnsPanel_(
-      '<div class="bible-hymns-panel-inner"><div class="bible-hymns-panel-head"><div><h2>♫ Hymns for this passage</h2><p>' + bibleHymnsEscapeHtml_(heading) + '</p></div><button class="bible-hymns-close" type="button" data-bible-hymns-close aria-label="Close hymn recommendations">×</button></div>' + content + '</div>'
+      '<div class="bible-hymns-panel-inner"><div class="bible-hymns-panel-head"><div><h2>♫ Hymns for this passage</h2><p>' + bibleHymnsEscapeHtml_(heading) + ' · ' + bibleHymnsEscapeHtml_(reference) + '</p></div><button class="bible-hymns-close" type="button" data-bible-hymns-close aria-label="Close hymn recommendations">×</button></div>' + content + '</div>'
     );
   } catch (error) {
     bibleHymnsPanel_(
