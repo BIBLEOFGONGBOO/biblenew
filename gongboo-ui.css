@@ -109,6 +109,34 @@ button{
   text-align:center;
 }
 
+/* Passage-specific tools replace the former decorative brand strip. */
+.bible-passage-context-bar{width:min(calc(100% - 24px),var(--gb-content-width));margin:10px auto 0}
+.bible-passage-context-bar[hidden]{display:none}
+.bible-passage-context-scroll{display:flex;justify-content:center;gap:8px}
+.bible-passage-context-scroll button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;border:1px solid #c4b5fd;border-radius:999px;background:#faf5ff;color:#6d28d9;padding:8px 14px;font:inherit;font-size:14px;font-weight:850;white-space:nowrap;cursor:pointer}
+.bible-passage-context-scroll button[data-passage-tool="places"]{border-color:#60a5fa;background:#eff6ff;color:#1d4ed8}
+.bible-passage-context-scroll button[data-passage-tool="hymns"]{border-color:#e9a8d2;background:#fff1f8;color:#b4237a}
+.bible-passage-context-scroll button:hover,.bible-passage-context-scroll button:focus-visible{filter:brightness(.96);outline:2px solid currentColor;outline-offset:2px}
+.bible-passage-context-status{margin:8px 0 0;color:#64748b;font-size:12px;text-align:center}
+.bible-hymns-panel{width:min(calc(100% - 24px),var(--gb-content-width));margin:10px auto 0;border:1px solid #f0b8d9;border-radius:16px;background:#fffafd;box-shadow:0 8px 24px rgba(91,33,82,.08)}
+.bible-hymns-panel[hidden]{display:none}
+.bible-hymns-panel-inner{padding:14px 16px 16px}
+.bible-hymns-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:11px}
+.bible-hymns-panel-head h2{margin:0;color:#831843;font-size:16px}
+.bible-hymns-panel-head p{margin:3px 0 0;color:#64748b;font-size:12px}
+.bible-hymns-close{flex:0 0 auto;border:0;border-radius:8px;background:transparent;color:#64748b;font:inherit;font-size:19px;line-height:1;padding:3px 6px;cursor:pointer}
+.bible-hymns-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.bible-hymn-card{display:flex;flex-direction:column;gap:7px;min-width:0;padding:12px;border:1px solid #f4d2e4;border-radius:12px;background:#fff}
+.bible-hymn-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#9d174d;font-size:12px;font-weight:800}
+.bible-hymn-state{border-radius:999px;background:#fdf2f8;padding:3px 7px;color:#9d174d;font-size:11px;font-weight:750}
+.bible-hymn-card strong{color:#312e81;font-size:14px;line-height:1.35}
+.bible-hymn-card p{margin:0;color:#64748b;font-size:12px;line-height:1.45}
+.bible-hymn-play{display:inline-flex;align-items:center;justify-content:center;min-height:34px;margin-top:auto;border-radius:9px;background:#9d174d;color:#fff;text-decoration:none;font-size:13px;font-weight:800}
+.bible-hymn-play:hover,.bible-hymn-play:focus-visible{background:#831843;outline:2px solid #831843;outline-offset:2px}
+.bible-hymns-empty{margin:0;color:#64748b;font-size:13px}
+@media(max-width:640px){.bible-passage-context-bar{width:100%;margin-top:7px}.bible-passage-context-scroll{justify-content:flex-start;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 12px 6px}.bible-passage-context-scroll::-webkit-scrollbar{display:none}.bible-passage-context-scroll button{flex:0 0 auto;min-height:36px;padding:7px 12px;font-size:13px}}
+@media(max-width:640px){.bible-hymns-panel{width:calc(100% - 24px);margin-top:7px}.bible-hymns-panel-inner{padding:13px}.bible-hymns-list{grid-template-columns:1fr}.bible-hymn-card{padding:11px}}
+
 .gb-toolbar{
   display:flex;
   align-items:center;

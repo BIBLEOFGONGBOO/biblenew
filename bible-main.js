@@ -3426,6 +3426,166 @@ dayQuestions.forEach(function(qq) {
 // Places / Topics / Commentary
 // ============================================================
 
+function bibleHymnsEscapeHtml_(value) {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function bibleHymnsBookName_(sourceBook) {
+  var normalized = String(sourceBook || '').replace(/-/g, ' ').trim();
+  var aliases = {
+    Psalms: 'Psalm',
+    Psalm: 'Psalm',
+    Canticles: 'Song of Solomon',
+    'Song of Songs': 'Song of Solomon'
+  };
+  return aliases[normalized] || normalized;
+}
+
+function bibleHymnsPlayerUrl_(playerUrl) {
+  var url = String(playerUrl || '');
+  var host = String(window.location.hostname || '').toLowerCase();
+  var isLocalBible = host === 'localhost' || host === '127.0.0.1' || !host;
+
+  // The manifest deliberately keeps the production Player URL.  During local
+  // integration testing, open the locally running Player with the exact same
+  // key so a Bible click tests the complete Bible → Player handoff.
+  if (!isLocalBible || !url) return url;
+
+  try {
+    var productionUrl = new URL(url);
+    return 'http://127.0.0.1:8010/' + productionUrl.search;
+  } catch (_) {
+    return url;
+  }
+}
+
+async function bibleHymnsRest_(table, query) {
+  var config = window.BIBLE_SUPABASE_CONFIG || {};
+  var baseUrl = String(config.url || '').replace(/\/+$/, '');
+  var key = String(config.publishableKey || '');
+
+  if (!baseUrl || !key) {
+    throw new Error('Hymn recommendations are not configured.');
+  }
+
+  var response = await fetch(
+    baseUrl + '/rest/v1/' + table + '?' + query,
+    { headers: { apikey: key, Authorization: 'Bearer ' + key, Accept: 'application/json' } }
+  );
+
+  if (!response.ok) {
+    throw new Error('Hymn recommendations could not be loaded (HTTP ' + response.status + ').');
+  }
+
+  return response.json();
+}
+
+function bibleHymnsContainsVerse_(pericope, chapter, verse) {
+  var startChapter = Number(pericope.start_chapter);
+  var startVerse = Number(pericope.start_verse);
+  var endChapter = Number(pericope.end_chapter);
+  var endVerse = Number(pericope.end_verse);
+  var afterStart = chapter > startChapter || (chapter === startChapter && verse >= startVerse);
+  var beforeEnd = chapter < endChapter || (chapter === endChapter && verse <= endVerse);
+  return afterStart && beforeEnd;
+}
+
+function bibleHymnsPanel_(html) {
+  var panel = document.getElementById('bibleHymnsPanel');
+  if (!panel) return null;
+  panel.hidden = false;
+  panel.innerHTML = html;
+  var close = panel.querySelector('[data-bible-hymns-close]');
+  if (close) close.onclick = function() { panel.hidden = true; };
+  return panel;
+}
+
+async function openBibleHymnsForSource_(sourceCode) {
+  var parts = bibleSourceCodeParts_(sourceCode);
+  if (!parts) return;
+
+  var panel = bibleHymnsPanel_(
+    '<div class="bible-hymns-panel-inner"><div class="bible-hymns-panel-head"><div><h2>♫ Hymns for this passage</h2><p>Loading recommendations…</p></div><button class="bible-hymns-close" type="button" data-bible-hymns-close aria-label="Close hymn recommendations">×</button></div></div>'
+  );
+  if (!panel) return;
+
+  try {
+    var bookName = bibleHymnsBookName_(parts.book);
+    var pericopes = await bibleHymnsRest_(
+      'bible_pericopes',
+      new URLSearchParams({
+        select: 'pericope_id,title_en,start_chapter,start_verse,end_chapter,end_verse',
+        book_name: 'eq.' + bookName
+      }).toString()
+    );
+    var matchingPericopes = pericopes.filter(function(pericope) {
+      return bibleHymnsContainsVerse_(pericope, parts.chapter, parts.verse);
+    });
+
+    if (!matchingPericopes.length) {
+      throw new Error('No pericope was found for this verse yet.');
+    }
+
+    var ids = matchingPericopes.map(function(pericope) { return pericope.pericope_id; });
+    var matches = await bibleHymnsRest_(
+      'pericope_hymn_matches',
+      new URLSearchParams({
+        select: 'pericope_id,hymn_number,rank,score,match_reason,review_status,hymn_player_manifest(hymn_number,title,player_url,status)',
+        pericope_id: 'in.(' + ids.join(',') + ')',
+        review_status: 'in.(approved,draft)',
+        order: 'rank.asc'
+      }).toString()
+    );
+
+    var unique = {};
+    matches.forEach(function(match) {
+      var hymn = match.hymn_player_manifest;
+      if (!hymn || hymn.status !== 'active' || !hymn.player_url) return;
+      var existing = unique[match.hymn_number];
+      var shouldReplace = !existing ||
+        (match.review_status === 'approved' && existing.review_status !== 'approved') ||
+        (match.review_status === existing.review_status && Number(match.rank) < Number(existing.rank));
+      if (shouldReplace) unique[match.hymn_number] = match;
+    });
+
+    var recommendations = Object.keys(unique).map(function(key) { return unique[key]; })
+      .sort(function(a, b) {
+        if (a.review_status !== b.review_status) return a.review_status === 'approved' ? -1 : 1;
+        return Number(a.rank) - Number(b.rank);
+      })
+      .slice(0, 3);
+
+    var heading = matchingPericopes[0].title_en || sourceCode;
+    var content = recommendations.length
+      ? '<div class="bible-hymns-list">' + recommendations.map(function(match) {
+          var hymn = match.hymn_player_manifest;
+          var state = match.review_status === 'approved' ? 'Reviewed' : 'Draft';
+          return '<article class="bible-hymn-card">' +
+            '<div class="bible-hymn-card-top"><span>Hymn ' + bibleHymnsEscapeHtml_(match.hymn_number) + '</span><span class="bible-hymn-state">' + state + '</span></div>' +
+            '<strong>' + bibleHymnsEscapeHtml_(hymn.title) + '</strong>' +
+            '<p>' + bibleHymnsEscapeHtml_(match.match_reason) + '</p>' +
+            '<a class="bible-hymn-play" href="' + bibleHymnsEscapeHtml_(bibleHymnsPlayerUrl_(hymn.player_url)) + '" target="_blank" rel="noopener">Open score and play</a>' +
+          '</article>';
+        }).join('') + '</div>'
+      : '<p class="bible-hymns-empty">No playable hymn recommendation has been published for this passage yet.</p>';
+
+    bibleHymnsPanel_(
+      '<div class="bible-hymns-panel-inner"><div class="bible-hymns-panel-head"><div><h2>♫ Hymns for this passage</h2><p>' + bibleHymnsEscapeHtml_(heading) + '</p></div><button class="bible-hymns-close" type="button" data-bible-hymns-close aria-label="Close hymn recommendations">×</button></div>' + content + '</div>'
+    );
+  } catch (error) {
+    bibleHymnsPanel_(
+      '<div class="bible-hymns-panel-inner"><div class="bible-hymns-panel-head"><div><h2>♫ Hymns for this passage</h2><p>' + bibleHymnsEscapeHtml_(error.message || 'Recommendations are temporarily unavailable.') + '</p></div><button class="bible-hymns-close" type="button" data-bible-hymns-close aria-label="Close hymn recommendations">×</button></div></div>'
+    );
+  }
+}
+
+window.openBibleHymnsForSource = openBibleHymnsForSource_;
+
 function attachBiblePlacesButton_(q) {
 
   var sourceCode =
@@ -3446,165 +3606,40 @@ function attachBiblePlacesButton_(q) {
   }
 
 
-  var container =
-    document.getElementById(
-      'quizContent'
-    );
+  var bar = document.getElementById('biblePassageContextBar');
+  if (!bar) return;
 
-  if (!container) {
-    return;
+  bar.hidden = false;
+  bar.dataset.sourceCode = sourceCode;
+
+  var status = bar.querySelector('.bible-passage-context-status');
+  if (status) {
+    status.hidden = true;
+    status.textContent = '';
   }
 
-
-  var card =
-    container.querySelector(
-      '.question-card'
-    );
-
-  if (
-    !card ||
-    card.querySelector(
-      '[data-bible-verse-places]'
-    )
-  ) {
-    return;
+  function configure(tool, handler) {
+    var button = bar.querySelector('[data-passage-tool="' + tool + '"]');
+    if (button) button.onclick = handler;
   }
 
-
-  // Places
-  var button =
-    document.createElement(
-      'button'
-    );
-
-  button.type =
-    'button';
-
-  button.className =
-    'bible-verse-places-button';
-
-  button.setAttribute(
-    'data-bible-verse-places',
-    sourceCode
-  );
-
-  button.textContent =
-    '📍 Places in this passage';
-
-  button.addEventListener(
-    'click',
-    function() {
-
-      if (
-        typeof window.openBiblePlacesForSource ===
-        'function'
-      ) {
-
-        window.openBiblePlacesForSource(
-          sourceCode
-        );
-      }
+  configure('places', function() {
+    if (typeof window.openBiblePlacesForSource === 'function') window.openBiblePlacesForSource(sourceCode);
+  });
+  configure('topics', function() {
+    if (typeof window.openBibleKnowledgeForSource === 'function') window.openBibleKnowledgeForSource(sourceCode);
+  });
+  configure('commentary', function() {
+    if (typeof window.openBibleCommentaryForSource === 'function') window.openBibleCommentaryForSource(sourceCode);
+  });
+  configure('hymns', function() {
+    if (typeof window.openBibleHymnsForSource === 'function') {
+      window.openBibleHymnsForSource(sourceCode);
+    } else if (status) {
+      status.textContent = 'Hymn recommendations will appear here after the reviewed matches are published.';
+      status.hidden = false;
     }
-  );
-
-
-  var number =
-    card.querySelector(
-      '.q-num'
-    );
-
-  if (number) {
-    number.insertAdjacentElement(
-      'afterend',
-      button
-    );
-  } else {
-    card.prepend(button);
-  }
-
-
-  // Topics
-  var knowledgeButton =
-    document.createElement(
-      'button'
-    );
-
-  knowledgeButton.type =
-    'button';
-
-  knowledgeButton.className =
-    'bible-verse-knowledge-button';
-
-  knowledgeButton.setAttribute(
-    'data-bible-verse-knowledge',
-    sourceCode
-  );
-
-  knowledgeButton.textContent =
-    'Topics in this passage';
-
-  knowledgeButton.addEventListener(
-    'click',
-    function() {
-
-      if (
-        typeof window.openBibleKnowledgeForSource ===
-        'function'
-      ) {
-
-        window.openBibleKnowledgeForSource(
-          sourceCode
-        );
-      }
-    }
-  );
-
-  button.insertAdjacentElement(
-    'afterend',
-    knowledgeButton
-  );
-
-
-  // Commentary
-  var commentaryButton =
-    document.createElement(
-      'button'
-    );
-
-  commentaryButton.type =
-    'button';
-
-  commentaryButton.className =
-    'bible-verse-knowledge-button';
-
-  commentaryButton.setAttribute(
-    'data-bible-verse-commentary',
-    sourceCode
-  );
-
-  commentaryButton.textContent =
-    'Commentary';
-
-  commentaryButton.addEventListener(
-    'click',
-    function() {
-
-      if (
-        typeof window.openBibleCommentaryForSource ===
-        'function'
-      ) {
-
-        window.openBibleCommentaryForSource(
-          sourceCode
-        );
-      }
-    }
-  );
-
-  knowledgeButton.insertAdjacentElement(
-    'afterend',
-    commentaryButton
-  );
+  });
 }
 
   // SUBBLOCK 0604-026

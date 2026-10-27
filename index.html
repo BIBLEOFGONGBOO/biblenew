@@ -79,7 +79,7 @@
 
   <link
     rel="stylesheet"
-    href="./gongboo-ui.css?v=template2-14"
+    href="./gongboo-ui.css?v=template2-16"
   />
 
   <link
@@ -569,9 +569,27 @@
     </div>
   </header>
 
-  <div class="gb-brand-strip" aria-label="Site identity">
-    GONGBOO.ORG : EASY LEARNING
-  </div>
+  <nav
+    id="biblePassageContextBar"
+    class="bible-passage-context-bar"
+    aria-label="Current passage tools"
+    hidden
+  >
+    <div class="bible-passage-context-scroll">
+      <button type="button" data-passage-tool="places"><span aria-hidden="true">📍</span><span>Places</span></button>
+      <button type="button" data-passage-tool="topics"><span aria-hidden="true">◌</span><span>Topics</span></button>
+      <button type="button" data-passage-tool="commentary"><span aria-hidden="true">▤</span><span>Commentary</span></button>
+      <button type="button" data-passage-tool="hymns"><span aria-hidden="true">♫</span><span>Hymns</span></button>
+    </div>
+    <p class="bible-passage-context-status" aria-live="polite" hidden></p>
+  </nav>
+
+  <section
+    id="bibleHymnsPanel"
+    class="bible-hymns-panel"
+    aria-label="Hymn recommendations for this passage"
+    hidden
+  ></section>
 
 
 
@@ -1462,7 +1480,7 @@
 
 <script
   type="module"
-  src="./bible-main.js?v=template2-17"
+  src="./bible-main.js?v=template2-20"
 ></script>
 
 </body>
