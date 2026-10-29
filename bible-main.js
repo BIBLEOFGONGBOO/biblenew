@@ -3532,8 +3532,11 @@ async function openBibleHymnsForSource_(sourceCode) {
     }
 
     var ids = matchingPericopes.map(function(pericope) { return pericope.pericope_id; });
+    var hymnMatchTable = new URLSearchParams(window.location.search).get('hymnMatches') === 'v2'
+      ? 'pericope_hymn_2'
+      : 'pericope_hymn_matches';
     var matches = await bibleHymnsRest_(
-      'pericope_hymn_matches',
+      hymnMatchTable,
       new URLSearchParams({
         select: 'pericope_id,hymn_number,rank,score,match_reason,review_status,hymn_player_manifest(hymn_number,title,player_url,status)',
         pericope_id: 'in.(' + ids.join(',') + ')',
@@ -3560,6 +3563,30 @@ async function openBibleHymnsForSource_(sourceCode) {
       })
       .slice(0, 3);
 
+    // A sermon passage must never end with an empty hymn panel.  Until an
+    // editor supplies a passage-specific match, use active Scripture/worship
+    // hymns as a safe, playable coverage fallback.
+    if (!recommendations.length) {
+      var fallbackHymns = await bibleHymnsRest_(
+        'hymn_player_manifest',
+        new URLSearchParams({
+          select: 'hymn_number,title,player_url,status',
+          hymn_number: 'in.(57,133,200)',
+          status: 'eq.active',
+          order: 'hymn_number.asc'
+        }).toString()
+      );
+      recommendations = fallbackHymns.map(function(hymn, index) {
+        return {
+          hymn_number: hymn.hymn_number,
+          rank: index + 1,
+          review_status: 'draft',
+          match_reason: 'A Scripture and worship hymn selected as a dependable passage fallback.',
+          hymn_player_manifest: hymn
+        };
+      });
+    }
+
     var pericope = matchingPericopes[0];
     var heading = pericope.title_en || sourceCode;
     var reference = pericope.reference || sourceCode;
@@ -3573,7 +3600,7 @@ async function openBibleHymnsForSource_(sourceCode) {
             '<a class="bible-hymn-play" href="' + bibleHymnsEscapeHtml_(bibleHymnsPlayerUrl_(hymn.player_url)) + '" target="_blank" rel="noopener">Open score and play</a>' +
           '</article>';
         }).join('') + '</div>'
-      : '<p class="bible-hymns-empty">No playable hymn recommendation has been published for this passage yet.</p>';
+      : '<p class="bible-hymns-empty">A hymn recommendation is being prepared for this passage.</p>';
 
     bibleHymnsPanel_(
       '<div class="bible-hymns-panel-inner"><div class="bible-hymns-panel-head"><div><h2>♫ Hymns for this passage</h2><p>' + bibleHymnsEscapeHtml_(heading) + ' · ' + bibleHymnsEscapeHtml_(reference) + '</p></div><button class="bible-hymns-close" type="button" data-bible-hymns-close aria-label="Close hymn recommendations">×</button></div>' + content + '</div>'
@@ -8283,7 +8310,20 @@ function readTextsWithHighlight(
           if (
             typeof go === 'function'
           ) {
+            var currentIndex =
+              finishedState.index;
             go(1);
+            // go() re-renders the passage and calls stopSpeech(), so the
+            // previous speech run is intentionally invalid after this point.
+            // Start a fresh run only when navigation actually advanced and
+            // AUTO has not been turned off in the meantime.
+            if (
+              finishedState.auto &&
+              !finishedState.micMode &&
+              finishedState.index === currentIndex + 1
+            ) {
+              speakWithDyslexiaSupport();
+            }
           }
         },
         500
